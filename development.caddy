@@ -1,0 +1,10 @@
+:80 {
+
+    gzip
+    root /home-pi/dist
+
+    rewrite {
+        regexp .*
+        to {path} /
+    }
+}
