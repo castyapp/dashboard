@@ -160,6 +160,12 @@
                     this.$refs.topProgress.done();
                 })
             }
+        },
+        mounted() {
+            let err = this.$route.params.err;
+            if (err != null){
+                this.$notify(err);
+            }
         }
     }
 </script>

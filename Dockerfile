@@ -5,7 +5,7 @@ RUN apt-get update\
     && apt-get install -y curl iputils-ping nano
 
 # Installing caddy
-RUN curl https://getcaddy.com | bash -s personal
+RUN curl https://getcaddy.com | bash -s personal http.grpc
 
 # Checking caddy version
 RUN caddy -version
@@ -15,6 +15,8 @@ RUN mkdir /movienight.caddy
 
 # Selecting work directory
 WORKDIR /movienight.caddy
+
+ADD ./dist ./dist
 
 ADD ./production.caddy .
 

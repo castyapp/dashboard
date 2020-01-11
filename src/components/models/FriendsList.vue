@@ -44,13 +44,20 @@
 
         </ul>
 
+        <div v-if="loading" class="content-loading">
+            <VueContentLoading :width="230" :height="55" primary="#333" secondary="#181818" :key="i" v-for="i in 10">
+                <circle cx="20" cy="20" r="20"></circle>
+                <rect x="55" y="9" rx="9" ry="9" width="170" height="20"></rect>
+            </VueContentLoading>
+        </div>
+
         <ul class="mt-2 friends_list_ul">
 
-            <li v-show="friends.length === 0">
+            <li v-if="!loading" v-show="friends.length === 0">
                 You have no friends here right now :(
             </li>
 
-            <li :class="getStateName(friend.state)" v-for="friend in friends"
+            <li :data-id="friend.id" :class="getStateName(friend.state)" v-for="friend in friends"
                 @contextmenu.prevent="$parent.$refs.menu.open($event, 'friend-menu', friend)">
 
                 <router-link class="friend"
@@ -59,17 +66,17 @@
                     <div class="avatar">
                         <img :src="apiBaseUrl + '/uploads/avatars/' + friend.avatar + '.png'"
                              alt="Avatar" />
-                        <i class="state-dot" v-if="friend.state !== undefined && friend.state !== 0"></i>
+                        <i class="state-dot"></i>
                     </div>
 
                     <div class="innerDetails">
                         <div class="username">
                             <strong>{{ friend.fullname }}</strong>
                         </div>
-                        <!--<div class="activity" v-show="friend.activity !== 0">-->
-                            <!--Watching-->
-                            <!--<strong>See [S#1] [E#1]</strong>-->
-                        <!--</div>-->
+                        <div class="activity" v-if="friend.activity !== undefined && friend.state === 1">
+                            Watching
+                            <strong>{{ friend.activity.activity.substring(0,23) + "..." }}</strong>
+                        </div>
                     </div>
 
                 </router-link>
@@ -123,9 +130,12 @@
     import {protobuf, enums} from "../../protocol/protobuf/base";
     import {Packet} from "../../protocol/protobuf/packet";
 
+    import {VueContentLoading} from 'vue-content-loading';
+
     export default {
         props: ['status'],
         components: {
+            VueContentLoading,
         },
         data() {
             return {
@@ -133,6 +143,7 @@
                 friends: [],
                 search_result: [],
                 search_keyword: null,
+                loading: true,
             }
         },
         methods: {
@@ -148,21 +159,18 @@
                 });
             },
             getStateName(state) {
-                if (state === 1){
-                    return "online"
+                switch (state) {
+                    case 1: return "online";
+                    case 2: return "busy";
+                    case 3: return "idle";
+                    default:
+                        return "offline"
                 }
-                if (state === 2){
-                    return "busy"
-                }
-                if (state === 3){
-                    return "idle"
-                }
-                return "offline"
             },
             setFriends(friends) {
                 if (friends !== null){
                     this.friends = friends;
-                    this.friends.sort(this.sortFriends);
+                    this.loading = false;
                 }
             },
             sortFriends(a, b){
@@ -197,12 +205,19 @@
                     searchResultBox.show();
                 }
             },
-            changeUserState(user_id, state) {
-                for (let i = 0; i <= this.friends.length - 1; i++) {
-                    if (this.friends[i].id === user_id){
-                        this.friends[i].state = state;
+            removeAllClassesEx(element, class_name) {
+                let classes = ["online", "offline", "idle", "busy"];
+                classes.forEach(classN => {
+                    if (classN !== class_name){
+                        element.removeClass(classN);
                     }
-                }
+                });
+            },
+            changeUserState(user, state) {
+                let friendElement = $(`[data-id="${user.id}"]`);
+                let stateClass = this.getStateName(state);
+                this.removeAllClassesEx(friendElement, stateClass);
+                friendElement.addClass(stateClass);
             },
             startConversation(user) {
                 this.$router.push({
@@ -215,25 +230,23 @@
                 this.search_result = [];
                 if (value.length > 3){
                     this.$store.dispatch("searchUser", value).then(response => {
-                        this.search_result = response.data.result;
+                        if (response.status === 200){
+                            this.search_result = response.data.result;
+                        }
                     });
                 }
             }
         },
         mounted() {
-
             websocket.user.connect();
-
-            bus.$on("got-friends", friends => {
+            this.$store.dispatch("getFriendsList").then(response => {
                 this.clearFriendsList();
-                this.setFriends(friends);
+                this.setFriends(response.data.result);
             });
-
             bus.$on(enums.EMSG[enums.EMSG.PERSONAL_STATE_CHANGED], data => {
                 let decoded = protobuf.PersonalStateMsgEvent.decode(data);
-                this.changeUserState(decoded.userId, decoded.state);
+                this.changeUserState(decoded.user, decoded.state);
             });
-
         },
         destroyed() {
             websocket.user.disconnect();

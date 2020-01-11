@@ -6,11 +6,15 @@
             <strong class="side-component-title">
                 <i class="icofont-library text-primary mr-2"></i>
                 Library
-                <i class="icofont-refresh pull-right refresh-btn"></i>
+                <i class="icofont-refresh pull-right refresh-btn" @click="getTheaters"></i>
             </strong>
             <small class="border-left-title">
                 You can see your theaters here.
             </small>
+        </div>
+
+        <div class="v-loading">
+            <EllipsisLoader :loading="loading" class="v-loading" :color="'#316bff'" />
         </div>
 
         <div class="movie-list row">
@@ -40,7 +44,7 @@
                 </div>
 
                 <div class="card-header">
-                    <i class="play-btn icofont-play-alt-1 pull-left" @click="goToTheater(theater.hash)"></i>
+                    <i class="play-btn icofont-play-alt-1 pull-left" @click="goToTheater(theater.id)"></i>
                     <strong class="pull-left ml-2">
 
                         <small class="movie-creator">
@@ -69,6 +73,10 @@
 </template>
 
 <style scoped>
+
+    .refresh-btn {
+        cursor: pointer;
+    }
 
     .default-movie-poster {
         width: 100%;
@@ -195,11 +203,17 @@
 
 <script>
 
+    import {EllipsisLoader} from 'vue-spinners-css';
+
     export default {
         data(){
             return {
                 theaters: [],
+                loading: true,
             }
+        },
+        components: {
+            EllipsisLoader,
         },
         methods: {
             goToTheater(theater_id) {
@@ -207,12 +221,20 @@
             },
             actionsBtn($event, theater) {
                 this.$parent.$refs.menu.open($event, 'theater-actions', theater)
-            }
+            },
+            getTheaters() {
+                this.loading = true;
+                this.theaters = [];
+                this.$store.dispatch("getTheaters").then(response => {
+                    this.loading = false;
+                    this.theaters = response.data.result;
+                }).catch(() => {
+                    this.loading = false;
+                });
+            },
         },
         mounted() {
-            this.$store.dispatch("getTheaters").then(response => {
-                this.theaters = response.data.result;
-            }).catch(console.log)
+            this.getTheaters();
         }
     }
 

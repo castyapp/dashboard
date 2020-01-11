@@ -4,36 +4,26 @@
 
         <div class="sidemenu">
 
-            <div class="logo">
+            <div class="logo" @click="redirect('dashboard')">
                 <img src="../../assets/icons/brand.svg" alt="Brand" />
             </div>
 
             <ul class="menu">
                 <li>
-                    <router-link :to="{ name: 'library' }">
+                    <router-link :to="{ name: 'library' }" v-title="'Library'" title-placement="right">
                         <i class="icofont-library"></i>
                     </router-link>
                 </li>
-                <!--<li>-->
-                    <!--<router-link :to="{ name: 'popular' }">-->
-                        <!--<i class="icofont-retro-music-disk"></i>-->
-                    <!--</router-link>-->
-                <!--</li>-->
                 <li>
-                    <router-link :to="{ name: 'settings' }">
+                    <router-link :to="{ name: 'settings' }" v-title="'Settings'" title-placement="right">
                         <i class="icofont-gears"></i>
                     </router-link>
                 </li>
-            </ul>
-
-            <ul class="menu">
-
-                <li class="custom-btn-menu">
-                    <router-link :to="{ name: 'create_theater' }">
+                <li>
+                    <router-link :to="{ name: 'create_theater' }" v-title="'Create a new theater'" title-placement="right">
                         <i class="icofont-plus"></i>
                     </router-link>
                 </li>
-
             </ul>
 
             <div class="footer">
@@ -54,16 +44,25 @@
 </template>
 
 <script>
+
     export default {
         methods: {
             actionsBtn($event) {
                 this.$parent.$refs.menu.open($event, 'usermenu-actions', {})
             },
+            redirect(name) {
+                this.$router.push({ name });
+            }
         },
     }
+
 </script>
 
 <style>
+
+    .logo {
+        cursor: pointer;
+    }
 
     .logo > img {
         width: 40px;
@@ -81,8 +80,8 @@
         align-items: center;
         text-decoration: none;
         color: #FFFFFF !important;
+        background: #316bff !important;
         border: 0;
-        margin: 3px;
         cursor: pointer;
     }
 
@@ -110,7 +109,14 @@
         list-style: none;
     }
 
+    ul.menu > li:first-child {
+        margin: 5px 0;
+    }
+
     ul.menu > li {
+        height: 40px;
+        width: 40px;
+        cursor: pointer;
         margin: 15px 0;
     }
 
@@ -118,11 +124,24 @@
         font-size: 20px;
         color: #ffffff;
         text-decoration: none;
-        cursor: default;
+        cursor: pointer;
+        display: -webkit-inline-box;
+        display: inline-flex;
+        padding: 10px;
+        margin: 10px 3px;
+        background: #343435;
+        border-radius: 50%;
+        opacity: 0.6;
+    }
+
+    ul.menu > li:hover > a {
+        opacity: 1;
     }
 
     ul.menu > li > a.router-link-exact-active {
-        color: #316cff;
+        color: #FFFFFF;
+        background: #316cff;
+        opacity: 1;
     }
 
     li.custom-btn-menu > a {

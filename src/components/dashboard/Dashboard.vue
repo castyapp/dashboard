@@ -4,6 +4,8 @@
 
         <notifications group="dashboard" position="top center" :max="1" />
 
+        <vue-topprogress ref="topProgress" />
+
         <Sidemenu />
 
         <div class="main-container">
@@ -44,7 +46,7 @@
 
                 <div class="friend-menu" v-show="type === 'theater-actions'">
 
-                    <ContextMenuItem @click.native="goToTheater(contextData.hash)">
+                    <ContextMenuItem @click.native="goToTheater(contextData.id)">
                         <i class="icofont-ui-play mr-1"></i>
                         Go to theater
                     </ContextMenuItem>
@@ -187,11 +189,11 @@
 <script>
 
     import $ from "jquery";
-    import {bus} from "../../main";
-    import ContextMenu from './../models/context-menu/ContextMenu';
-    import ContextMenuItem from './../models/context-menu/ContextMenuItem';
+    import {store} from "../../store/store";
     import Sidemenu from '../models/Sidemenu';
     import FriendsList from '../models/FriendsList';
+    import ContextMenu from './../models/context-menu/ContextMenu';
+    import ContextMenuItem from './../models/context-menu/ContextMenuItem';
 
     import Multiselect from 'vue-multiselect'
     import "../../assets/css/vue-multiselect.css";
@@ -242,7 +244,7 @@
             setFriends(friends) {
                 if (friends !== null){
                     this.friends = friends;
-                    bus.$emit("got-friends", friends);
+                    this.$emit("got-friends", friends);
                 }
             },
             inviteModal(theater) {
@@ -262,9 +264,6 @@
             });
         },
         mounted() {
-            this.$store.dispatch("getFriendsList").then(response => {
-                this.setFriends(response.data.result);
-            });
             $("#inviteFriendToTheaterModal").on('hidden.bs.modal', () => {
                 this.selectForInvite = null;
                 this.selectedFriends = [];

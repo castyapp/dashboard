@@ -5,7 +5,7 @@ import Logout from './components/auth/Logout'
 
 // Dashboard components
 import Dashboard from './components/dashboard/Dashboard'
-import Profile from './components/dashboard/Profile'
+import Settings from './components/dashboard/Settings'
 import Popular from './components/dashboard/Popular'
 import Library from './components/dashboard/Library'
 
@@ -66,7 +66,7 @@ const routes = [
                 path: 'settings',
                 name: 'settings',
                 components: {
-                    dashboard: Profile,
+                    dashboard: Settings,
                 },
             },
         ],

@@ -9,6 +9,74 @@ var $Reader = $protobuf.Reader, $Writer = $protobuf.Writer, $util = $protobuf.ut
 // Exported root namespace
 var $root = $protobuf.roots["default"] || ($protobuf.roots["default"] = {});
 
+$root.enums = (function() {
+
+    /**
+     * Namespace enums.
+     * @exports enums
+     * @namespace
+     */
+    var enums = {};
+
+    /**
+     * EMSG_PERSONAL_STATE enum.
+     * @name enums.EMSG_PERSONAL_STATE
+     * @enum {string}
+     * @property {number} OFFLINE=0 OFFLINE value
+     * @property {number} ONLINE=1 ONLINE value
+     * @property {number} IDLE=2 IDLE value
+     * @property {number} BUSY=3 BUSY value
+     * @property {number} INVISIBLE=4 INVISIBLE value
+     */
+    enums.EMSG_PERSONAL_STATE = (function() {
+        var valuesById = {}, values = Object.create(valuesById);
+        values[valuesById[0] = "OFFLINE"] = 0;
+        values[valuesById[1] = "ONLINE"] = 1;
+        values[valuesById[2] = "IDLE"] = 2;
+        values[valuesById[3] = "BUSY"] = 3;
+        values[valuesById[4] = "INVISIBLE"] = 4;
+        return values;
+    })();
+
+    /**
+     * EMSG enum.
+     * @name enums.EMSG
+     * @enum {string}
+     * @property {number} INVALID=0 INVALID value
+     * @property {number} LOGON=1 LOGON value
+     * @property {number} LOGOUT=2 LOGOUT value
+     * @property {number} CHAT_MESSAGE=3 CHAT_MESSAGE value
+     * @property {number} THEATER_ONLINE_USERS=4 THEATER_ONLINE_USERS value
+     * @property {number} THEATER_UPDATE_USER=5 THEATER_UPDATE_USER value
+     * @property {number} PERSONAL_STATE_CHANGED=6 PERSONAL_STATE_CHANGED value
+     * @property {number} PERSONAL_ACTIVITY_CHANGED=7 PERSONAL_ACTIVITY_CHANGED value
+     * @property {number} THEATER_LOGON=8 THEATER_LOGON value
+     * @property {number} THEATER_LOGOUT=9 THEATER_LOGOUT value
+     * @property {number} AUTHORIZED=10 AUTHORIZED value
+     * @property {number} UNAUTHORIZED=11 UNAUTHORIZED value
+     * @property {number} NEW_CHAT_MESSAGE=12 NEW_CHAT_MESSAGE value
+     */
+    enums.EMSG = (function() {
+        var valuesById = {}, values = Object.create(valuesById);
+        values[valuesById[0] = "INVALID"] = 0;
+        values[valuesById[1] = "LOGON"] = 1;
+        values[valuesById[2] = "LOGOUT"] = 2;
+        values[valuesById[3] = "CHAT_MESSAGE"] = 3;
+        values[valuesById[4] = "THEATER_ONLINE_USERS"] = 4;
+        values[valuesById[5] = "THEATER_UPDATE_USER"] = 5;
+        values[valuesById[6] = "PERSONAL_STATE_CHANGED"] = 6;
+        values[valuesById[7] = "PERSONAL_ACTIVITY_CHANGED"] = 7;
+        values[valuesById[8] = "THEATER_LOGON"] = 8;
+        values[valuesById[9] = "THEATER_LOGOUT"] = 9;
+        values[valuesById[10] = "AUTHORIZED"] = 10;
+        values[valuesById[11] = "UNAUTHORIZED"] = 11;
+        values[valuesById[12] = "NEW_CHAT_MESSAGE"] = 12;
+        return values;
+    })();
+
+    return enums;
+})();
+
 $root.protobuf = (function() {
 
     /**
@@ -305,7 +373,7 @@ $root.protobuf = (function() {
          * Properties of a PersonalStateMsgEvent.
          * @memberof protobuf
          * @interface IPersonalStateMsgEvent
-         * @property {string|null} [userId] PersonalStateMsgEvent userId
+         * @property {messages.IUser|null} [user] PersonalStateMsgEvent user
          * @property {enums.EMSG_PERSONAL_STATE|null} [state] PersonalStateMsgEvent state
          * @property {protobuf.IPersonalStateActivityMsgEvent|null} [activity] PersonalStateMsgEvent activity
          */
@@ -326,12 +394,12 @@ $root.protobuf = (function() {
         }
 
         /**
-         * PersonalStateMsgEvent userId.
-         * @member {string} userId
+         * PersonalStateMsgEvent user.
+         * @member {messages.IUser|null|undefined} user
          * @memberof protobuf.PersonalStateMsgEvent
          * @instance
          */
-        PersonalStateMsgEvent.prototype.userId = "";
+        PersonalStateMsgEvent.prototype.user = null;
 
         /**
          * PersonalStateMsgEvent state.
@@ -373,8 +441,8 @@ $root.protobuf = (function() {
         PersonalStateMsgEvent.encode = function encode(message, writer) {
             if (!writer)
                 writer = $Writer.create();
-            if (message.userId != null && message.hasOwnProperty("userId"))
-                writer.uint32(/* id 1, wireType 2 =*/10).string(message.userId);
+            if (message.user != null && message.hasOwnProperty("user"))
+                $root.messages.User.encode(message.user, writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
             if (message.state != null && message.hasOwnProperty("state"))
                 writer.uint32(/* id 2, wireType 0 =*/16).int32(message.state);
             if (message.activity != null && message.hasOwnProperty("activity"))
@@ -414,7 +482,7 @@ $root.protobuf = (function() {
                 var tag = reader.uint32();
                 switch (tag >>> 3) {
                 case 1:
-                    message.userId = reader.string();
+                    message.user = $root.messages.User.decode(reader, reader.uint32());
                     break;
                 case 2:
                     message.state = reader.int32();
@@ -457,9 +525,11 @@ $root.protobuf = (function() {
         PersonalStateMsgEvent.verify = function verify(message) {
             if (typeof message !== "object" || message === null)
                 return "object expected";
-            if (message.userId != null && message.hasOwnProperty("userId"))
-                if (!$util.isString(message.userId))
-                    return "userId: string expected";
+            if (message.user != null && message.hasOwnProperty("user")) {
+                var error = $root.messages.User.verify(message.user);
+                if (error)
+                    return "user." + error;
+            }
             if (message.state != null && message.hasOwnProperty("state"))
                 switch (message.state) {
                 default:
@@ -491,8 +561,11 @@ $root.protobuf = (function() {
             if (object instanceof $root.protobuf.PersonalStateMsgEvent)
                 return object;
             var message = new $root.protobuf.PersonalStateMsgEvent();
-            if (object.userId != null)
-                message.userId = String(object.userId);
+            if (object.user != null) {
+                if (typeof object.user !== "object")
+                    throw TypeError(".protobuf.PersonalStateMsgEvent.user: object expected");
+                message.user = $root.messages.User.fromObject(object.user);
+            }
             switch (object.state) {
             case "OFFLINE":
             case 0:
@@ -537,12 +610,12 @@ $root.protobuf = (function() {
                 options = {};
             var object = {};
             if (options.defaults) {
-                object.userId = "";
+                object.user = null;
                 object.state = options.enums === String ? "OFFLINE" : 0;
                 object.activity = null;
             }
-            if (message.userId != null && message.hasOwnProperty("userId"))
-                object.userId = message.userId;
+            if (message.user != null && message.hasOwnProperty("user"))
+                object.user = $root.messages.User.toObject(message.user, options);
             if (message.state != null && message.hasOwnProperty("state"))
                 object.state = options.enums === String ? $root.enums.EMSG_PERSONAL_STATE[message.state] : message.state;
             if (message.activity != null && message.hasOwnProperty("activity"))
@@ -1840,6 +1913,7 @@ $root.protobuf = (function() {
                 case 9:
                 case 10:
                 case 11:
+                case 12:
                     break;
                 }
             if (message.data != null && message.hasOwnProperty("data"))
@@ -1910,9 +1984,13 @@ $root.protobuf = (function() {
             case 10:
                 message.type = 10;
                 break;
-            case "NEW_CHAT_MESSAGE":
+            case "UNAUTHORIZED":
             case 11:
                 message.type = 11;
+                break;
+            case "NEW_CHAT_MESSAGE":
+            case 12:
+                message.type = 12;
                 break;
             }
             if (object.data != null)
@@ -2226,18 +2304,18 @@ $root.google = (function() {
     return google;
 })();
 
-$root.enums = (function() {
+$root.messages = (function() {
 
     /**
-     * Namespace enums.
-     * @exports enums
+     * Namespace messages.
+     * @exports messages
      * @namespace
      */
-    var enums = {};
+    var messages = {};
 
     /**
-     * EMSG_PERSONAL_STATE enum.
-     * @name enums.EMSG_PERSONAL_STATE
+     * PERSONAL_STATE enum.
+     * @name messages.PERSONAL_STATE
      * @enum {string}
      * @property {number} OFFLINE=0 OFFLINE value
      * @property {number} ONLINE=1 ONLINE value
@@ -2245,7 +2323,7 @@ $root.enums = (function() {
      * @property {number} BUSY=3 BUSY value
      * @property {number} INVISIBLE=4 INVISIBLE value
      */
-    enums.EMSG_PERSONAL_STATE = (function() {
+    messages.PERSONAL_STATE = (function() {
         var valuesById = {}, values = Object.create(valuesById);
         values[valuesById[0] = "OFFLINE"] = 0;
         values[valuesById[1] = "ONLINE"] = 1;
@@ -2255,41 +2333,717 @@ $root.enums = (function() {
         return values;
     })();
 
-    /**
-     * EMSG enum.
-     * @name enums.EMSG
-     * @enum {string}
-     * @property {number} INVALID=0 INVALID value
-     * @property {number} LOGON=1 LOGON value
-     * @property {number} LOGOUT=2 LOGOUT value
-     * @property {number} CHAT_MESSAGE=3 CHAT_MESSAGE value
-     * @property {number} THEATER_ONLINE_USERS=4 THEATER_ONLINE_USERS value
-     * @property {number} THEATER_UPDATE_USER=5 THEATER_UPDATE_USER value
-     * @property {number} PERSONAL_STATE_CHANGED=6 PERSONAL_STATE_CHANGED value
-     * @property {number} PERSONAL_ACTIVITY_CHANGED=7 PERSONAL_ACTIVITY_CHANGED value
-     * @property {number} THEATER_LOGON=8 THEATER_LOGON value
-     * @property {number} THEATER_LOGOUT=9 THEATER_LOGOUT value
-     * @property {number} AUTHORIZED=10 AUTHORIZED value
-     * @property {number} NEW_CHAT_MESSAGE=11 NEW_CHAT_MESSAGE value
-     */
-    enums.EMSG = (function() {
-        var valuesById = {}, values = Object.create(valuesById);
-        values[valuesById[0] = "INVALID"] = 0;
-        values[valuesById[1] = "LOGON"] = 1;
-        values[valuesById[2] = "LOGOUT"] = 2;
-        values[valuesById[3] = "CHAT_MESSAGE"] = 3;
-        values[valuesById[4] = "THEATER_ONLINE_USERS"] = 4;
-        values[valuesById[5] = "THEATER_UPDATE_USER"] = 5;
-        values[valuesById[6] = "PERSONAL_STATE_CHANGED"] = 6;
-        values[valuesById[7] = "PERSONAL_ACTIVITY_CHANGED"] = 7;
-        values[valuesById[8] = "THEATER_LOGON"] = 8;
-        values[valuesById[9] = "THEATER_LOGOUT"] = 9;
-        values[valuesById[10] = "AUTHORIZED"] = 10;
-        values[valuesById[11] = "NEW_CHAT_MESSAGE"] = 11;
-        return values;
+    messages.Activity = (function() {
+
+        /**
+         * Properties of an Activity.
+         * @memberof messages
+         * @interface IActivity
+         * @property {string|null} [id] Activity id
+         * @property {string|null} [activity] Activity activity
+         */
+
+        /**
+         * Constructs a new Activity.
+         * @memberof messages
+         * @classdesc Represents an Activity.
+         * @implements IActivity
+         * @constructor
+         * @param {messages.IActivity=} [properties] Properties to set
+         */
+        function Activity(properties) {
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+
+        /**
+         * Activity id.
+         * @member {string} id
+         * @memberof messages.Activity
+         * @instance
+         */
+        Activity.prototype.id = "";
+
+        /**
+         * Activity activity.
+         * @member {string} activity
+         * @memberof messages.Activity
+         * @instance
+         */
+        Activity.prototype.activity = "";
+
+        /**
+         * Creates a new Activity instance using the specified properties.
+         * @function create
+         * @memberof messages.Activity
+         * @static
+         * @param {messages.IActivity=} [properties] Properties to set
+         * @returns {messages.Activity} Activity instance
+         */
+        Activity.create = function create(properties) {
+            return new Activity(properties);
+        };
+
+        /**
+         * Encodes the specified Activity message. Does not implicitly {@link messages.Activity.verify|verify} messages.
+         * @function encode
+         * @memberof messages.Activity
+         * @static
+         * @param {messages.IActivity} message Activity message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        Activity.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.id != null && message.hasOwnProperty("id"))
+                writer.uint32(/* id 1, wireType 2 =*/10).string(message.id);
+            if (message.activity != null && message.hasOwnProperty("activity"))
+                writer.uint32(/* id 2, wireType 2 =*/18).string(message.activity);
+            return writer;
+        };
+
+        /**
+         * Encodes the specified Activity message, length delimited. Does not implicitly {@link messages.Activity.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof messages.Activity
+         * @static
+         * @param {messages.IActivity} message Activity message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        Activity.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+
+        /**
+         * Decodes an Activity message from the specified reader or buffer.
+         * @function decode
+         * @memberof messages.Activity
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {messages.Activity} Activity
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        Activity.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.messages.Activity();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1:
+                    message.id = reader.string();
+                    break;
+                case 2:
+                    message.activity = reader.string();
+                    break;
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+
+        /**
+         * Decodes an Activity message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof messages.Activity
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {messages.Activity} Activity
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        Activity.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+
+        /**
+         * Verifies an Activity message.
+         * @function verify
+         * @memberof messages.Activity
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        Activity.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            if (message.id != null && message.hasOwnProperty("id"))
+                if (!$util.isString(message.id))
+                    return "id: string expected";
+            if (message.activity != null && message.hasOwnProperty("activity"))
+                if (!$util.isString(message.activity))
+                    return "activity: string expected";
+            return null;
+        };
+
+        /**
+         * Creates an Activity message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof messages.Activity
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {messages.Activity} Activity
+         */
+        Activity.fromObject = function fromObject(object) {
+            if (object instanceof $root.messages.Activity)
+                return object;
+            var message = new $root.messages.Activity();
+            if (object.id != null)
+                message.id = String(object.id);
+            if (object.activity != null)
+                message.activity = String(object.activity);
+            return message;
+        };
+
+        /**
+         * Creates a plain object from an Activity message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof messages.Activity
+         * @static
+         * @param {messages.Activity} message Activity
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        Activity.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.defaults) {
+                object.id = "";
+                object.activity = "";
+            }
+            if (message.id != null && message.hasOwnProperty("id"))
+                object.id = message.id;
+            if (message.activity != null && message.hasOwnProperty("activity"))
+                object.activity = message.activity;
+            return object;
+        };
+
+        /**
+         * Converts this Activity to JSON.
+         * @function toJSON
+         * @memberof messages.Activity
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        Activity.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+
+        return Activity;
     })();
 
-    return enums;
+    messages.User = (function() {
+
+        /**
+         * Properties of a User.
+         * @memberof messages
+         * @interface IUser
+         * @property {string|null} [id] User id
+         * @property {string|null} [fullname] User fullname
+         * @property {string|null} [username] User username
+         * @property {string|null} [hash] User hash
+         * @property {string|null} [email] User email
+         * @property {string|null} [password] User password
+         * @property {boolean|null} [isActive] User isActive
+         * @property {string|null} [avatar] User avatar
+         * @property {messages.IActivity|null} [activity] User activity
+         * @property {messages.PERSONAL_STATE|null} [state] User state
+         * @property {google.protobuf.ITimestamp|null} [lastLogin] User lastLogin
+         * @property {google.protobuf.ITimestamp|null} [joinedAt] User joinedAt
+         * @property {google.protobuf.ITimestamp|null} [updatedAt] User updatedAt
+         */
+
+        /**
+         * Constructs a new User.
+         * @memberof messages
+         * @classdesc Represents a User.
+         * @implements IUser
+         * @constructor
+         * @param {messages.IUser=} [properties] Properties to set
+         */
+        function User(properties) {
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+
+        /**
+         * User id.
+         * @member {string} id
+         * @memberof messages.User
+         * @instance
+         */
+        User.prototype.id = "";
+
+        /**
+         * User fullname.
+         * @member {string} fullname
+         * @memberof messages.User
+         * @instance
+         */
+        User.prototype.fullname = "";
+
+        /**
+         * User username.
+         * @member {string} username
+         * @memberof messages.User
+         * @instance
+         */
+        User.prototype.username = "";
+
+        /**
+         * User hash.
+         * @member {string} hash
+         * @memberof messages.User
+         * @instance
+         */
+        User.prototype.hash = "";
+
+        /**
+         * User email.
+         * @member {string} email
+         * @memberof messages.User
+         * @instance
+         */
+        User.prototype.email = "";
+
+        /**
+         * User password.
+         * @member {string} password
+         * @memberof messages.User
+         * @instance
+         */
+        User.prototype.password = "";
+
+        /**
+         * User isActive.
+         * @member {boolean} isActive
+         * @memberof messages.User
+         * @instance
+         */
+        User.prototype.isActive = false;
+
+        /**
+         * User avatar.
+         * @member {string} avatar
+         * @memberof messages.User
+         * @instance
+         */
+        User.prototype.avatar = "";
+
+        /**
+         * User activity.
+         * @member {messages.IActivity|null|undefined} activity
+         * @memberof messages.User
+         * @instance
+         */
+        User.prototype.activity = null;
+
+        /**
+         * User state.
+         * @member {messages.PERSONAL_STATE} state
+         * @memberof messages.User
+         * @instance
+         */
+        User.prototype.state = 0;
+
+        /**
+         * User lastLogin.
+         * @member {google.protobuf.ITimestamp|null|undefined} lastLogin
+         * @memberof messages.User
+         * @instance
+         */
+        User.prototype.lastLogin = null;
+
+        /**
+         * User joinedAt.
+         * @member {google.protobuf.ITimestamp|null|undefined} joinedAt
+         * @memberof messages.User
+         * @instance
+         */
+        User.prototype.joinedAt = null;
+
+        /**
+         * User updatedAt.
+         * @member {google.protobuf.ITimestamp|null|undefined} updatedAt
+         * @memberof messages.User
+         * @instance
+         */
+        User.prototype.updatedAt = null;
+
+        /**
+         * Creates a new User instance using the specified properties.
+         * @function create
+         * @memberof messages.User
+         * @static
+         * @param {messages.IUser=} [properties] Properties to set
+         * @returns {messages.User} User instance
+         */
+        User.create = function create(properties) {
+            return new User(properties);
+        };
+
+        /**
+         * Encodes the specified User message. Does not implicitly {@link messages.User.verify|verify} messages.
+         * @function encode
+         * @memberof messages.User
+         * @static
+         * @param {messages.IUser} message User message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        User.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.id != null && message.hasOwnProperty("id"))
+                writer.uint32(/* id 1, wireType 2 =*/10).string(message.id);
+            if (message.fullname != null && message.hasOwnProperty("fullname"))
+                writer.uint32(/* id 2, wireType 2 =*/18).string(message.fullname);
+            if (message.username != null && message.hasOwnProperty("username"))
+                writer.uint32(/* id 3, wireType 2 =*/26).string(message.username);
+            if (message.hash != null && message.hasOwnProperty("hash"))
+                writer.uint32(/* id 4, wireType 2 =*/34).string(message.hash);
+            if (message.email != null && message.hasOwnProperty("email"))
+                writer.uint32(/* id 5, wireType 2 =*/42).string(message.email);
+            if (message.password != null && message.hasOwnProperty("password"))
+                writer.uint32(/* id 6, wireType 2 =*/50).string(message.password);
+            if (message.isActive != null && message.hasOwnProperty("isActive"))
+                writer.uint32(/* id 7, wireType 0 =*/56).bool(message.isActive);
+            if (message.avatar != null && message.hasOwnProperty("avatar"))
+                writer.uint32(/* id 8, wireType 2 =*/66).string(message.avatar);
+            if (message.activity != null && message.hasOwnProperty("activity"))
+                $root.messages.Activity.encode(message.activity, writer.uint32(/* id 9, wireType 2 =*/74).fork()).ldelim();
+            if (message.state != null && message.hasOwnProperty("state"))
+                writer.uint32(/* id 10, wireType 0 =*/80).int32(message.state);
+            if (message.lastLogin != null && message.hasOwnProperty("lastLogin"))
+                $root.google.protobuf.Timestamp.encode(message.lastLogin, writer.uint32(/* id 11, wireType 2 =*/90).fork()).ldelim();
+            if (message.joinedAt != null && message.hasOwnProperty("joinedAt"))
+                $root.google.protobuf.Timestamp.encode(message.joinedAt, writer.uint32(/* id 12, wireType 2 =*/98).fork()).ldelim();
+            if (message.updatedAt != null && message.hasOwnProperty("updatedAt"))
+                $root.google.protobuf.Timestamp.encode(message.updatedAt, writer.uint32(/* id 13, wireType 2 =*/106).fork()).ldelim();
+            return writer;
+        };
+
+        /**
+         * Encodes the specified User message, length delimited. Does not implicitly {@link messages.User.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof messages.User
+         * @static
+         * @param {messages.IUser} message User message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        User.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+
+        /**
+         * Decodes a User message from the specified reader or buffer.
+         * @function decode
+         * @memberof messages.User
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {messages.User} User
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        User.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.messages.User();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1:
+                    message.id = reader.string();
+                    break;
+                case 2:
+                    message.fullname = reader.string();
+                    break;
+                case 3:
+                    message.username = reader.string();
+                    break;
+                case 4:
+                    message.hash = reader.string();
+                    break;
+                case 5:
+                    message.email = reader.string();
+                    break;
+                case 6:
+                    message.password = reader.string();
+                    break;
+                case 7:
+                    message.isActive = reader.bool();
+                    break;
+                case 8:
+                    message.avatar = reader.string();
+                    break;
+                case 9:
+                    message.activity = $root.messages.Activity.decode(reader, reader.uint32());
+                    break;
+                case 10:
+                    message.state = reader.int32();
+                    break;
+                case 11:
+                    message.lastLogin = $root.google.protobuf.Timestamp.decode(reader, reader.uint32());
+                    break;
+                case 12:
+                    message.joinedAt = $root.google.protobuf.Timestamp.decode(reader, reader.uint32());
+                    break;
+                case 13:
+                    message.updatedAt = $root.google.protobuf.Timestamp.decode(reader, reader.uint32());
+                    break;
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+
+        /**
+         * Decodes a User message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof messages.User
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {messages.User} User
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        User.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+
+        /**
+         * Verifies a User message.
+         * @function verify
+         * @memberof messages.User
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        User.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            if (message.id != null && message.hasOwnProperty("id"))
+                if (!$util.isString(message.id))
+                    return "id: string expected";
+            if (message.fullname != null && message.hasOwnProperty("fullname"))
+                if (!$util.isString(message.fullname))
+                    return "fullname: string expected";
+            if (message.username != null && message.hasOwnProperty("username"))
+                if (!$util.isString(message.username))
+                    return "username: string expected";
+            if (message.hash != null && message.hasOwnProperty("hash"))
+                if (!$util.isString(message.hash))
+                    return "hash: string expected";
+            if (message.email != null && message.hasOwnProperty("email"))
+                if (!$util.isString(message.email))
+                    return "email: string expected";
+            if (message.password != null && message.hasOwnProperty("password"))
+                if (!$util.isString(message.password))
+                    return "password: string expected";
+            if (message.isActive != null && message.hasOwnProperty("isActive"))
+                if (typeof message.isActive !== "boolean")
+                    return "isActive: boolean expected";
+            if (message.avatar != null && message.hasOwnProperty("avatar"))
+                if (!$util.isString(message.avatar))
+                    return "avatar: string expected";
+            if (message.activity != null && message.hasOwnProperty("activity")) {
+                var error = $root.messages.Activity.verify(message.activity);
+                if (error)
+                    return "activity." + error;
+            }
+            if (message.state != null && message.hasOwnProperty("state"))
+                switch (message.state) {
+                default:
+                    return "state: enum value expected";
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                    break;
+                }
+            if (message.lastLogin != null && message.hasOwnProperty("lastLogin")) {
+                var error = $root.google.protobuf.Timestamp.verify(message.lastLogin);
+                if (error)
+                    return "lastLogin." + error;
+            }
+            if (message.joinedAt != null && message.hasOwnProperty("joinedAt")) {
+                var error = $root.google.protobuf.Timestamp.verify(message.joinedAt);
+                if (error)
+                    return "joinedAt." + error;
+            }
+            if (message.updatedAt != null && message.hasOwnProperty("updatedAt")) {
+                var error = $root.google.protobuf.Timestamp.verify(message.updatedAt);
+                if (error)
+                    return "updatedAt." + error;
+            }
+            return null;
+        };
+
+        /**
+         * Creates a User message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof messages.User
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {messages.User} User
+         */
+        User.fromObject = function fromObject(object) {
+            if (object instanceof $root.messages.User)
+                return object;
+            var message = new $root.messages.User();
+            if (object.id != null)
+                message.id = String(object.id);
+            if (object.fullname != null)
+                message.fullname = String(object.fullname);
+            if (object.username != null)
+                message.username = String(object.username);
+            if (object.hash != null)
+                message.hash = String(object.hash);
+            if (object.email != null)
+                message.email = String(object.email);
+            if (object.password != null)
+                message.password = String(object.password);
+            if (object.isActive != null)
+                message.isActive = Boolean(object.isActive);
+            if (object.avatar != null)
+                message.avatar = String(object.avatar);
+            if (object.activity != null) {
+                if (typeof object.activity !== "object")
+                    throw TypeError(".messages.User.activity: object expected");
+                message.activity = $root.messages.Activity.fromObject(object.activity);
+            }
+            switch (object.state) {
+            case "OFFLINE":
+            case 0:
+                message.state = 0;
+                break;
+            case "ONLINE":
+            case 1:
+                message.state = 1;
+                break;
+            case "IDLE":
+            case 2:
+                message.state = 2;
+                break;
+            case "BUSY":
+            case 3:
+                message.state = 3;
+                break;
+            case "INVISIBLE":
+            case 4:
+                message.state = 4;
+                break;
+            }
+            if (object.lastLogin != null) {
+                if (typeof object.lastLogin !== "object")
+                    throw TypeError(".messages.User.lastLogin: object expected");
+                message.lastLogin = $root.google.protobuf.Timestamp.fromObject(object.lastLogin);
+            }
+            if (object.joinedAt != null) {
+                if (typeof object.joinedAt !== "object")
+                    throw TypeError(".messages.User.joinedAt: object expected");
+                message.joinedAt = $root.google.protobuf.Timestamp.fromObject(object.joinedAt);
+            }
+            if (object.updatedAt != null) {
+                if (typeof object.updatedAt !== "object")
+                    throw TypeError(".messages.User.updatedAt: object expected");
+                message.updatedAt = $root.google.protobuf.Timestamp.fromObject(object.updatedAt);
+            }
+            return message;
+        };
+
+        /**
+         * Creates a plain object from a User message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof messages.User
+         * @static
+         * @param {messages.User} message User
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        User.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.defaults) {
+                object.id = "";
+                object.fullname = "";
+                object.username = "";
+                object.hash = "";
+                object.email = "";
+                object.password = "";
+                object.isActive = false;
+                object.avatar = "";
+                object.activity = null;
+                object.state = options.enums === String ? "OFFLINE" : 0;
+                object.lastLogin = null;
+                object.joinedAt = null;
+                object.updatedAt = null;
+            }
+            if (message.id != null && message.hasOwnProperty("id"))
+                object.id = message.id;
+            if (message.fullname != null && message.hasOwnProperty("fullname"))
+                object.fullname = message.fullname;
+            if (message.username != null && message.hasOwnProperty("username"))
+                object.username = message.username;
+            if (message.hash != null && message.hasOwnProperty("hash"))
+                object.hash = message.hash;
+            if (message.email != null && message.hasOwnProperty("email"))
+                object.email = message.email;
+            if (message.password != null && message.hasOwnProperty("password"))
+                object.password = message.password;
+            if (message.isActive != null && message.hasOwnProperty("isActive"))
+                object.isActive = message.isActive;
+            if (message.avatar != null && message.hasOwnProperty("avatar"))
+                object.avatar = message.avatar;
+            if (message.activity != null && message.hasOwnProperty("activity"))
+                object.activity = $root.messages.Activity.toObject(message.activity, options);
+            if (message.state != null && message.hasOwnProperty("state"))
+                object.state = options.enums === String ? $root.messages.PERSONAL_STATE[message.state] : message.state;
+            if (message.lastLogin != null && message.hasOwnProperty("lastLogin"))
+                object.lastLogin = $root.google.protobuf.Timestamp.toObject(message.lastLogin, options);
+            if (message.joinedAt != null && message.hasOwnProperty("joinedAt"))
+                object.joinedAt = $root.google.protobuf.Timestamp.toObject(message.joinedAt, options);
+            if (message.updatedAt != null && message.hasOwnProperty("updatedAt"))
+                object.updatedAt = $root.google.protobuf.Timestamp.toObject(message.updatedAt, options);
+            return object;
+        };
+
+        /**
+         * Converts this User to JSON.
+         * @function toJSON
+         * @memberof messages.User
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        User.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+
+        return User;
+    })();
+
+    return messages;
 })();
 
 module.exports = $root;

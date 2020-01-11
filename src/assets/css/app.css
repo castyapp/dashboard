@@ -409,7 +409,7 @@ div.dark-selector > .menu>.item {
     border-color: #33333340 !important;
 }
 
-.form-dark > .form-group > input {
+.form-dark > .form-group input {
     background: #131212 !important;
 }
 
@@ -531,6 +531,11 @@ tr.new-log > td:first-child {
 
 .offline .state-dot {
     background-color: transparent !important;
+    border-color: transparent !important;
+}
+
+.offline .activity {
+    display: none;
 }
 
 .offline .state-dot-circle {
@@ -565,4 +570,9 @@ tr.new-log > td:first-child {
 
 .pull-left {
     float: left;
+}
+
+.v-loading {
+    margin: 0 auto;
+    display: table;
 }

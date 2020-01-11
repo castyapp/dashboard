@@ -352,6 +352,8 @@
 
                 this.$store.dispatch("createTheater", theater).then(response => {
 
+
+
                     console.log(response);
 
                     this.$router.push({ name: "dashboard" }).then(() => {

@@ -14,11 +14,12 @@
 
         <div class="col-msg-container">
             <div class="messages pl-2 pr-2">
-                <div id="scrollArea" class="chats" v-chat-scroll>
 
-                    <div v-if="loading" class="VclBulletList-loading">
-                        <VclBulletList :width="570" :rows="25" :primary="'#333'" :secondary="'#181818'"></VclBulletList>
-                    </div>
+                <div class="v-loading">
+                    <EllipsisLoader :loading="loading" class="v-loading" :color="'#316bff'" />
+                </div>
+
+                <div id="scrollArea" class="chats" v-chat-scroll>
 
                     <div class="message" :data-id="index" :class="{ 'sm-user': isLastOneThisUser(index) }"
                          v-for="(message, index) in messages">
@@ -205,11 +206,6 @@
         padding: 0 10px;
     }
 
-    .VclBulletList-loading {
-        position: absolute;
-        z-index: -9;
-    }
-
     .small-avatar {
         width: 30px;
         float: left;
@@ -232,7 +228,7 @@
     import TheaterMessage from "../../models/TheaterMessage";
     import {protobuf, enums} from "../../../protocol/protobuf/base";
 
-    import {VclBulletList} from 'vue-content-loading';
+    import {EllipsisLoader} from 'vue-spinners-css';
 
     export default {
         name: 'Message',
@@ -246,7 +242,7 @@
         },
         components: {
             TheaterMessage,
-            VclBulletList,
+            EllipsisLoader,
         },
         methods: {
             hasMetaData(message) {
@@ -309,7 +305,7 @@
             this.messages = [];
             let friend_username = this.$route.params.friend_id;
 
-            if (typeof this.$route.params.friend !== 'undefined') {
+            if (this.$route.params.friend !== undefined) {
                 this.friend = this.$route.params.friend;
             }
 
@@ -319,9 +315,11 @@
                 });
             }
 
+            let v = this;
             this.$store.dispatch("getMessages", friend_username).then(response => {
                 this.messages = response.data.result;
                 this.loading = false;
+                v.$parent.$emit("ready");
             });
 
             bus.$on(enums.EMSG[enums.EMSG.CHAT_MESSAGE], data => {

@@ -189,9 +189,10 @@
 <script>
 
     import $ from "jquery";
+    import {bus} from "../../main";
     import {websocket} from "../../store/ws";
-    import {protobuf, enums} from "../../protocol/protobuf/base";
     import {Packet} from "../../protocol/protobuf/packet";
+    import {protobuf, enums} from "../../protocol/protobuf/base";
 
     export default {
         props: ['theater'],
@@ -237,15 +238,11 @@
                     }
                 }
             },
-            changeMemberState(user_id, state) {
-                let userIndex = this.findMember(user_id);
+            changeMemberState(user, state) {
+                let userIndex = this.findMember(user.id);
                 if (state === 1){
                     if (userIndex === -1){
-                        this.$store.dispatch("getFriend", user_id).then(response => {
-                            let friend = response.data.result;
-                            // find user with api and add it here
-                            this.members.push(friend);
-                        }).catch(console.log)
+                        this.members.push(user);
                     }
                 } else {
                     if (userIndex > -1) {
@@ -262,27 +259,26 @@
                 return -1
             }
         },
-        async mounted() {
-            if (websocket.theater.connected){
+        mounted() {
 
-                console.log(`Connected to theater!`);
+            bus.$on("theater-connected", (members) => {
 
-                await this.$store.dispatch("getTheaterMembers", this.theater.hash)
-                    .then(response => {
-                        this.members = response.data.result;
-                    }).catch(console.log);
-
+                this.members = members;
                 this.ws = websocket.theater.ws;
+
+                console.log(`Connected to theater[${this.theater.id}] ws!`);
+
                 this.ws.onmessage = (message) => {
                     let packet = new Packet(message.data);
                     switch (packet.emsg) {
                         case enums.EMSG.THEATER_UPDATE_USER:
                             let decoded = protobuf.PersonalStateMsgEvent.decode(packet.data);
-                            this.changeMemberState(decoded.userId, decoded.state);
+                            this.changeMemberState(decoded.user, decoded.state);
                             break;
                     }
                 };
-            }
+
+            });
         }
     }
 

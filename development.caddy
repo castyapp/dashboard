@@ -1,10 +1,24 @@
-:80 {
-
+irgeek.ir, www.irgeek.ir {
     gzip
-    root /home-pi/dist
-
+    root /movienight.caddy/dist
     rewrite {
         regexp .*
         to {path} /
     }
 }
+
+api.irgeek.ir {
+    proxy / movienight.api:9002 {
+        transparent
+    }
+}
+
+gateway.irgeek.ir {
+    proxy / movienight.ws:3000 {
+        transparent
+        websocket
+    }
+}
+
+grpc.irgeek.ir
+grpc movienight.grpc:55283
