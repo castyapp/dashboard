@@ -1,24 +1,21 @@
-irgeek.ir, www.irgeek.ir {
+casty.ir, www.casty.ir {
     gzip
-    root /movienight.caddy/dist
+    root /casty.caddy/dist
     rewrite {
         regexp .*
         to {path} /
     }
 }
 
-api.irgeek.ir {
-    proxy / movienight.api:9002 {
+api.casty.ir {
+    proxy / casty.api:9002 {
         transparent
     }
 }
 
-gateway.irgeek.ir {
-    proxy / movienight.ws:3000 {
+gateway.casty.ir {
+    proxy / casty.gateway:3000 {
         transparent
         websocket
     }
 }
-
-grpc.irgeek.ir
-grpc movienight.grpc:55283

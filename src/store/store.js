@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from 'axios'
-import config from "./api"
+import config from './api'
 
 Vue.use(Vuex);
 
@@ -46,6 +46,7 @@ export const store = new Vuex.Store({
     actions: {
         logout(context) {
             context.commit("destroyToken");
+            this.state.user = null;
         },
         getFriendsList(context) {
             return new Promise((resolve, reject) => {
@@ -94,6 +95,15 @@ export const store = new Vuex.Store({
         getFriend(context, friend_id) {
             return new Promise((resolve, reject) => {
                 axios.get(`/user/@friends/${friend_id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${context.state.token}`
+                    },
+                }).then(resolve).catch(reject)
+            })
+        },
+        getFriendRequest(context, request_id) {
+            return new Promise((resolve, reject) => {
+                axios.get(`/user/@friends/${request_id}/@fr`, {
                     headers: {
                         'Authorization': `Bearer ${context.state.token}`
                     },
@@ -190,6 +200,21 @@ export const store = new Vuex.Store({
                 }).then(resolve).catch(reject);
             })
         },
+        acceptFriendRequest(context, request_id) {
+
+            return new Promise((resolve, reject) => {
+
+                const params = new URLSearchParams();
+                params.append('request_id', request_id);
+
+                axios.post('/user/@friends/accept', params, {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Authorization': `Bearer ${context.state.token}`,
+                    }
+                }).then(resolve).catch(reject);
+            })
+        },
         register(context, data) {
 
             return new Promise((resolve, reject) => {
@@ -219,18 +244,67 @@ export const store = new Vuex.Store({
 
                 const params = new URLSearchParams();
 
-                params.append('username', credentials.username);
-                params.append('password', credentials.password);
+                params.append('user', credentials.user);
+                params.append('pass', credentials.pass);
+                params.append('g-recaptcha-response', credentials.gToken);
 
                 axios.post('/auth/@create', params, {
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
-                        'Authorization': `Bearer ${context.state.token}`,
                     }
                 }).then(response => {
                     context.commit('retrieveToken', response.data.result);
                     resolve(response)
                 }).catch(reject);
+            })
+        },
+        getNotifications(context) {
+            return new Promise((resolve, reject) => {
+                axios.get('/user/@notifications', {
+                    headers: {
+                        'Authorization': `Bearer ${context.state.token}`
+                    },
+                }).then(resolve).catch(reject);
+            })
+        },
+        readAllNotifications(context) {
+            return new Promise((resolve, reject) => {
+                axios.delete('/user/@notifications', {
+                    headers: {
+                        'Authorization': `Bearer ${context.state.token}`
+                    },
+                }).then(resolve).catch(reject);
+            })
+        },
+        inviteFriendToTheater(context, {friend_ids, theater_id}) {
+
+            return new Promise((resolve, reject) => {
+
+                axios.post(`/user/@theaters/${theater_id}/invite`, {friend_ids}, {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Authorization': `Bearer ${context.state.token}`
+                    }
+                }).then(resolve).catch(reject);
+
+            })
+        },
+        OAUTHCallback(context, {service, code}) {
+
+            return new Promise((resolve, reject) => {
+
+                const params = new URLSearchParams();
+                params.append('code', code);
+
+                axios.post(`/oauth/${service}/@callback`, params, {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    }
+                }).then(response => {
+                    context.commit('retrieveToken', response.data.result);
+                    resolve(response)
+                }).catch(reject);
+
             })
         }
     },

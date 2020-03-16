@@ -7,7 +7,8 @@
     import {websocket} from "../../store/ws";
 
     export default {
-        created() {
+        name: "logout",
+        mounted() {
             this.$store.dispatch('logout').then(() => {
                 localStorage.removeItem("user");
                 websocket.user.disconnect();

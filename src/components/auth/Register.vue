@@ -1,139 +1,129 @@
 <template>
 
-    <div class="mt-5">
+    <form class="login-form"
+          action="#"
+          @submit.prevent="register">
 
-        <notifications group="auth" position="top center" :max="1" />
-        <notifications group="error" position="top center" :max="1" />
+        <div class="form-group">
+            <label for="fullname"></label>
+            <input type="text"
+                   class="form-control"
+                   id="fullname"
+                   name="fullname"
+                   placeholder="Fullname"
+                   autofocus="autofocus"
+                   v-model="fullname"
+                   required="required" />
 
-        <vue-topprogress ref="topProgress" />
-
-        <form class="col-md-4 offset-md-4 login-form text-center"
-              action="#"
-              @submit.prevent="register">
-
-            <h2>Register</h2>
-
-            <div class="alert alert-success"
-                 v-if="successMessage">
-                <strong>{{ successMessage }}</strong>
-            </div>
-
-            <div id="serverError">
-                <div class="alert alert-danger" v-if="serverError">
-                    <strong>{{ serverError }}</strong>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <input type="text"
-                       class="form-control"
-                       id="fullname"
-                       name="fullname"
-                       placeholder="Fullname"
-                       autofocus="autofocus"
-                       v-model="fullname"
-                       required="required" />
-
-                <small v-if="errors.fullname" class="text-danger fa-pull-left text-left">
+            <small v-if="errors.fullname" class="text-danger fa-pull-left text-left">
                     <span class="clearfix">
                         {{ errors.fullname }}
                     </span>
-                </small>
+            </small>
+        </div>
+
+        <div class="form-group">
+            <label for="username"></label>
+            <input type="text"
+                   class="form-control"
+                   id="username"
+                   name="username"
+                   placeholder="Username"
+                   autofocus="autofocus"
+                   v-model="username"
+                   required="required" />
+
+            <small v-if="errors.username" class="text-danger fa-pull-left text-left">
+                <span class="clearfix" v-for="err in errors.username">
+                    {{ err }}
+                </span>
+            </small>
+        </div>
+
+        <div class="form-group">
+            <label for="email"></label>
+            <input type="email"
+                   class="form-control"
+                   id="email"
+                   name="email"
+                   placeholder="Email"
+                   autofocus="autofocus"
+                   v-model="email"
+                   required="required" />
+
+            <small v-if="errors.email" class="text-danger fa-pull-left text-left">
+                <span class="clearfix" v-for="err in errors.email">
+                    {{ err }}
+                </span>
+            </small>
+        </div>
+
+        <div class="form-group">
+            <label for="password"></label>
+            <input type="password"
+                   class="form-control"
+                   name="password"
+                   id="password"
+                   placeholder="Password"
+                   v-model="password"
+                   required="required" />
+
+            <small v-if="errors.password" class="text-danger fa-pull-left text-left">
+                <span class="clearfix" v-for="err in errors.password">
+                    {{ err }}
+                </span>
+            </small>
+        </div>
+
+        <div class="form-group">
+            <label for="password_confirmation"></label>
+            <input type="password"
+                   class="form-control"
+                   name="password_confirmation"
+                   id="password_confirmation"
+                   placeholder="Password Confirmation"
+                   v-model="password_confirmation"
+                   required="required" />
+
+            <small v-if="errors.password_confirmation" class="text-danger fa-pull-left text-left">
+                <span class="clearfix" v-for="err in errors.password_confirmation">
+                    {{ err }}
+                </span>
+            </small>
+        </div>
+
+        <div class="form-group login-bottom-action-buttons">
+
+            <div class="buttons">
+                <button class="btn btn-primary">Register</button>
+                <a class="btn">Forget password?</a>
             </div>
 
-            <div class="form-group">
-                <input type="text"
-                       class="form-control"
-                       id="username"
-                       name="username"
-                       placeholder="Username"
-                       autofocus="autofocus"
-                       v-model="username"
-                       required="required" />
+            <div class="oauthButtons">
 
-                <small v-if="errors.username" class="text-danger fa-pull-left text-left">
-                    <span class="clearfix">
-                        {{ errors.username }}
-                    </span>
-                </small>
-            </div>
+                <strong>Or you can sign up with:</strong>
 
-            <div class="form-group">
-                <input type="email"
-                       class="form-control"
-                       id="email"
-                       name="email"
-                       placeholder="Email"
-                       autofocus="autofocus"
-                       v-model="email"
-                       required="required" />
-
-                <small v-if="errors.email" class="text-danger fa-pull-left text-left">
-                    <span class="clearfix">
-                        {{ errors.email }}
-                    </span>
-                </small>
-            </div>
-
-            <div class="form-group">
-                <input type="password"
-                       class="form-control"
-                       name="password"
-                       placeholder="Password"
-                       v-model="password"
-                       required="required" />
-
-                <small v-if="errors.password" class="text-danger fa-pull-left text-left">
-                    <span class="clearfix">
-                        {{ errors.password }}
-                    </span>
-                </small>
-            </div>
-
-            <div class="form-group">
-                <input type="password"
-                       class="form-control"
-                       name="password_confirmation"
-                       placeholder="Password Confirmation"
-                       v-model="password_confirmation"
-                       required="required" />
-
-                <small v-if="errors.password_confirmation" class="text-danger fa-pull-left text-left">
-                    <span class="clearfix">
-                        {{ errors.password_confirmation }}
-                    </span>
-                </small>
-            </div>
-
-            <div class="form-group">
-                <button type="submit" class="btn btn-primary" :disabled="loading">
-                    <span class="lds-ring-container" v-if="loading">
-                        <span class="lds-ring">
-                            <span></span>
-                            <span></span>
-                            <span></span>
-                            <span></span>
-                        </span>
-                    </span>
-                    Register
+                <button type="button" class="clickable oauthBtn oauthGoogleBtn"  >
+                    <i class="icofont-google-plus"></i>
+                    Google
                 </button>
+
+                <button type="button" class="clickable oauthBtn oauthDiscordBtn" >
+                    <i class="discord-icon"></i>
+                    Discord
+                </button>
+
             </div>
 
-            <span>
-                Looking for login?
-                <router-link :to="{ name: 'login' }">
-                    Click here!
-                </router-link>
-            </span>
+        </div>
 
-        </form>
+    </form>
 
-    </div>
 </template>
 
 <script>
 
-    const $ = require("jquery");
+    const jQuery = require("jquery");
 
     export default {
         name: 'register',
@@ -144,15 +134,15 @@
         },
         data() {
             return {
+                googleSignInParams: {
+                    client_id: process.env.VUE_APP_API_GOOGLE_CLIENT_ID,
+                },
                 errors: {},
                 username: '',
                 fullname: '',
                 email: '',
                 password: '',
                 password_confirmation: '',
-                loading: false,
-                serverError: '',
-                successMessage: this.dataSuccessMessage,
             }
         },
         mounted() {
@@ -164,11 +154,11 @@
         methods: {
             register() {
 
-                $('#serverError').removeClass();
+                jQuery('#serverError').removeClass();
 
-                this.$refs.topProgress.start();
+                this.$parent.$refs.topProgress.start();
 
-                this.loading = true;
+                this.$parent.loading = true;
 
                 this.$store.dispatch('register', {
                     fullname: this.fullname,
@@ -179,9 +169,9 @@
                 }).then(() => {
 
                     this.errors = {};
-                    this.loading = false;
-                    this.serverError = "";
-                    // this.successMessage = 'Login successfully! Please wait ...';
+                    this.$parent.loading = false;
+                    this.$parent.serverError = "";
+                    this.$parent.successMessage = 'Login successfully! Please wait ...';
 
                     this.$notify({
                         group: 'auth',
@@ -192,28 +182,29 @@
                     });
 
                     setTimeout(() => {
-                        this.$refs.topProgress.done();
+                        this.$parent.$refs.topProgress.done();
                         this.$router.push({ name: 'dashboard' })
                     }, 1000);
 
                 }).catch(error => {
 
-                    this.loading = false;
+                    this.$parent.loading = false;
 
                     if (typeof error.response !== "undefined"){
 
                         if (error.response.data.message) {
                             this.errors = {};
-                            this.serverError = error.response.data.message;
+                            this.$parent.serverError = error.response.data.message;
                         } else {
                             this.errors = error.response.data.result;
-                            this.serverError = "Please correct the following error(s) in form!";
+                            this.$parent.serverError = "Please correct the following error(s) in form!";
                         }
 
                         this.password = '';
-                        this.successMessage = '';
+                        this.password_confirmation = '';
+                        this.$parent.successMessage = '';
 
-                        $('#serverError')
+                        jQuery('#serverError')
                             .addClass('shake animated')
                             .one('webkitAnimationEnd' +
                                 ' mozAnimationEnd ' +
@@ -221,12 +212,12 @@
                                 'oanimationend ' +
                                 'animationend', () => {
 
-                                $(this).removeClass();
+                                jQuery(this).removeClass();
                             });
 
                     }
 
-                    this.$refs.topProgress.done();
+                    this.$parent.$refs.topProgress.done();
                 })
             }
         }

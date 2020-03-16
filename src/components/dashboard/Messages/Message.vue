@@ -21,7 +21,9 @@
 
                 <div id="scrollArea" class="chats" v-chat-scroll>
 
-                    <div class="message" :data-id="index" :class="{ 'sm-user': isLastOneThisUser(index) }"
+                    <div class="message" :data-id="index" 
+                         :key="message.id"
+                         :class="{ 'sm-user': isLastOneThisUser(index) }"
                          v-for="(message, index) in messages">
 
                         <div class="small-avatar">
@@ -224,11 +226,9 @@
     import {bus} from "../../../main";
     import moment from 'moment-timezone';
     import {websocket} from "../../../store/ws";
-    import {emit} from "../../../protocol/messages";
-    import TheaterMessage from "../../models/TheaterMessage";
-    import {protobuf, enums} from "../../../protocol/protobuf/base";
-
     import {EllipsisLoader} from 'vue-spinners-css';
+    import {enums} from "../../../protocol/protobuf/base";
+    import TheaterMessage from "../../models/TheaterMessage";
 
     export default {
         name: 'Message',
@@ -322,9 +322,7 @@
                 v.$parent.$emit("ready");
             });
 
-            bus.$on(enums.EMSG[enums.EMSG.CHAT_MESSAGE], data => {
-                let decoded = protobuf.ChatMsgEvent.decode(data);
-
+            bus.$on(enums.EMSG[enums.EMSG.NEW_CHAT_MESSAGE], decoded => {
                 let sender;
                 let senderString = decoded.from.trim();
                 if (senderString !== '' || senderString !== undefined){

@@ -22,7 +22,6 @@
 <script>
 
     import $ from "jquery";
-    import {bus} from "../../../main";
     import {websocket} from "../../../store/ws";
     import VideoPlayer from "../../models/VideoPlayer";
     import TheaterChat from "../../models/TheaterChat";

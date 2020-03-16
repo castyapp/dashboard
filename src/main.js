@@ -8,7 +8,8 @@ import VueChatScroll from 'vue-chat-scroll'
 import Notifications from 'vue-notification'
 import vueTopProgress from 'vue-top-progress'
 import Master from './components/layouts/Master'
-import * as VueSpinnersCss from "vue-spinners-css";
+import * as VueSpinnersCss from "vue-spinners-css"
+import GSignInButton from 'vue-google-signin-button'
 
 Vue.config.productionTip = false;
 
@@ -16,6 +17,7 @@ import 'v-title/lib/element-ui';
 
 Vue.use(VTitle);
 Vue.use(VueRouter);
+Vue.use(GSignInButton);
 Vue.use(VueChatScroll);
 Vue.use(Notifications);
 Vue.use(VueSpinnersCss);
@@ -39,8 +41,7 @@ import "./assets/css/icofont.css";
 
 import 'vue-loaders/dist/vue-loaders.css';
 import VueLoaders from 'vue-loaders';
-
-Vue.component('loader', VueLoaders.component);
+Vue.use(VueLoaders);
 
 router.beforeEach(async (to, from, next) => {
     if (to.matched.some(record => record.meta.requiresAuth)) {

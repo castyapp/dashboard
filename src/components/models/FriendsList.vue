@@ -1,14 +1,20 @@
 <template>
 
-    <div class="friends_list p-3" :class="status">
+    <div class="friends_list" :class="status">
 
         <div class="title-border-bottom pb-2">
             <strong class="side-component-title">
                 <div class="friends_title">
-                    <i class="icofont-users-social text-primary mr-2"></i>
-                    Friends
-                    <i class="search_icon icofont-search-1 mr-2 pull-right"
-                       @click="openSearchBox"></i>
+
+                    <i class="icofont-users-social mr-2"></i>
+                    <span>Friends</span>
+
+                    <NotificationCenter :notifications="notifications" />
+
+                    <button type="button" class="friends-menu-btn pull-right" @click="toggleSearchBox">
+                        <i class="icofont-search-1 search_icon"></i>
+                    </button>
+
                 </div>
             </strong>
         </div>
@@ -25,7 +31,7 @@
 
         <ul class="mt-2 search_result" style="display: none">
 
-            <li class="offline" v-for="user in search_result">
+            <li class="offline" :key="user.id" v-for="user in search_result">
                 <a class="friend">
                     <div class="avatar">
                         <img :src="apiBaseUrl + '/uploads/avatars/' + user.avatar + '.png'"
@@ -57,8 +63,10 @@
                 You have no friends here right now :(
             </li>
 
-            <li :data-id="friend.id" :class="getStateName(friend.state)" v-for="friend in friends"
-                @contextmenu.prevent="$parent.$refs.menu.open($event, 'friend-menu', friend)">
+            <li :data-id="friend.id" 
+            :key="friend.id"
+            :class="getStateName(friend.state)" v-for="friend in friends"
+            @contextmenu.prevent="$parent.$refs.menu.open($event, 'friend-menu', friend)">
 
                 <router-link class="friend"
                              :to="{ name: 'messages', params: { friend_id: friend.username, friend }}">
@@ -78,6 +86,9 @@
                             <strong>{{ friend.activity.activity.substring(0,23) + "..." }}</strong>
                         </div>
                     </div>
+
+                    <span :data-friend-badge-id="friend.id"
+                          class="unread-badge-friendlist d-none">0</span>
 
                 </router-link>
 
@@ -118,144 +129,6 @@
         background: #1E88E5;
         color: #FAFAFA;
     }
-
-</style>
-
-<script>
-
-    import $ from "jquery";
-    import {bus} from "../../main";
-    import {Reader} from "protobufjs";
-    import {websocket} from "../../store/ws";
-    import {protobuf, enums} from "../../protocol/protobuf/base";
-    import {Packet} from "../../protocol/protobuf/packet";
-
-    import {VueContentLoading} from 'vue-content-loading';
-
-    export default {
-        props: ['status'],
-        components: {
-            VueContentLoading,
-        },
-        data() {
-            return {
-                ws: null,
-                friends: [],
-                search_result: [],
-                search_keyword: null,
-                loading: true,
-            }
-        },
-        methods: {
-            friendHandler(e, user) {
-                console.log(user);
-                e.preventDefault();
-            },
-            sendFriendRequest(user) {
-                this.$store.dispatch("sendFriendRequest", user.id).then(response => {
-                    console.log(response);
-                }).catch(err => {
-                    console.log(err);
-                });
-            },
-            getStateName(state) {
-                switch (state) {
-                    case 1: return "online";
-                    case 2: return "busy";
-                    case 3: return "idle";
-                    default:
-                        return "offline"
-                }
-            },
-            setFriends(friends) {
-                if (friends !== null){
-                    this.friends = friends;
-                    this.loading = false;
-                }
-            },
-            sortFriends(a, b){
-                let stateA = a.state,
-                    stateB = b.state;
-                if(!stateA && stateB) return 1;
-                if(stateA && !stateB) return -1;
-                return 0;
-            },
-            clearFriendsList() {
-                this.friends = [];
-            },
-            openSearchBox() {
-                let searchFriendsBox = $(".search_friends");
-                let friendsList = $(".friends_list_ul");
-                let searchIcon = $("i.search_icon");
-                let searchResultBox = $(".search_result");
-                let searchInput = $(".search_box").get(0);
-
-                if (searchFriendsBox.hasClass("opened")) {
-                    searchIcon.removeClass("icofont-close");
-                    searchIcon.addClass("icofont-search-1");
-                    searchFriendsBox.removeClass("opened");
-                    friendsList.show();
-                    searchResultBox.hide();
-                } else {
-                    searchFriendsBox.addClass("opened");
-                    friendsList.hide();
-                    searchIcon.removeClass("icofont-search-1");
-                    searchIcon.addClass("icofont-close");
-                    searchInput.focus();
-                    searchResultBox.show();
-                }
-            },
-            removeAllClassesEx(element, class_name) {
-                let classes = ["online", "offline", "idle", "busy"];
-                classes.forEach(classN => {
-                    if (classN !== class_name){
-                        element.removeClass(classN);
-                    }
-                });
-            },
-            changeUserState(user, state) {
-                let friendElement = $(`[data-id="${user.id}"]`);
-                let stateClass = this.getStateName(state);
-                this.removeAllClassesEx(friendElement, stateClass);
-                friendElement.addClass(stateClass);
-            },
-            startConversation(user) {
-                this.$router.push({
-                    path: `/messages/${user.id}`
-                })
-            },
-        },
-        watch: {
-            search_keyword(value) {
-                this.search_result = [];
-                if (value.length > 3){
-                    this.$store.dispatch("searchUser", value).then(response => {
-                        if (response.status === 200){
-                            this.search_result = response.data.result;
-                        }
-                    });
-                }
-            }
-        },
-        mounted() {
-            websocket.user.connect();
-            this.$store.dispatch("getFriendsList").then(response => {
-                this.clearFriendsList();
-                this.setFriends(response.data.result);
-            });
-            bus.$on(enums.EMSG[enums.EMSG.PERSONAL_STATE_CHANGED], data => {
-                let decoded = protobuf.PersonalStateMsgEvent.decode(data);
-                this.changeUserState(decoded.user, decoded.state);
-            });
-        },
-        destroyed() {
-            websocket.user.disconnect();
-        }
-    }
-
-</script>
-
-<style>
 
     .friends_list_ul > li > .friend {
         cursor: pointer;
@@ -378,11 +251,225 @@
         width: 250px;
         background: #181818;
         height: 100%;
-        padding: 10px;
+        padding: 13px;
     }
 
     .friends_list.close {
         display: none;
     }
 
+    button.friends-menu-btn {
+        color: #969696;
+        border-radius: 50%;
+        background: #313131;
+        border: none;
+        width: 32px;
+        height: 30px;
+        font-size: 15px;
+        margin-left: 10px;
+    }
+
+    span.unread_count_notifications {
+        background: red;
+        border-radius: 50%;
+        font-size: 11px;
+        width: 17px;
+        height: 17px;
+        text-align: center;
+        padding: 2px;
+        font-weight: bold;
+        position: absolute;
+        color: #ffffff;
+        margin-top: 9px;
+        margin-left: -7px;
+    }
+
 </style>
+
+<script>
+
+    import $ from "jquery";
+    import {bus} from "../../main";
+    import {websocket} from "../../store/ws";
+    import {VueContentLoading} from 'vue-content-loading';
+    import NotificationCenter from "./NotificationCenter";
+    import {protobuf, enums} from "../../protocol/protobuf/base";
+
+    export default {
+        props: ['status'],
+        components: {
+            VueContentLoading,
+            NotificationCenter,
+        },
+        data() {
+            return {
+                friends: [],
+                search_result: [],
+                search_keyword: null,
+                loading: true,
+                notifications: {
+                    data: [],
+                    unread_count: 0,
+                },
+            }
+        },
+        methods: {
+            sendFriendRequest(user) {
+                this.$store.dispatch("sendFriendRequest", user.id).then(() => {
+
+                    this.$notify({
+                        group: 'dashboard',
+                        type: 'success',
+                        text: "FriendRequest sent successfully!",
+                        title: "Success",
+                        duration: 2000,
+                    });
+
+                    this.search_keyword = "";
+                    this.toggleSearchBox();
+
+                }).catch(err => {
+
+                    if (err.response.status === 409){
+                        this.$notify({
+                            group: 'dashboard',
+                            type: 'error',
+                            text: "Friend request sent already!",
+                            title: "Failed",
+                            duration: 4000,
+                        });
+                    } else {
+                        this.$notify({
+                            group: 'dashboard',
+                            type: 'error',
+                            text: "Failed to send request, Please tray again later!",
+                            title: "Failed",
+                            duration: 2000,
+                        });
+                    }
+
+                    this.search_keyword = "";
+                    this.toggleSearchBox();
+
+                });
+            },
+            getStateName(state) {
+                switch (state) {
+                    case 1: return "online";
+                    case 2: return "busy";
+                    case 3: return "idle";
+                    default:
+                        return "offline"
+                }
+            },
+            setFriends(friends) {
+                this.loading = false;
+                if (friends !== null){
+                    this.friends = friends;
+                    this.$parent.setFriends(friends);
+                }
+            },
+            clearFriendsList() {
+                this.friends = [];
+            },
+            toggleSearchBox() {
+                let searchFriendsBox = $(".search_friends");
+                let friendsList = $(".friends_list_ul");
+                let searchIcon = $("i.search_icon");
+                let searchResultBox = $(".search_result");
+                let searchInput = $(".search_box").get(0);
+
+                if (searchFriendsBox.hasClass("opened")) {
+                    searchIcon.removeClass("icofont-close");
+                    searchIcon.addClass("icofont-search-1");
+                    searchFriendsBox.removeClass("opened");
+                    friendsList.show();
+                    searchResultBox.hide();
+                } else {
+                    searchFriendsBox.addClass("opened");
+                    friendsList.hide();
+                    searchIcon.removeClass("icofont-search-1");
+                    searchIcon.addClass("icofont-close");
+                    searchInput.focus();
+                    searchResultBox.show();
+                }
+            },
+            removeAllClassesEx(element, class_name) {
+                let classes = ["online", "offline", "idle", "busy"];
+                classes.forEach(classN => {
+                    if (classN !== class_name){
+                        element.removeClass(classN);
+                    }
+                });
+            },
+            changeUserState(user, state) {
+                let friendElement = this.findFriendById(user.id);
+                let stateClass = this.getStateName(state);
+                this.removeAllClassesEx(friendElement, stateClass);
+                friendElement.addClass(stateClass);
+            },
+            findFriendById(id) {
+                return $(`[data-id="${id}"]`);
+            },
+            findFriendBadgeById(id) {
+                return $(`[data-friend-badge-id="${id}"]`);
+            },
+            startConversation(user) {
+                this.$router.push({
+                    path: `/messages/${user.id}`
+                })
+            },
+            getNotifications() {
+                this.$store.dispatch("getNotifications").then(response => {
+                    this.notifications.unread_count = response.data.result.unread_count;
+                    this.notifications.data = response.data.result.notifications;
+                }).catch(console.log);
+            }
+        },
+        watch: {
+            search_keyword(value) {
+                this.search_result = [];
+                if (value.length > 3){
+                    this.$store.dispatch("searchUser", value).then(response => {
+                        if (response.status === 200){
+                            this.search_result = response.data.result;
+                        }
+                    });
+                }
+            }
+        },
+        mounted() {
+            websocket.user.connect();
+
+            bus.$on("new-friend", friend => {
+                this.friends.push(friend);
+            });
+
+            this.$store.dispatch("getFriendsList").then(response => {
+                this.clearFriendsList();
+                this.setFriends(response.data.result);
+            });
+
+            bus.$on(enums.EMSG[enums.EMSG.CHAT_MESSAGE], data => {
+                let decoded = protobuf.ChatMsgEvent.decode(data);
+                bus.$emit(enums.EMSG[enums.EMSG.NEW_CHAT_MESSAGE], decoded);
+                let friend = JSON.parse(decoded.from);
+                let friendElement = this.findFriendBadgeById(friend.id);
+                let currentCount = parseInt(friendElement.text());
+                friendElement.removeClass("d-none");
+                friendElement.text(currentCount + 1);
+            });
+
+            bus.$on(enums.EMSG[enums.EMSG.PERSONAL_STATE_CHANGED], data => {
+                let decoded = protobuf.PersonalStateMsgEvent.decode(data);
+                this.changeUserState(decoded.user, decoded.state);
+            });
+
+            this.getNotifications();
+        },
+        destroyed() {
+            websocket.user.disconnect();
+        }
+    }
+
+</script>

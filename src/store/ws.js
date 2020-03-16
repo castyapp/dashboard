@@ -12,7 +12,7 @@ class UserWebsocket {
         }
 
         let user = store.state.user;
-        this.ws = new WebSocket(`wss://gateway.irgeek.ir/user`);
+        this.ws = new WebSocket(`ws://localhost:3000/user`);
         this.ws.binaryType = 'arraybuffer';
 
         this.ws.onopen = () => {
@@ -27,32 +27,15 @@ class UserWebsocket {
             this.ws.close();
         };
 
-        let thisWebs = this;
-        this.ws.onclose = e => {
-
-            this.connected = false;
+        this.ws.onclose = () => {
             console.log(`disconnect from user [${user.id}] ws!`);
-
-            if (store.state.token !== null){
-                console.log(`Reconnect will be attempted in 1 second. ${e.reason}!`);
-                setTimeout(function() {
-                    thisWebs.connect();
-                }, 2000);
-            }
-
         };
 
         this.ws.onmessage = (message) => {
             let packet = new Packet(message.data);
-
             if (enums.EMSG.UNAUTHORIZED === packet.emsg){
-                thisWebs.disconnect();
                 console.log("Unauthorized! try to refresh token!");
-                store.dispatch("refreshToken").then(() => {
-                    thisWebs.connect();
-                });
             }
-
             bus.$emit(enums.EMSG[packet.emsg], packet.data);
         };
 
@@ -81,24 +64,14 @@ class TheaterWebsocket {
             return
         }
 
-        this.ws = new WebSocket(`wss://gateway.irgeek.ir/theater`);
+        this.ws = new WebSocket(`ws://localhost:3000/theater`);
         this.ws.binaryType = 'arraybuffer';
-        this.connected = false;
 
-        this.ws.onopen = async () => {
-            await emit(this.ws, enums.EMSG.THEATER_LOGON, protobuf.TheaterLogOnEvent, {
+        this.ws.onopen = () => {
+            emit(this.ws, enums.EMSG.THEATER_LOGON, protobuf.TheaterLogOnEvent, {
                 room:  new Buffer(room),
                 token: new Buffer(store.state.token),
             });
-
-            store.dispatch("getTheaterMembers", room)
-                .then(response => {
-                    bus.$emit("theater-connected", response.data.result);
-                }).catch(err => {
-                    console.log(err);
-                });
-
-            this.connected = true;
         };
 
         this.ws.onerror = e => {
@@ -106,24 +79,24 @@ class TheaterWebsocket {
             this.ws.close();
         };
 
-        let thisWebs = this;
-        this.ws.onclose = e => {
-
-            this.connected = false;
+        this.ws.onclose = () => {
             console.log(`disconnect from theater [${room}] ws!`);
-
-            if (store.state.token !== null){
-                console.log(`Reconnect will be attempted in 1 second. ${e.reason}!`);
-                setTimeout(function() {
-                    thisWebs.connect(room);
-                }, 1000);
-            }
-
         };
 
         this.ws.onmessage = (message) => {
+
             let packet = new Packet(message.data);
-            bus.$emit(enums.EMSG[packet.emsg], packet.data);
+
+            if (packet.emsg === enums.EMSG.AUTHORIZED) {
+                store.dispatch("getTheaterMembers", room).then(response => {
+                    bus.$emit("theater-connected", response.data.result);
+                }).catch(err => {
+                    console.log(err);
+                });
+            } else {
+                bus.$emit(enums.EMSG[packet.emsg], packet.data);
+            }
+
         };
 
         return this.ws;

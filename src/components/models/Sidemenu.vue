@@ -1,42 +1,44 @@
 <template>
 
-    <div>
+    <div class="sidemenu">
 
-        <div class="sidemenu">
+        <div class="logo" @click="redirect('dashboard')">
+            <img src="../../assets/icons/brand.svg" alt="Brand" />
+        </div>
 
-            <div class="logo" @click="redirect('dashboard')">
-                <img src="../../assets/icons/brand.svg" alt="Brand" />
-            </div>
+        <ul class="menu">
+            <li>
+                <router-link :to="{ name: 'library' }" v-title="'Library'" title-placement="right">
+                    <i class="icofont-library"></i>
+                </router-link>
+            </li>
+<!--            <li>-->
+<!--                <router-link :to="{ name: 'shared_with_you' }" v-title="'Shared with you'" title-placement="right">-->
+<!--                    <i class="icofont-share-boxed"></i>-->
+<!--                    &lt;!&ndash;<span class="unread-badge-menu">1</span>&ndash;&gt;-->
+<!--                </router-link>-->
+<!--            </li>-->
+            <li>
+                <router-link :to="{ name: 'settings' }" v-title="'Settings'" title-placement="right">
+                    <i class="icofont-gears"></i>
+                </router-link>
+            </li>
+            <li>
+                <router-link :to="{ name: 'create_theater' }" v-title="'Create a new theater'" title-placement="right">
+                    <i class="icofont-plus"></i>
+                </router-link>
+            </li>
+        </ul>
 
-            <ul class="menu">
-                <li>
-                    <router-link :to="{ name: 'library' }" v-title="'Library'" title-placement="right">
-                        <i class="icofont-library"></i>
-                    </router-link>
-                </li>
-                <li>
-                    <router-link :to="{ name: 'settings' }" v-title="'Settings'" title-placement="right">
-                        <i class="icofont-gears"></i>
-                    </router-link>
-                </li>
-                <li>
-                    <router-link :to="{ name: 'create_theater' }" v-title="'Create a new theater'" title-placement="right">
-                        <i class="icofont-plus"></i>
-                    </router-link>
-                </li>
-            </ul>
-
-            <div class="footer">
-                <a class="user-avatar-button" @click.prevent.stop="actionsBtn($event)">
-                    <div class="online">
-                        <img :src="apiBaseUrl + '/uploads/avatars/' + user.avatar + '.png'"
-                             class="avatar"
-                             :alt="user.fullname" />
-                        <i class="sidemenu-state state-dot"></i>
-                    </div>
-                </a>
-            </div>
-
+        <div class="footer">
+            <a class="user-avatar-button" @click.prevent.stop="actionsBtn($event)">
+                <div class="online">
+                    <img :src="apiBaseUrl + '/uploads/avatars/' + user.avatar + '.png'"
+                         class="avatar"
+                         :alt="user.fullname" />
+                    <i class="sidemenu-state state-dot"></i>
+                </div>
+            </a>
         </div>
 
     </div>
@@ -125,7 +127,6 @@
         color: #ffffff;
         text-decoration: none;
         cursor: pointer;
-        display: -webkit-inline-box;
         display: inline-flex;
         padding: 10px;
         margin: 10px 3px;

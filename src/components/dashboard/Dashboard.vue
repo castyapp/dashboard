@@ -29,19 +29,14 @@
                     </ContextMenuItem>
 
                     <ContextMenuItem @click.native="$refs.menu.close">
-                        <i class="icofont-arrow-left mr-1"></i>
-                        Invite to Theater
-                    </ContextMenuItem>
-
-                    <ContextMenuItem @click.native="$refs.menu.close">
                         <i class="icofont-ui-mute mr-1"></i>
                         Mute Notifications
                     </ContextMenuItem>
 
-                    <ContextMenuItem @click.native="$refs.menu.close">
-                        <i class="icofont-trash mr-1"></i>
-                        Remove Friend
-                    </ContextMenuItem>
+                    <!--<ContextMenuItem @click.native="$refs.menu.close">-->
+                    <!--    <i class="icofont-trash mr-1"></i>-->
+                    <!--    Remove Friend-->
+                    <!--</ContextMenuItem>-->
                 </div>
 
                 <div class="friend-menu" v-show="type === 'theater-actions'">
@@ -56,10 +51,10 @@
                         Invite a Friend
                     </ContextMenuItem>
 
-                    <ContextMenuItem @click.native="$refs.menu.close">
-                        <i class="icofont-trash mr-1"></i>
-                        Remove Theater
-                    </ContextMenuItem>
+                    <!--<ContextMenuItem @click.native="$refs.menu.close">-->
+                    <!--    <i class="icofont-trash mr-1"></i>-->
+                    <!--    Remove Theater-->
+                    <!--</ContextMenuItem>-->
 
                 </div>
 
@@ -115,16 +110,13 @@
 
                         <div class="pull-right">
 
-                            <button type="button"
+                            <VueLoadingButton
+                                    @click.native="inviteSelectedFriends"
+                                    :loading="inviteLoading"
                                     class="btn btn-primary full-width"
-                                    @click="inviteSelectedFriends"
                                     :disabled="selectedFriends.length === 0">
-
-                                <span>
-                                    Send
-                                    <i class="icofont-arrow-right"></i>
-                                </span>
-                            </button>
+                                <span>Send</span>
+                            </VueLoadingButton>
 
                         </div>
 
@@ -189,7 +181,6 @@
 <script>
 
     import $ from "jquery";
-    import {store} from "../../store/store";
     import Sidemenu from '../models/Sidemenu';
     import FriendsList from '../models/FriendsList';
     import ContextMenu from './../models/context-menu/ContextMenu';
@@ -198,6 +189,8 @@
     import Multiselect from 'vue-multiselect'
     import "../../assets/css/vue-multiselect.css";
 
+    import VueLoadingButton from 'vue-loading-button'
+
     export default {
         components: {
             Sidemenu,
@@ -205,6 +198,7 @@
             ContextMenu,
             ContextMenuItem,
             Multiselect,
+            VueLoadingButton,
         },
         data() {
             return {
@@ -212,14 +206,16 @@
                 selectedFriends: [],
                 friends: [],
                 selectForInvite: null,
+                inviteLoading: false,
             }
         },
         methods: {
             startConversation(user) {
+                let path = `/messages/${user.username}`;
+                if (path !== this.$route.path){
+                    this.$router.push({path})
+                }
                 this.$refs.menu.close();
-                this.$router.push({
-                    path: `/messages/${user.username}`
-                })
             },
             searchItemsLabel({ fullname }) {
                 return `${fullname}`
@@ -255,7 +251,44 @@
                 }
             },
             inviteSelectedFriends() {
-                console.log("Invited!");
+
+                this.inviteLoading = true;
+
+                let selectedFriendIds = [];
+                this.selectedFriends.forEach(selectedFriend => {
+                    selectedFriendIds.push(selectedFriend.id);
+                });
+
+                this.$store.dispatch("inviteFriendToTheater", {
+                    friend_ids: selectedFriendIds,
+                    theater_id: this.selectForInvite.id,
+                }).then(() => {
+
+                    this.$notify({
+                        group: 'dashboard',
+                        type: 'success',
+                        text: "Invatations sent successfully!",
+                        title: "Success",
+                        duration: 2000,
+                    });
+
+                    this.inviteLoading = false;
+                    $("#inviteFriendToTheaterModal").modal('hide');
+
+                }).catch(() => {
+
+                    this.$notify({
+                        group: 'dashboard',
+                        type: 'error',
+                        text: "Something went wrong, please try again later!",
+                        title: "Failed",
+                        duration: 2000,
+                    });
+
+                    this.inviteLoading = false;
+
+                });
+
             }
         },
         created() {

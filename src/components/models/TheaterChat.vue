@@ -15,9 +15,10 @@
 
             <div class="chat-container">
                 <div class="chat-messages">
-                    <div class="logs">
 
-                        <div v-for="chat in chats" v-if="chats.length > 0">
+                    <div class="logs" v-if="chats.length > 0">
+
+                        <div :key="chat.id" v-for="chat in chats">
 
                             <div class="message" v-if="chat.type === 'EMSG_LOG_MESSAGE'">
                                 <span>{{ chat.data }}</span>
@@ -40,14 +41,15 @@
                         </div>
 
                     </div>
+
                 </div>
             </div>
 
         </div>
 
-        <div class="users pull-right">
+        <div class="users pull-right" v-if="members.length > 0">
 
-            <div class="user" v-for="member in members" v-if="members.length > 0">
+            <div class="user" :key="member.id" v-for="member in members">
                 <div class="online">
                     <img :src="apiBaseUrl + '/uploads/avatars/' + member.avatar + '.png'"
                          class="theater_connected_user_avatar"
@@ -269,13 +271,16 @@
                 console.log(`Connected to theater[${this.theater.id}] ws!`);
 
                 this.ws.onmessage = (message) => {
+
                     let packet = new Packet(message.data);
-                    switch (packet.emsg) {
-                        case enums.EMSG.THEATER_UPDATE_USER:
-                            let decoded = protobuf.PersonalStateMsgEvent.decode(packet.data);
-                            this.changeMemberState(decoded.user, decoded.state);
-                            break;
+
+                    console.log(enums.EMSG[packet.emsg]);
+
+                    if (packet.emsg === enums.EMSG.THEATER_UPDATE_USER) {
+                        let decoded = protobuf.PersonalStateMsgEvent.decode(packet.data);
+                        this.changeMemberState(decoded.user, decoded.state);
                     }
+
                 };
 
             });

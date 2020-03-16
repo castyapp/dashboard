@@ -576,3 +576,170 @@ tr.new-log > td:first-child {
     margin: 0 auto;
     display: table;
 }
+
+.clickable {
+    cursor: pointer;
+}
+
+/* Login styles */
+div#serverError > div.alert {
+    margin-bottom: 0;
+    margin-top: 20px;
+}
+
+.oauthBtn {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 3px;
+
+}
+
+.oauthGoogleBtn {
+    background-color: #3c82f7;
+    color: #fff;
+    box-shadow: 0 3px 0 #0f69ff;
+}
+
+.oauthDiscordBtn {
+    background-color: #7289DA;
+    color: #fff;
+    box-shadow: 0 3px 0 #546bbd;
+}
+
+i.discord-icon {
+    background: url("../../assets/icons/social/discord-brand.png");
+    width: 18px;
+    height: 13px;
+    display: block;
+    background-size: cover;
+    float: left;
+    margin: 5px 6px 5px 0;
+}
+
+.btn-discord {
+    background: transparent !important;
+    border: none !important;
+}
+
+.discord-brand {
+    height: 40px;
+}
+
+.oauthButtons > button {
+    display: block;
+    margin: 10px auto;
+    border: none !important;
+}
+
+.oauthButtons {
+    text-align: center;
+}
+
+.login-bottom-action-buttons > .buttons > button.loginBTN {
+    padding: 3px 20px;
+}
+
+.login-bottom-action-buttons > .buttons > button {
+    margin: 5px;
+}
+
+.login-bottom-action-buttons > .buttons {
+    text-align: center;
+    margin: 15px 0;
+}
+
+.brand-name {
+    font-weight: bolder;
+    font-size: 20px;
+}
+
+.login_container {
+    width: 350px;
+    background: #FFFFFF;
+    margin: 50px auto;
+    padding: 20px 20px 5px;
+    color: #333333;
+    border-radius: 5px;
+    position: absolute;
+    left: 0;
+    right: 0;
+}
+
+.login_container > .logo {
+    text-align: center;
+    display: grid;
+}
+
+.img-logo {
+    margin: 0 auto;
+}
+
+.actions {
+    text-align: center;
+    margin: 10px 0 20px 0;
+    display: block;
+}
+
+.actions > a {
+    color: #333333;
+    border-bottom: 2px solid #333333;
+    margin: 3px;
+    opacity: 0.5;
+    text-decoration: none;
+}
+
+.actions > a.router-link-active,
+.actions > a:hover {
+    opacity: 1;
+    text-decoration: none;
+    color: #306cff;
+    border-color: #306cff;
+}
+
+.login-form > .form-group {
+    margin: 10px 0;
+}
+
+.auth .form-group > label {
+    display: none;
+}
+
+.alert.alert-darker {
+    background: #2f3030;
+    color: #fff;
+    padding: 10px 15px;
+}
+
+.btn-new-theater {
+    margin-left: 10px;
+    padding: 2px 10px;
+    font-size: 14px;
+}
+
+span.unread-badge-menu {
+    background: red;
+    border-radius: 50%;
+    font-size: 11px;
+    width: 17px;
+    height: 17px;
+    text-align: center;
+    padding: 2px;
+    position: absolute;
+    right: 11px;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+span.unread-badge-friendlist {
+    background: red;
+    border-radius: 50%;
+    font-size: 11px;
+    width: 17px;
+    height: 17px;
+    text-align: center;
+    padding: 2px;
+    font-weight: bold;
+    position: absolute;
+    color: #ffffff;
+    right: 20px;
+}

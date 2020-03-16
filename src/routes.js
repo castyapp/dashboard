@@ -1,5 +1,6 @@
 // Auth components
 import Login from './components/auth/Login'
+import Auth from './components/auth/Auth'
 import Register from './components/auth/Register'
 import Logout from './components/auth/Logout'
 
@@ -8,12 +9,24 @@ import Dashboard from './components/dashboard/Dashboard'
 import Settings from './components/dashboard/Settings'
 import Popular from './components/dashboard/Popular'
 import Library from './components/dashboard/Library'
+import SharedWithYou from './components/dashboard/SharedWithYou'
 
 import Message from './components/dashboard/Messages/Message'
 
 // Theaters components
 import CreateTheater from './components/dashboard/Theaters/Create'
 import Theater from './components/dashboard/Theaters/Theater'
+
+// OAUTH
+import OAUTH from './components/auth/oauth/base'
+
+// Google oauth
+import GoogleOAUTH from './components/auth/oauth/google/Connect'
+import GoogleCallback from './components/auth/oauth/google/Callback'
+
+// Discord oauth
+import DiscordOAUTH from './components/auth/oauth/discord/Connect'
+import DiscordCallback from './components/auth/oauth/discord/Callback'
 
 const routes = [
     {
@@ -32,6 +45,13 @@ const routes = [
                 name: 'library',
                 components: {
                     dashboard: Library,
+                },
+            },
+            {
+                path: 'shared_with_you',
+                name: 'shared_with_you',
+                components: {
+                    dashboard: SharedWithYou,
                 },
             },
             {
@@ -75,34 +95,80 @@ const routes = [
         }
     },
     {
-        path: '/login',
-        name: 'login',
+        path: '/oauth',
+        name: 'oauth',
         components: {
-            main: Login,
+            main: OAUTH,
         },
-        meta: {
-            requiresVisitor: true,
-        }
+        children: [
+            {
+                path: 'google/connect',
+                name: 'google_oauth_connect',
+                components: {
+                    oauth: GoogleOAUTH
+                },
+            },
+            {
+                path: 'google/callback',
+                name: 'google_oauth_callback',
+                components: {
+                    oauth: GoogleCallback
+                }
+            },
+            {
+                path: 'discord/connect',
+                name: 'discord_oauth_connect',
+                components: {
+                    oauth: DiscordOAUTH
+                },
+            },
+            {
+                path: 'discord/callback',
+                name: 'discord_oauth_callback',
+                components: {
+                    oauth: DiscordCallback
+                }
+            }
+        ],
     },
     {
-        path: '/register',
-        name: 'register',
+        path: '',
+        name: 'auth',
         components: {
-            main: Register,
+            main: Auth,
         },
-        meta: {
-            requiresVisitor: true,
-        }
-    },
-    {
-        path: '/logout',
-        name: 'logout',
-        components: {
-            main: Logout,
-        },
-        meta: {
-            requiresAuth: true,
-        }
+        children: [
+            {
+                path: '/login',
+                name: 'login',
+                components: {
+                    auth: Login,
+                },
+                meta: {
+                    requiresVisitor: true,
+                }
+            },
+            {
+                path: '/register',
+                name: 'register',
+                components: {
+                    auth: Register,
+                },
+                meta: {
+                    requiresVisitor: true,
+                }
+            },
+            {
+                path: '/logout',
+                name: 'logout',
+                components: {
+                    auth: Logout,
+                },
+                meta: {
+                    requiresAuth: true,
+                }
+            },
+        ]
     },
     { path: '*' }
 ];

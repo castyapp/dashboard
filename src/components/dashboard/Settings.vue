@@ -6,7 +6,7 @@
 
             <div class="title-border-bottom pb-2">
                 <strong class="side-component-title">
-                    <i class="icofont-user text-primary mr-2"></i>
+                    <i class="icofont-user mr-2"></i>
                     Profile
                 </strong>
                 <small class="border-left-title">
@@ -110,7 +110,7 @@
 
             <div class="title-border-bottom pb-2">
                 <strong class="side-component-title">
-                    <i class="icofont-lock text-primary mr-2"></i>
+                    <i class="icofont-lock mr-2"></i>
                     Security
                 </strong>
                 <small class="border-left-title">
@@ -192,42 +192,45 @@
 
         </div>
 
-        <!--<div class="clearfix"></div>-->
+        <div class="clearfix"></div>
 
-        <!--<div class="col-md-12">-->
+        <div class="col-md-12">
 
-            <!--<div class="d-inline-block full-width p-3" :class=" user.two_factor_auth_enabled ? 'bg-success' : 'bg-dark' ">-->
+            <div class="d-inline-block full-width p-3 curved"
+                 :class=" user.two_factor_auth_enabled ? 'bg-success' : 'bg-dark' ">
 
-                <!--<div class="fa-pull-left full-width">-->
+                <div class="fa-pull-left full-width">
 
-                    <!--<div class="clearfix">-->
+                    <div class="clearfix">
 
-                        <!--<div class="fa-pull-left">-->
-                            <!--<i class="fa fa-key text-primary mr-2"></i>-->
-                            <!--<strong class="clearfix">Two-factor authentication</strong>-->
-                            <!--<strong class="text-warning">-->
-                                <!--Two-factor authentication adds an additional layer of security to your account <br>-->
-                                <!--by requiring more than just a password to log in.-->
-                            <!--</strong>-->
+                        <div class="fa-pull-left">
+                            <i class="fa fa-key text-primary mr-2"></i>
+                            <strong class="clearfix">
+                                <i class="icofont-ssl-security"></i>
+                                Two-factor authentication
+                            </strong>
+                            <p class="m-2" :class=" user.two_factor_auth_enabled ? 'text-warning' : 'text-default' ">
+                                Two-factor authentication adds an additional layer of security to your account <br>
+                                by requiring more than just a password to log in.
+                            </p>
+                        </div>
 
-                        <!--</div>-->
+                        <TwoFactoryAuthButton class="m-2" v-show="!user.two_factor_auth_enabled" />
 
-                        <!--<TwoFactoryAuthButton v-show="!user.two_factor_auth_enabled" />-->
+                        <div class="clearfix"></div>
 
-                        <!--<div class="clearfix"></div>-->
+                        <span class="fa-pull-right m-2" v-show="user.two_factor_auth_enabled">
+                            <i class="fa fa-check"></i>
+                            You have two-factor authentication enabled!
+                        </span>
 
-                        <!--<span class="fa-pull-right" v-show="user.two_factor_auth_enabled">-->
-                            <!--<i class="fa fa-check"></i>-->
-                            <!--You have two-factor authentication enabled!-->
-                        <!--</span>-->
+                    </div>
 
-                    <!--</div>-->
+                </div>
 
-                <!--</div>-->
+            </div>
 
-            <!--</div>-->
-
-        <!--</div>-->
+        </div>
 
     </div>
 
@@ -242,6 +245,10 @@
 
     form.form-dark > .form-group > input.form-control-disabled {
         background: #1b1b1b !important;
+    }
+
+    .curved {
+        border-radius: 5px;
     }
 
 </style>

@@ -1,118 +1,113 @@
 <template>
 
-    <div class="mt-5">
+    <form class="login-form"
+          action="#"
+          @submit.prevent="login">
 
-        <notifications group="auth" position="top center" :max="1" />
+        <div class="form-group">
+            <label for="username"></label>
+            <input type="text"
+                   class="form-control"
+                   id="username"
+                   placeholder="E-mail Address or Username"
+                   autofocus="autofocus"
+                   v-model="user"
+                   required="required" />
+            <small v-if="errors.username" class="text-danger pull-left text-left">
+                <span class="clearfix" v-for="err in errors.username">
+                    {{ err }}
+                </span>
+            </small>
+        </div>
 
-        <vue-topprogress ref="topProgress" />
+        <div class="form-group">
+            <label for="password"></label>
+            <input type="password"
+                   id="password"
+                   class="form-control"
+                   name="password"
+                   placeholder="Password"
+                   v-model="pass"
+                   required="required" />
 
-        <form class="col-md-4 offset-md-4 login-form text-center"
-              action="#"
-              @submit.prevent="login">
+            <small v-if="errors.password" class="text-danger pull-left text-left">
+                <span class="clearfix" v-for="err in errors.password">
+                    {{ err }}
+                </span>
+            </small>
+        </div>
 
-            <h2>Login</h2>
-
-            <div class="alert alert-success"
-                 v-if="successMessage">
-                <strong>{{ successMessage }}</strong>
+        <div class="form-group login-bottom-action-buttons">
+            <div class="buttons">
+                <VueRecaptcha :sitekey="sitekey"
+                              ref="recaptcha"
+                              @verify="onCaptchaVerified"
+                              @expired="onCaptchaExpired"
+                              size="invisible"
+                              :loadRecaptchaScript="true" />
+                <button class="btn btn-primary ">Login</button>
+                <a class="btn">Forget password?</a>
             </div>
 
-            <div id="serverError">
-                <div class="alert alert-danger" v-if="serverError">
-                    <strong>{{ serverError }}</strong>
-                </div>
-            </div>
+            <div class="oauthButtons">
 
-            <div class="form-group">
-                <input type="text"
-                       class="form-control"
-                       id="username"
-                       name="username"
-                       placeholder="Username"
-                       autofocus="autofocus"
-                       v-model="username"
-                       required="required" />
+                <strong>Or you can sign in with:</strong>
 
-                <small v-if="errors.username" class="text-danger pull-left text-left">
-                    <span class="clearfix">
-                        {{ errors.username }}
-                    </span>
-                </small>
-            </div>
-
-            <div class="form-group">
-                <input type="password"
-                       class="form-control"
-                       name="password"
-                       placeholder="Password"
-                       v-model="password"
-                       required="required" />
-
-                <small v-if="errors.password" class="text-danger pull-left text-left">
-                    <span class="clearfix">
-                        {{ errors.password }}
-                    </span>
-                </small>
-            </div>
-
-            <div class="form-group">
-                <button type="submit" class="btn btn-primary" :disabled="loading">
-                    <span class="lds-ring-container" v-if="loading">
-                        <span class="lds-ring">
-                            <span></span>
-                            <span></span>
-                            <span></span>
-                            <span></span>
-                        </span>
-                    </span>
-                    Login
+                <button type="button" class="clickable oauthBtn oauthGoogleBtn" @click="GoogleOAUTHPage">
+                    <i class="icofont-google-plus"></i>
+                    Google
                 </button>
+
+                <button type="button" class="clickable oauthBtn oauthDiscordBtn" @click="DiscordOAUTHPage">
+                    <i class="discord-icon"></i>
+                    Discord
+                </button>
+
             </div>
 
-        </form>
+        </div>
 
-    </div>
+    </form>
+
 </template>
 
 <script>
 
-    const $ = require("jquery");
+    const jQuery = require("jquery");
+    import VueRecaptcha from 'vue-recaptcha';
 
     export default {
         name: 'login',
-        props: {
-            dataSuccessMessage: {
-                type: String,
-            }
+        components: {
+            VueRecaptcha,
         },
         data() {
             return {
                 errors: {},
-                username: '',
-                password: '',
-                loading: false,
-                serverError: '',
-                successMessage: this.dataSuccessMessage,
+                user: '',
+                pass: '',
+                sitekey: process.env.VUE_APP_API_RECAPTCHA_KEY,
             }
         },
         methods: {
-            login() {
+            onCaptchaVerified(recaptchaToken) {
 
-                $('#serverError').removeClass();
+                jQuery('#serverError').removeClass();
 
-                this.$refs.topProgress.start();
+                this.$parent.$refs.topProgress.start();
 
                 this.loading = true;
 
                 this.$store.dispatch('createAuthToken', {
-                    username: this.username,
-                    password: this.password,
+                    user: this.user,
+                    pass: this.pass,
+                    gToken: recaptchaToken,
                 }).then(() => {
 
                     this.errors = {};
                     this.loading = false;
-                    this.serverError = "";
-                    // this.successMessage = 'Login successfully! Please wait ...';
+                    this.$parent.serverError = "";
+                    this.$parent.successMessage = 'Login successfully! Please wait ...';
 
                     this.$notify({
                         group: 'auth',
@@ -123,7 +118,7 @@
                     });
 
                     setTimeout(() => {
-                        this.$refs.topProgress.done();
+                        this.$parent.$refs.topProgress.done();
                         this.$router.push({ name: 'dashboard' })
                     }, 1000);
 
@@ -135,16 +130,16 @@
 
                         if (error.response.data.message) {
                             this.errors = {};
-                            this.serverError = error.response.data.message;
+                            this.$parent.serverError = error.response.data.message;
                         } else {
                             this.errors = error.response.data.result;
-                            this.serverError = "Please correct the following error(s) in form!";
+                            this.$parent.serverError = "Please correct the following error(s) in form!";
                         }
 
                         this.password = '';
-                        this.successMessage = '';
+                        this.$parent.successMessage = '';
 
-                        $('#serverError')
+                        jQuery('#serverError')
                             .addClass('shake animated')
                             .one('webkitAnimationEnd' +
                                 ' mozAnimationEnd ' +
@@ -152,13 +147,28 @@
                                 'oanimationend ' +
                                 'animationend', () => {
 
-                                $(this).removeClass();
+                                jQuery(this).removeClass();
                             });
 
                     }
 
-                    this.$refs.topProgress.done();
-                })
+                    this.$parent.$refs.topProgress.done();
+                    this.$refs.recaptcha.reset();
+
+                });
+
+            },
+            onCaptchaExpired() {
+                this.$refs.recaptcha.reset();
+            },
+            login() {
+                this.$refs.recaptcha.execute();
+            },
+            GoogleOAUTHPage() {
+                this.$router.push({ name: "google_oauth_connect" });
+            },
+            DiscordOAUTHPage() {
+                this.$router.push({ name: "discord_oauth_connect" });
             }
         },
         mounted() {
@@ -168,4 +178,5 @@
             }
         }
     }
+
 </script>

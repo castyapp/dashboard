@@ -4,12 +4,12 @@
 
         <div class="title-border-bottom pb-2">
             <strong class="side-component-title">
-                <i class="icofont-library mr-2"></i>
-                Library
+                <i class="icofont-share-boxed mr-2"></i>
+                Shared With You
                 <i class="icofont-refresh pull-right refresh-btn" @click="getTheaters"></i>
             </strong>
             <small class="border-left-title">
-                You can see your theaters here.
+                You can see your theaters that people shared with you here.
             </small>
         </div>
 
@@ -19,7 +19,8 @@
 
         <div class="movie-list row" v-if="theaters.length > 0">
 
-            <div class="card card-movie text-white" v-for="theater in theaters">
+            <div :key="theater.id" class="card card-movie text-white" 
+            v-for="theater in theaters">
 
                 <div class="poster">
 
@@ -69,11 +70,7 @@
 
         <div class="alert alert-darker" v-if="!loading && theaters.length === 0 ">
             <i class="icofont-warning-alt"></i>
-            You have no theaters here yet!
-            <router-link class="btn btn-primary btn-new-theater" :to="{ name: 'create_theater' }">
-                <i class="icofont-plus"></i>
-                Create a new one
-            </router-link>
+            Nobody shared any theaters with you!
         </div>
 
     </div>
@@ -150,7 +147,7 @@
 
     .card-movie {
         border: 0;
-        background: #181818;
+        background: #333 !important;
         margin: 10px;
         width: 250px;
     }
