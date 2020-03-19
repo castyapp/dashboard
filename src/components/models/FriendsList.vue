@@ -450,7 +450,7 @@
                 this.setFriends(response.data.result);
             });
 
-            bus.$on(enums.EMSG[enums.EMSG.CHAT_MESSAGE], data => {
+            bus.$on(enums.EMSG[enums.EMSG.CHAT_MESSAGES], data => {
                 let decoded = protobuf.ChatMsgEvent.decode(data);
                 bus.$emit(enums.EMSG[enums.EMSG.NEW_CHAT_MESSAGE], decoded);
                 let friend = JSON.parse(decoded.from);

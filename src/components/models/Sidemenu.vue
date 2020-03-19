@@ -47,6 +47,8 @@
 
 <script>
 
+    import {bus} from "../../main";
+
     export default {
         methods: {
             actionsBtn($event) {
@@ -56,6 +58,11 @@
                 this.$router.push({ name });
             }
         },
+        mounted() {
+            bus.$on("updated-user", user => {
+                this.user = user;
+            });
+        }
     }
 
 </script>

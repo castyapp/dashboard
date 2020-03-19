@@ -47,15 +47,17 @@
                     <strong class="pull-left ml-2">
 
                         <small class="movie-creator">
-                            Created by:
-                            <span v-if="theater.user.id === user.id">You</span>
-                            <span v-else>{{ theater.user.fullname }}</span>
+                            <i class="icofont-user-alt-3"></i>
+                            <div class="th-created-by">
+                                {{ theater.user.fullname }}
+                                <span v-if="theater.user.id === user.id">(You)</span>
+                            </div>
                         </small>
 
                         <small class="movie-creator">
-                            Duration:
-                            <span v-if="theater.movie.length === undefined">0</span>
-                            <span v-else>{{ theater.movie.length }}</span>
+                            <i class="icofont-clock-time"></i>
+                            <span v-if="theater.movie.length === undefined">N/A</span>
+                            <span v-else>{{ secondsToHms(theater.movie.length) }}</span>
                         </small>
 
                     </strong>
@@ -177,6 +179,20 @@
         color: #316cff;
     }
 
+    .th-created-by {
+        display: inline-block;
+    }
+
+    small.movie-creator {
+        font-size: 13px;
+        font-weight: bold;
+    }
+
+    small.movie-creator > i {
+        margin-right: 3px;
+        font-size: 15px;
+    }
+
 </style>
 
 <script>
@@ -210,6 +226,19 @@
                     this.loading = false;
                 });
             },
+            secondsToHms(d) {
+                d = Number(d);
+                let h = Math.floor(d / 3600);
+                let m = Math.floor(d % 3600 / 60);
+                let s = Math.floor(d % 3600 % 60);
+                let hours = h.toString().length > 1 ? h.toString() : `0${h.toString()}`;
+                let minutes = m.toString().length > 1 ? m.toString() : `0${m.toString()}`;
+                let seconds = s.toString().length > 1 ? s.toString() : `0${s.toString()}`;
+                if (h === 0){
+                    return `${minutes}:${seconds}`;
+                }
+                return `${hours}:${minutes}:${seconds}`;
+            }
         },
         mounted() {
             this.getTheaters();

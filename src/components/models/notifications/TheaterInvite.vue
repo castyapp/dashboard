@@ -23,11 +23,11 @@
                          alt="Poster" />
                 </div>
                 <div class="th-details">
-                                <span class="th-name">
-                                    {{ notification.theater.title }}
-                                </span>
+                    <span class="th-name">
+                        {{ notification.theater.title }}
+                    </span>
                 </div>
-                <button class="nc-button nc-btn-join-th">
+                <button class="nc-button nc-btn-join-th" @click="joinTheater(notification.theater)">
                     Join <i class="icofont-plus"></i>
                 </button>
             </div>
@@ -41,8 +41,10 @@
 
     export default {
         props: ['notification'],
-        mounted() {
-
+        methods: {
+            joinTheater(theater) {
+                this.$router.push({ path: `theater/${theater.id}` });
+            }
         }
     }
 

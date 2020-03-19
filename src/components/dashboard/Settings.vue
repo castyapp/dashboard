@@ -20,7 +20,25 @@
 
                 <div class="full-width form-group clearfix">
 
-                    <div class="pull-left" style="width: 75%;">
+                    <div class="profile-avatar pull-left">
+
+                        <img class="pull-right clickable user_avatar_img"
+                             :src="getUserAvatar(user)"
+                             :alt="user.fullname" />
+
+                        <div class="change_avatar_overlay clickable" style="display: none;" @click="selectNewAvatar">
+                            <i class="icofont-camera"></i>
+                        </div>
+
+                        <input class="box__file"
+                               type="file"
+                               id="user_avatar_input"
+                               @change="onChangeAvatar"
+                               accept="image/*" />
+
+                    </div>
+
+                    <div class="profile-details-section pull-left">
 
                         <label for="fullname">Fullname</label>
 
@@ -29,20 +47,15 @@
                                id="fullname"
                                name="fullname"
                                placeholder="Enter your fullname here"
-                               v-model="user.fullname"
+                               v-model="form.fullname"
                                autocomplete="off" />
 
-                        <small v-if="errors.user.fullname" class="text-danger text-left">
+                        <small v-if="errors.fullname" class="text-danger text-left">
                             <span class="clearfix">
-                                {{ errors.user.fullname }}
+                                {{ errors.fullname }}
                             </span>
                         </small>
 
-                    </div>
-
-                    <div class="profile-avatar pull-right" style="width: 20%;">
-                        <img class="pull-right" :src="apiBaseUrl + '/uploads/avatars/' + user.avatar + '.png'"
-                             :alt="user.fullname">
                     </div>
 
                 </div>
@@ -99,7 +112,7 @@
                 </div>
 
                 <button class="btn btn-primary">
-                    Edit Profile
+                    Update Profile
                 </button>
 
             </form>
@@ -238,8 +251,27 @@
 
 <style>
 
+    .change_avatar_overlay > i {
+        font-size: 20px;
+        color: #eeeeee;
+    }
+
+    .change_avatar_overlay {
+        position: absolute;
+        background: #181818e0;
+        width: 75px;
+        height: 75px;
+        text-align: center;
+        padding-top: 30px;
+    }
+
+    .profile-details-section {
+        float: left;
+    }
+
     .profile-avatar > img {
         width: 75px;
+        height: 75px;
         border-radius: 50%;
     }
 
@@ -251,10 +283,18 @@
         border-radius: 5px;
     }
 
+    .profile-avatar {
+        display: inline-grid;
+        margin-right: 20px;
+    }
+
 </style>
 
 <script>
 
+    const $ = require("jquery");
+
+    import {bus} from "../../main";
     import TwoFactoryAuthButton from "../models/2FAEnableButton";
 
     export default {
@@ -263,6 +303,7 @@
         },
         data() {
             return {
+                selected_avatar: '',
                 current_password: '',
                 new_password: '',
                 verify_new_password: '',
@@ -270,16 +311,72 @@
                     user: {},
                     password: {},
                 },
+                form: {
+                    fullname: null,
+                    avatar: null,
+                },
             }
         },
         methods: {
+            getUserAvatar() {
+                if (this.selected_avatar === ''){
+                    return this.apiBaseUrl + '/uploads/avatars/' + this.user.avatar + '.png'
+                }
+                return this.selected_avatar;
+            },
+            readAvatarFile(file) {
+                let reader = new FileReader();
+                reader.onload = (e) => {
+                    this.selected_avatar = e.target.result;
+                    this.form.avatar     = file;
+                };
+                reader.readAsDataURL(file);
+            },
+            onChangeAvatar(e) {
+                let files = e.target.files;
+                this.readAvatarFile(files[0]);
+            },
+            selectNewAvatar() {
+                $("#user_avatar_input").trigger("click");
+            },
             updatePassword() {
 
             },
             updateProfile() {
-
+                this.$parent.$refs.topProgress.start();
+                this.$store.dispatch("updateProfile", this.form).then(response => {
+                    this.user = response.data.result;
+                    bus.$emit('updated-user', this.user);
+                    this.$notify({
+                        group: 'dashboard',
+                        type: 'success',
+                        text: "User updated successfully!",
+                        title: "Success",
+                        duration: 2000,
+                    });
+                    this.$parent.$refs.topProgress.done();
+                }).catch(err => {
+                    this.$notify({
+                        group: 'dashboard',
+                        type: 'error',
+                        text: "Something went wrong, please try again later!",
+                        title: "Failed",
+                        duration: 2000,
+                    });
+                    console.log(err);
+                    this.$parent.$refs.topProgress.done();
+                });
             }
         },
+        mounted() {
+            this.form.fullname = this.user.fullname;
+            $(".user_avatar_img").hover(() => {
+                $(".change_avatar_overlay").show();
+            });
+            $(".change_avatar_overlay").hover(() => {}, () => {
+                $(".change_avatar_overlay").hide();
+            });
+        }
     }
 
 </script>

@@ -14,17 +14,22 @@
             </div>
 
             <div class="chat-container">
+
                 <div class="chat-messages">
 
-                    <div class="logs" v-if="chats.length > 0">
+                    <div class="logs" v-chat-scroll v-if="ready">
 
-                        <div :key="chat.id" v-for="chat in chats">
+                        <div :key="chat.id" class="theater-chat-message" v-for="chat in chats">
+
+                            <div class="message welcome-msg" v-if="chat.type === 'WELCOME_MESSAGE'">
+                                <span>Welcome to chat!</span>
+                            </div>
 
                             <div class="message" v-if="chat.type === 'EMSG_LOG_MESSAGE'">
                                 <span>{{ chat.data }}</span>
                             </div>
 
-                            <div class="u-msg message" v-if="chat.type === 'EMSG_CHATS' || chat.type === 'EMSG_CHAT_MESSAGE'">
+                            <div class="u-msg message" v-if="chat.type === 'EMSG_CHATS' || chat.own_message">
 
                                 <div class="u-avatar pull-left">
                                     <img :src="apiBaseUrl + '/uploads/avatars/' + chat.user.avatar + '.png'"
@@ -34,7 +39,7 @@
                                     {{ chat.user.fullname }}
                                 </span>
                                 <span> : </span>
-                                <div class="msg">{{ chat.data }}</div>
+                                <div class="msg">{{ chat.message }}</div>
 
                             </div>
 
@@ -43,18 +48,7 @@
                     </div>
 
                 </div>
-            </div>
 
-        </div>
-
-        <div class="users pull-right" v-if="members.length > 0">
-
-            <div class="user" :key="member.id" v-for="member in members">
-                <div class="online">
-                    <img :src="apiBaseUrl + '/uploads/avatars/' + member.avatar + '.png'"
-                         class="theater_connected_user_avatar"
-                         :alt="member.fullname" />
-                </div>
             </div>
 
         </div>
@@ -86,7 +80,7 @@
         flex-direction: column;
         height: 100%;
         width: 100%;
-        padding: 10px 55px 0 20px;
+        padding: 10px 10px;
     }
 
     .u-msg > .u-name {
@@ -111,22 +105,6 @@
         margin: 0 5px;
     }
 
-    .users > .user {
-        border-radius: 20px;
-        padding: 0;
-        margin: 0 0 5px 0;
-    }
-
-    .users > .user:last-child {
-        margin: 0;
-    }
-
-    img.theater_connected_user_avatar {
-        width: 25px;
-        background: #FFFFFF;
-        border-radius: 50%;
-    }
-
     .chat-input {
         width: 100%;
         position: absolute;
@@ -145,7 +123,7 @@
     .logs {
         flex-grow: 1;
         height: 100%;
-        overflow-anchor: none;
+        overflow: auto;
     }
 
     .chat-messages {
@@ -180,10 +158,18 @@
         position: fixed;
         top: 0;
         right: 0;
-        width: 320px;
+        width: 300px;
         background: #181818;
         height: 100%;
         padding: 10px 0 10px 0;
+    }
+
+    .message.welcome-msg {
+        width: 275px;
+        font-size: 15px;
+        font-weight: bold;
+        margin: 0 5px 5px;
+        padding-top: 0;
     }
 
 </style>
@@ -192,98 +178,88 @@
 
     import $ from "jquery";
     import {bus} from "../../main";
-    import {websocket} from "../../store/ws";
     import {Packet} from "../../protocol/protobuf/packet";
     import {protobuf, enums} from "../../protocol/protobuf/base";
 
     export default {
-        props: ['theater'],
+        props: ['theater', 'ready'],
         data() {
             return {
                 chats: [],
-                ws: null,
+                theaterWebsocket: null,
                 members: [],
             }
         },
         methods: {
             sendMessage() {
-
                 let messageInput = $(".chat-box-text");
                 let msg = messageInput.val();
-
                 if (msg !== ""){
-
                     messageInput.val("");
-
-                    if (this.ws !== null){
-
-                        // let newMessage = {
-                        //     type: enums.EmsgChatMessage,
-                        //     data: {
-                        //         name: "chats",
-                        //         value: msg
-                        //     }
-                        // };
-
-                        // let chat = ChatMessage.create(newMessage);
-                        // let buffer = ChatMessage.encode(chat).finish();
-                        //
-                        // console.log(buffer);
-
-                        // let chat = { type: enums.EmsgChatMessage, data: msg };
-                        // this.ws.send(buffer);
-
-                        // newMessage.user = this.$store.state.user;
-                        // this.chats.push(newMessage);
+                    if (this.theaterWebsocket.ws !== null){
+                        let newMessage = {
+                            type: enums.EMSG.NEW_CHAT_MESSAGE,
+                            message: msg
+                        };
+                        this.theaterWebsocket.sendMessage(msg);
+                        newMessage.own_message = true;
+                        newMessage.user = this.$store.state.user;
+                        this.chats.push(newMessage);
                     } else {
-                        console.log(`Websocket connection: ${this.ws}`);
+                        console.log(`Websocket connection: ${this.theaterWebsocket.ws}`);
                     }
                 }
             },
             changeMemberState(user, state) {
-                let userIndex = this.findMember(user.id);
-                if (state === 1){
-                    if (userIndex === -1){
-                        this.members.push(user);
-                    }
-                } else {
-                    if (userIndex > -1) {
-                        this.members.splice(userIndex, 1);
-                    }
-                }
+                bus.$emit('new-theater-member', {user, state})
             },
-            findMember(user_id) {
-                for (let index = 0; index <= this.members.length - 1; index++){
-                    if (this.members[index].id === user_id){
-                        return index
-                    }
-                }
-                return -1
-            }
+            newChatMessage(chatMsg) {
+                let msgTextDecoder = new TextDecoder("utf-8");
+                this.chats.push({
+                    type: 'EMSG_CHATS',
+                    user: chatMsg.user,
+                    message: msgTextDecoder.decode(chatMsg.message)
+                });
+            },
         },
         mounted() {
 
-            bus.$on("theater-connected", (members) => {
+            this.chats.push({ type: 'WELCOME_MESSAGE' });
 
-                this.members = members;
-                this.ws = websocket.theater.ws;
+            bus.$on("theater-connected", (socket) => {
+
+                this.theaterWebsocket = socket;
 
                 console.log(`Connected to theater[${this.theater.id}] ws!`);
 
-                this.ws.onmessage = (message) => {
+                this.theaterWebsocket.ws.onmessage = (message) => {
 
                     let packet = new Packet(message.data);
 
-                    console.log(enums.EMSG[packet.emsg]);
-
-                    if (packet.emsg === enums.EMSG.THEATER_UPDATE_USER) {
-                        let decoded = protobuf.PersonalStateMsgEvent.decode(packet.data);
-                        this.changeMemberState(decoded.user, decoded.state);
+                    switch (packet.emsg) {
+                        case enums.EMSG.THEATER_MEMBERS:
+                            let membersDecoded = protobuf.TheaterMembers.decode(packet.data);
+                            bus.$emit("new-theater-members", membersDecoded.members);
+                            break;
+                        case enums.EMSG.MEMBER_STATE_CHANGED:
+                            let decoded = protobuf.PersonalStateMsgEvent.decode(packet.data);
+                            this.changeMemberState(decoded.user, decoded.state);
+                            break;
+                        case enums.EMSG.CHAT_MESSAGES:
+                            let chatMsg = protobuf.ChatMsgEvent.decode(packet.data);
+                            this.newChatMessage(chatMsg);
+                            break;
+                        default:
+                            bus.$emit(enums.EMSG[packet.emsg], packet);
+                            break
                     }
 
                 };
 
             });
+        },
+        destroyed() {
+            this.theaterWebsocket.disconnect();
         }
     }
 

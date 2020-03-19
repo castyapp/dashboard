@@ -1,6 +1,7 @@
-const EMsgMask  = 2147483647;
 import {enums} from "./base";
 import {Reader} from "protobufjs";
+
+const EMsgMask  = 2147483647;
 
 class Packet {
     constructor(data) {

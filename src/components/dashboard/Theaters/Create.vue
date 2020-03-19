@@ -141,8 +141,8 @@
                                             Choose a picture
                                         </strong>
                                         <span class="box__dragndrop">
-                                    or drag it here.
-                                </span>
+                                            or drag it here.
+                                        </span>
                                     </label>
 
                                 </div>
@@ -240,7 +240,6 @@
 
     import "bootstrap-select/dist/js/bootstrap-select.js";
     import "bootstrap-select/dist/css/bootstrap-select.css";
-
     import DropdownMenu from "./../../models/dropdown-menu/DropdownMenu";
 
     export default {
@@ -347,17 +346,9 @@
                 };
             },
             create() {
-
                 let theater = this.getTheaterObject();
-
-                this.$store.dispatch("createTheater", theater).then(response => {
-
-
-
-                    console.log(response);
-
+                this.$store.dispatch("createTheater", theater).then(() => {
                     this.$router.push({ name: "dashboard" }).then(() => {
-
                         this.$notify({
                             group: 'dashboard',
                             type: 'success',
@@ -365,13 +356,9 @@
                             title: "Success",
                             duration: 2000,
                         });
-
                     });
-
                 }).catch(err => {
-
                     this.errors = err.response.data.result;
-
                     this.$notify({
                         group: 'dashboard',
                         type: 'error',
@@ -379,10 +366,7 @@
                         title: "Failed",
                         duration: 2000,
                     });
-
                 });
-
-                console.log(theater);
             },
             createAndShare() {
                 let theater = this.getTheaterObject();
@@ -566,6 +550,29 @@
         margin: 5px;
         font-size: 14px;
         font-weight: 100;
+    }
+
+    .movie-preview-container {
+        background: #131212;
+        margin: 10px 0;
+        padding: 10px;
+        border-radius: 5px;
+        height: 100px;
+    }
+
+    .movie-preview {
+        width: 200px;
+        height: 100px;
+        float: left;
+    }
+
+    .movie-preview {
+        width: 150px;
+        height: 80px;
+        float: left;
+        background: #333;
+        border-radius: 5px;
+        margin-right: 10px;
     }
 
 </style>

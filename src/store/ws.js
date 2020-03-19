@@ -41,6 +41,9 @@ class UserWebsocket {
 
         return this.ws;
     }
+    sendPacket(eNUM, pROTO, payload) {
+        emit(this.ws, eNUM, pROTO, payload);
+    }
     sendMessage(message, to) {
         emit(this.ws, enums.EMSG.NEW_CHAT_MESSAGE, protobuf.ChatMsgEvent, {
             message: new Buffer(message),
@@ -68,7 +71,7 @@ class TheaterWebsocket {
         this.ws.binaryType = 'arraybuffer';
 
         this.ws.onopen = () => {
-            emit(this.ws, enums.EMSG.THEATER_LOGON, protobuf.TheaterLogOnEvent, {
+            emit(this.ws, enums.EMSG.LOGON, protobuf.TheaterLogOnEvent, {
                 room:  new Buffer(room),
                 token: new Buffer(store.state.token),
             });
@@ -84,22 +87,20 @@ class TheaterWebsocket {
         };
 
         this.ws.onmessage = (message) => {
-
             let packet = new Packet(message.data);
-
             if (packet.emsg === enums.EMSG.AUTHORIZED) {
-                store.dispatch("getTheaterMembers", room).then(response => {
-                    bus.$emit("theater-connected", response.data.result);
-                }).catch(err => {
-                    console.log(err);
-                });
+                bus.$emit("theater-connected", this);
             } else {
                 bus.$emit(enums.EMSG[packet.emsg], packet.data);
             }
-
         };
 
-        return this.ws;
+        return this;
+    }
+    sendMessage(message) {
+        emit(this.ws, enums.EMSG.NEW_CHAT_MESSAGE, protobuf.ChatMsgEvent, {
+            message: new Buffer(message),
+        });
     }
     disconnect() {
         if (typeof this.ws !== 'undefined' && this.ws !== null){

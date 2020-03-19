@@ -160,16 +160,31 @@ export const store = new Vuex.Store({
                 }).then(resolve).catch(reject);
             })
         },
-        createTheater(context, theater) {
-
+        updateProfile(context, form) {
             return new Promise((resolve, reject) => {
-
+                let params = new FormData();
+                params.append('fullname', form.fullname);
+                if (form.avatar !== null){
+                    params.append('avatar', form.avatar, form.avatar.filename);
+                }
+                axios.put('/user/@me', params, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'Authorization': `Bearer ${context.state.token}`,
+                    }
+                }).then(response => {
+                    this.state.user = response.data.result;
+                    resolve(response)
+                }).catch(reject);
+            })
+        },
+        createTheater(context, theater) {
+            return new Promise((resolve, reject) => {
                 let params = new FormData();
                 params.append('title', theater.title);
                 params.append('movie_uri', theater.movie_uri);
                 params.append('privacy', theater.privacy);
                 params.append('video_player_access', theater.player_access);
-
                 if (theater.poster !== null){
                     params.append(
                         'poster',
@@ -177,14 +192,12 @@ export const store = new Vuex.Store({
                         theater.poster.filename
                     );
                 }
-
                 axios.post('/user/@theaters', params, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                         'Authorization': `Bearer ${context.state.token}`,
                     }
                 }).then(resolve).catch(reject);
-
             })
         },
         sendFriendRequest(context, friend_id) {

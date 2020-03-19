@@ -1,9 +1,9 @@
 syntax = "proto3";
 package protobuf;
 
-import "google/protobuf/timestamp.proto";
 import "enums/enums.proto";
 import "messages/user.proto";
+import "google/protobuf/timestamp.proto";
 
 message CMsgProtoBufHeader {
     bytes UserHash        = 1;
@@ -19,12 +19,13 @@ message PersonalStateMsgEvent {
 }
 
 message ChatMsgEvent {
-    bytes   message = 1;
-    string  from    = 2;
-    string  to      = 3;
-    repeated uint64 emojies  = 4;
-    repeated uint64 mentions = 5;
-    google.protobuf.Timestamp created_at = 6;
+    bytes                     message     = 1;
+    string                    from        = 2;
+    string                    to          = 3;
+    messages.User             user        = 4;
+    repeated uint64           emojies     = 5;
+    repeated uint64           mentions    = 6;
+    google.protobuf.Timestamp created_at  = 7;
 }
 
 message PersonalStateActivityMsgEvent {
@@ -47,4 +48,8 @@ message MsgEvent {
     enums.EMSG  type = 1;
     bytes       data = 2;
     google.protobuf.Timestamp created_at = 3;
+}
+
+message TheaterMembers {
+    repeated messages.User members = 1;
 }

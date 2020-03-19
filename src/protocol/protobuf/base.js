@@ -9,74 +9,6 @@ var $Reader = $protobuf.Reader, $Writer = $protobuf.Writer, $util = $protobuf.ut
 // Exported root namespace
 var $root = $protobuf.roots["default"] || ($protobuf.roots["default"] = {});
 
-$root.enums = (function() {
-
-    /**
-     * Namespace enums.
-     * @exports enums
-     * @namespace
-     */
-    var enums = {};
-
-    /**
-     * EMSG_PERSONAL_STATE enum.
-     * @name enums.EMSG_PERSONAL_STATE
-     * @enum {string}
-     * @property {number} OFFLINE=0 OFFLINE value
-     * @property {number} ONLINE=1 ONLINE value
-     * @property {number} IDLE=2 IDLE value
-     * @property {number} BUSY=3 BUSY value
-     * @property {number} INVISIBLE=4 INVISIBLE value
-     */
-    enums.EMSG_PERSONAL_STATE = (function() {
-        var valuesById = {}, values = Object.create(valuesById);
-        values[valuesById[0] = "OFFLINE"] = 0;
-        values[valuesById[1] = "ONLINE"] = 1;
-        values[valuesById[2] = "IDLE"] = 2;
-        values[valuesById[3] = "BUSY"] = 3;
-        values[valuesById[4] = "INVISIBLE"] = 4;
-        return values;
-    })();
-
-    /**
-     * EMSG enum.
-     * @name enums.EMSG
-     * @enum {string}
-     * @property {number} INVALID=0 INVALID value
-     * @property {number} LOGON=1 LOGON value
-     * @property {number} LOGOUT=2 LOGOUT value
-     * @property {number} CHAT_MESSAGE=3 CHAT_MESSAGE value
-     * @property {number} THEATER_ONLINE_USERS=4 THEATER_ONLINE_USERS value
-     * @property {number} THEATER_UPDATE_USER=5 THEATER_UPDATE_USER value
-     * @property {number} PERSONAL_STATE_CHANGED=6 PERSONAL_STATE_CHANGED value
-     * @property {number} PERSONAL_ACTIVITY_CHANGED=7 PERSONAL_ACTIVITY_CHANGED value
-     * @property {number} THEATER_LOGON=8 THEATER_LOGON value
-     * @property {number} THEATER_LOGOUT=9 THEATER_LOGOUT value
-     * @property {number} AUTHORIZED=10 AUTHORIZED value
-     * @property {number} UNAUTHORIZED=11 UNAUTHORIZED value
-     * @property {number} NEW_CHAT_MESSAGE=12 NEW_CHAT_MESSAGE value
-     */
-    enums.EMSG = (function() {
-        var valuesById = {}, values = Object.create(valuesById);
-        values[valuesById[0] = "INVALID"] = 0;
-        values[valuesById[1] = "LOGON"] = 1;
-        values[valuesById[2] = "LOGOUT"] = 2;
-        values[valuesById[3] = "CHAT_MESSAGE"] = 3;
-        values[valuesById[4] = "THEATER_ONLINE_USERS"] = 4;
-        values[valuesById[5] = "THEATER_UPDATE_USER"] = 5;
-        values[valuesById[6] = "PERSONAL_STATE_CHANGED"] = 6;
-        values[valuesById[7] = "PERSONAL_ACTIVITY_CHANGED"] = 7;
-        values[valuesById[8] = "THEATER_LOGON"] = 8;
-        values[valuesById[9] = "THEATER_LOGOUT"] = 9;
-        values[valuesById[10] = "AUTHORIZED"] = 10;
-        values[valuesById[11] = "UNAUTHORIZED"] = 11;
-        values[valuesById[12] = "NEW_CHAT_MESSAGE"] = 12;
-        return values;
-    })();
-
-    return enums;
-})();
-
 $root.protobuf = (function() {
 
     /**
@@ -646,6 +578,7 @@ $root.protobuf = (function() {
          * @property {Uint8Array|null} [message] ChatMsgEvent message
          * @property {string|null} [from] ChatMsgEvent from
          * @property {string|null} [to] ChatMsgEvent to
+         * @property {messages.IUser|null} [user] ChatMsgEvent user
          * @property {Array.<number|Long>|null} [emojies] ChatMsgEvent emojies
          * @property {Array.<number|Long>|null} [mentions] ChatMsgEvent mentions
          * @property {google.protobuf.ITimestamp|null} [createdAt] ChatMsgEvent createdAt
@@ -691,6 +624,14 @@ $root.protobuf = (function() {
          * @instance
          */
         ChatMsgEvent.prototype.to = "";
+
+        /**
+         * ChatMsgEvent user.
+         * @member {messages.IUser|null|undefined} user
+         * @memberof protobuf.ChatMsgEvent
+         * @instance
+         */
+        ChatMsgEvent.prototype.user = null;
 
         /**
          * ChatMsgEvent emojies.
@@ -746,20 +687,22 @@ $root.protobuf = (function() {
                 writer.uint32(/* id 2, wireType 2 =*/18).string(message.from);
             if (message.to != null && message.hasOwnProperty("to"))
                 writer.uint32(/* id 3, wireType 2 =*/26).string(message.to);
+            if (message.user != null && message.hasOwnProperty("user"))
+                $root.messages.User.encode(message.user, writer.uint32(/* id 4, wireType 2 =*/34).fork()).ldelim();
             if (message.emojies != null && message.emojies.length) {
-                writer.uint32(/* id 4, wireType 2 =*/34).fork();
+                writer.uint32(/* id 5, wireType 2 =*/42).fork();
                 for (var i = 0; i < message.emojies.length; ++i)
                     writer.uint64(message.emojies[i]);
                 writer.ldelim();
             }
             if (message.mentions != null && message.mentions.length) {
-                writer.uint32(/* id 5, wireType 2 =*/42).fork();
+                writer.uint32(/* id 6, wireType 2 =*/50).fork();
                 for (var i = 0; i < message.mentions.length; ++i)
                     writer.uint64(message.mentions[i]);
                 writer.ldelim();
             }
             if (message.createdAt != null && message.hasOwnProperty("createdAt"))
-                $root.google.protobuf.Timestamp.encode(message.createdAt, writer.uint32(/* id 6, wireType 2 =*/50).fork()).ldelim();
+                $root.google.protobuf.Timestamp.encode(message.createdAt, writer.uint32(/* id 7, wireType 2 =*/58).fork()).ldelim();
             return writer;
         };
 
@@ -804,6 +747,9 @@ $root.protobuf = (function() {
                     message.to = reader.string();
                     break;
                 case 4:
+                    message.user = $root.messages.User.decode(reader, reader.uint32());
+                    break;
+                case 5:
                     if (!(message.emojies && message.emojies.length))
                         message.emojies = [];
                     if ((tag & 7) === 2) {
@@ -813,7 +759,7 @@ $root.protobuf = (function() {
                     } else
                         message.emojies.push(reader.uint64());
                     break;
-                case 5:
+                case 6:
                     if (!(message.mentions && message.mentions.length))
                         message.mentions = [];
                     if ((tag & 7) === 2) {
@@ -823,7 +769,7 @@ $root.protobuf = (function() {
                     } else
                         message.mentions.push(reader.uint64());
                     break;
-                case 6:
+                case 7:
                     message.createdAt = $root.google.protobuf.Timestamp.decode(reader, reader.uint32());
                     break;
                 default:
@@ -870,6 +816,11 @@ $root.protobuf = (function() {
             if (message.to != null && message.hasOwnProperty("to"))
                 if (!$util.isString(message.to))
                     return "to: string expected";
+            if (message.user != null && message.hasOwnProperty("user")) {
+                var error = $root.messages.User.verify(message.user);
+                if (error)
+                    return "user." + error;
+            }
             if (message.emojies != null && message.hasOwnProperty("emojies")) {
                 if (!Array.isArray(message.emojies))
                     return "emojies: array expected";
@@ -913,6 +864,11 @@ $root.protobuf = (function() {
                 message.from = String(object.from);
             if (object.to != null)
                 message.to = String(object.to);
+            if (object.user != null) {
+                if (typeof object.user !== "object")
+                    throw TypeError(".protobuf.ChatMsgEvent.user: object expected");
+                message.user = $root.messages.User.fromObject(object.user);
+            }
             if (object.emojies) {
                 if (!Array.isArray(object.emojies))
                     throw TypeError(".protobuf.ChatMsgEvent.emojies: array expected");
@@ -976,6 +932,7 @@ $root.protobuf = (function() {
                 }
                 object.from = "";
                 object.to = "";
+                object.user = null;
                 object.createdAt = null;
             }
             if (message.message != null && message.hasOwnProperty("message"))
@@ -984,6 +941,8 @@ $root.protobuf = (function() {
                 object.from = message.from;
             if (message.to != null && message.hasOwnProperty("to"))
                 object.to = message.to;
+            if (message.user != null && message.hasOwnProperty("user"))
+                object.user = $root.messages.User.toObject(message.user, options);
             if (message.emojies && message.emojies.length) {
                 object.emojies = [];
                 for (var j = 0; j < message.emojies.length; ++j)
@@ -1914,6 +1873,8 @@ $root.protobuf = (function() {
                 case 10:
                 case 11:
                 case 12:
+                case 13:
+                case 14:
                     break;
                 }
             if (message.data != null && message.hasOwnProperty("data"))
@@ -1952,45 +1913,53 @@ $root.protobuf = (function() {
             case 2:
                 message.type = 2;
                 break;
-            case "CHAT_MESSAGE":
+            case "PERSONAL_STATE_CHANGED":
             case 3:
                 message.type = 3;
                 break;
-            case "THEATER_ONLINE_USERS":
+            case "PERSONAL_ACTIVITY_CHANGED":
             case 4:
                 message.type = 4;
                 break;
-            case "THEATER_UPDATE_USER":
+            case "AUTHORIZED":
             case 5:
                 message.type = 5;
                 break;
-            case "PERSONAL_STATE_CHANGED":
+            case "UNAUTHORIZED":
             case 6:
                 message.type = 6;
                 break;
-            case "PERSONAL_ACTIVITY_CHANGED":
+            case "CHAT_MESSAGES":
             case 7:
                 message.type = 7;
                 break;
-            case "THEATER_LOGON":
+            case "LOG_MESSAGES":
             case 8:
                 message.type = 8;
                 break;
-            case "THEATER_LOGOUT":
+            case "NEW_CHAT_MESSAGE":
             case 9:
                 message.type = 9;
                 break;
-            case "AUTHORIZED":
+            case "NEW_LOG_MESSAGE":
             case 10:
                 message.type = 10;
                 break;
-            case "UNAUTHORIZED":
+            case "MEMBER_STATE_CHANGED":
             case 11:
                 message.type = 11;
                 break;
-            case "NEW_CHAT_MESSAGE":
+            case "THEATER_MEMBERS":
             case 12:
                 message.type = 12;
+                break;
+            case "THEATER_PLAY":
+            case 13:
+                message.type = 13;
+                break;
+            case "THEATER_PAUSE":
+            case 14:
+                message.type = 14;
                 break;
             }
             if (object.data != null)
@@ -2053,255 +2022,590 @@ $root.protobuf = (function() {
         return MsgEvent;
     })();
 
+    protobuf.TheaterMembers = (function() {
+
+        /**
+         * Properties of a TheaterMembers.
+         * @memberof protobuf
+         * @interface ITheaterMembers
+         * @property {Array.<messages.IUser>|null} [members] TheaterMembers members
+         */
+
+        /**
+         * Constructs a new TheaterMembers.
+         * @memberof protobuf
+         * @classdesc Represents a TheaterMembers.
+         * @implements ITheaterMembers
+         * @constructor
+         * @param {protobuf.ITheaterMembers=} [properties] Properties to set
+         */
+        function TheaterMembers(properties) {
+            this.members = [];
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+
+        /**
+         * TheaterMembers members.
+         * @member {Array.<messages.IUser>} members
+         * @memberof protobuf.TheaterMembers
+         * @instance
+         */
+        TheaterMembers.prototype.members = $util.emptyArray;
+
+        /**
+         * Creates a new TheaterMembers instance using the specified properties.
+         * @function create
+         * @memberof protobuf.TheaterMembers
+         * @static
+         * @param {protobuf.ITheaterMembers=} [properties] Properties to set
+         * @returns {protobuf.TheaterMembers} TheaterMembers instance
+         */
+        TheaterMembers.create = function create(properties) {
+            return new TheaterMembers(properties);
+        };
+
+        /**
+         * Encodes the specified TheaterMembers message. Does not implicitly {@link protobuf.TheaterMembers.verify|verify} messages.
+         * @function encode
+         * @memberof protobuf.TheaterMembers
+         * @static
+         * @param {protobuf.ITheaterMembers} message TheaterMembers message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        TheaterMembers.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.members != null && message.members.length)
+                for (var i = 0; i < message.members.length; ++i)
+                    $root.messages.User.encode(message.members[i], writer.uint32(/* id 1, wireType 2 =*/10).fork()).ldelim();
+            return writer;
+        };
+
+        /**
+         * Encodes the specified TheaterMembers message, length delimited. Does not implicitly {@link protobuf.TheaterMembers.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof protobuf.TheaterMembers
+         * @static
+         * @param {protobuf.ITheaterMembers} message TheaterMembers message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        TheaterMembers.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+
+        /**
+         * Decodes a TheaterMembers message from the specified reader or buffer.
+         * @function decode
+         * @memberof protobuf.TheaterMembers
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {protobuf.TheaterMembers} TheaterMembers
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        TheaterMembers.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.protobuf.TheaterMembers();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1:
+                    if (!(message.members && message.members.length))
+                        message.members = [];
+                    message.members.push($root.messages.User.decode(reader, reader.uint32()));
+                    break;
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+
+        /**
+         * Decodes a TheaterMembers message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof protobuf.TheaterMembers
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {protobuf.TheaterMembers} TheaterMembers
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        TheaterMembers.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+
+        /**
+         * Verifies a TheaterMembers message.
+         * @function verify
+         * @memberof protobuf.TheaterMembers
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        TheaterMembers.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            if (message.members != null && message.hasOwnProperty("members")) {
+                if (!Array.isArray(message.members))
+                    return "members: array expected";
+                for (var i = 0; i < message.members.length; ++i) {
+                    var error = $root.messages.User.verify(message.members[i]);
+                    if (error)
+                        return "members." + error;
+                }
+            }
+            return null;
+        };
+
+        /**
+         * Creates a TheaterMembers message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof protobuf.TheaterMembers
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {protobuf.TheaterMembers} TheaterMembers
+         */
+        TheaterMembers.fromObject = function fromObject(object) {
+            if (object instanceof $root.protobuf.TheaterMembers)
+                return object;
+            var message = new $root.protobuf.TheaterMembers();
+            if (object.members) {
+                if (!Array.isArray(object.members))
+                    throw TypeError(".protobuf.TheaterMembers.members: array expected");
+                message.members = [];
+                for (var i = 0; i < object.members.length; ++i) {
+                    if (typeof object.members[i] !== "object")
+                        throw TypeError(".protobuf.TheaterMembers.members: object expected");
+                    message.members[i] = $root.messages.User.fromObject(object.members[i]);
+                }
+            }
+            return message;
+        };
+
+        /**
+         * Creates a plain object from a TheaterMembers message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof protobuf.TheaterMembers
+         * @static
+         * @param {protobuf.TheaterMembers} message TheaterMembers
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        TheaterMembers.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.arrays || options.defaults)
+                object.members = [];
+            if (message.members && message.members.length) {
+                object.members = [];
+                for (var j = 0; j < message.members.length; ++j)
+                    object.members[j] = $root.messages.User.toObject(message.members[j], options);
+            }
+            return object;
+        };
+
+        /**
+         * Converts this TheaterMembers to JSON.
+         * @function toJSON
+         * @memberof protobuf.TheaterMembers
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        TheaterMembers.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+
+        return TheaterMembers;
+    })();
+
+    protobuf.TheaterVideoPlayer = (function() {
+
+        /**
+         * Properties of a TheaterVideoPlayer.
+         * @memberof protobuf
+         * @interface ITheaterVideoPlayer
+         * @property {string|null} [theaterId] TheaterVideoPlayer theaterId
+         * @property {string|null} [source] TheaterVideoPlayer source
+         * @property {string|null} [poster] TheaterVideoPlayer poster
+         * @property {number|null} [currentTime] TheaterVideoPlayer currentTime
+         * @property {string|null} [userId] TheaterVideoPlayer userId
+         * @property {google.protobuf.ITimestamp|null} [sentAt] TheaterVideoPlayer sentAt
+         */
+
+        /**
+         * Constructs a new TheaterVideoPlayer.
+         * @memberof protobuf
+         * @classdesc Represents a TheaterVideoPlayer.
+         * @implements ITheaterVideoPlayer
+         * @constructor
+         * @param {protobuf.ITheaterVideoPlayer=} [properties] Properties to set
+         */
+        function TheaterVideoPlayer(properties) {
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+
+        /**
+         * TheaterVideoPlayer theaterId.
+         * @member {string} theaterId
+         * @memberof protobuf.TheaterVideoPlayer
+         * @instance
+         */
+        TheaterVideoPlayer.prototype.theaterId = "";
+
+        /**
+         * TheaterVideoPlayer source.
+         * @member {string} source
+         * @memberof protobuf.TheaterVideoPlayer
+         * @instance
+         */
+        TheaterVideoPlayer.prototype.source = "";
+
+        /**
+         * TheaterVideoPlayer poster.
+         * @member {string} poster
+         * @memberof protobuf.TheaterVideoPlayer
+         * @instance
+         */
+        TheaterVideoPlayer.prototype.poster = "";
+
+        /**
+         * TheaterVideoPlayer currentTime.
+         * @member {number} currentTime
+         * @memberof protobuf.TheaterVideoPlayer
+         * @instance
+         */
+        TheaterVideoPlayer.prototype.currentTime = 0;
+
+        /**
+         * TheaterVideoPlayer userId.
+         * @member {string} userId
+         * @memberof protobuf.TheaterVideoPlayer
+         * @instance
+         */
+        TheaterVideoPlayer.prototype.userId = "";
+
+        /**
+         * TheaterVideoPlayer sentAt.
+         * @member {google.protobuf.ITimestamp|null|undefined} sentAt
+         * @memberof protobuf.TheaterVideoPlayer
+         * @instance
+         */
+        TheaterVideoPlayer.prototype.sentAt = null;
+
+        /**
+         * Creates a new TheaterVideoPlayer instance using the specified properties.
+         * @function create
+         * @memberof protobuf.TheaterVideoPlayer
+         * @static
+         * @param {protobuf.ITheaterVideoPlayer=} [properties] Properties to set
+         * @returns {protobuf.TheaterVideoPlayer} TheaterVideoPlayer instance
+         */
+        TheaterVideoPlayer.create = function create(properties) {
+            return new TheaterVideoPlayer(properties);
+        };
+
+        /**
+         * Encodes the specified TheaterVideoPlayer message. Does not implicitly {@link protobuf.TheaterVideoPlayer.verify|verify} messages.
+         * @function encode
+         * @memberof protobuf.TheaterVideoPlayer
+         * @static
+         * @param {protobuf.ITheaterVideoPlayer} message TheaterVideoPlayer message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        TheaterVideoPlayer.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.theaterId != null && message.hasOwnProperty("theaterId"))
+                writer.uint32(/* id 1, wireType 2 =*/10).string(message.theaterId);
+            if (message.source != null && message.hasOwnProperty("source"))
+                writer.uint32(/* id 2, wireType 2 =*/18).string(message.source);
+            if (message.poster != null && message.hasOwnProperty("poster"))
+                writer.uint32(/* id 3, wireType 2 =*/26).string(message.poster);
+            if (message.currentTime != null && message.hasOwnProperty("currentTime"))
+                writer.uint32(/* id 4, wireType 5 =*/37).float(message.currentTime);
+            if (message.userId != null && message.hasOwnProperty("userId"))
+                writer.uint32(/* id 5, wireType 2 =*/42).string(message.userId);
+            if (message.sentAt != null && message.hasOwnProperty("sentAt"))
+                $root.google.protobuf.Timestamp.encode(message.sentAt, writer.uint32(/* id 6, wireType 2 =*/50).fork()).ldelim();
+            return writer;
+        };
+
+        /**
+         * Encodes the specified TheaterVideoPlayer message, length delimited. Does not implicitly {@link protobuf.TheaterVideoPlayer.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof protobuf.TheaterVideoPlayer
+         * @static
+         * @param {protobuf.ITheaterVideoPlayer} message TheaterVideoPlayer message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        TheaterVideoPlayer.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+
+        /**
+         * Decodes a TheaterVideoPlayer message from the specified reader or buffer.
+         * @function decode
+         * @memberof protobuf.TheaterVideoPlayer
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {protobuf.TheaterVideoPlayer} TheaterVideoPlayer
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        TheaterVideoPlayer.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.protobuf.TheaterVideoPlayer();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1:
+                    message.theaterId = reader.string();
+                    break;
+                case 2:
+                    message.source = reader.string();
+                    break;
+                case 3:
+                    message.poster = reader.string();
+                    break;
+                case 4:
+                    message.currentTime = reader.float();
+                    break;
+                case 5:
+                    message.userId = reader.string();
+                    break;
+                case 6:
+                    message.sentAt = $root.google.protobuf.Timestamp.decode(reader, reader.uint32());
+                    break;
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+
+        /**
+         * Decodes a TheaterVideoPlayer message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof protobuf.TheaterVideoPlayer
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {protobuf.TheaterVideoPlayer} TheaterVideoPlayer
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        TheaterVideoPlayer.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+
+        /**
+         * Verifies a TheaterVideoPlayer message.
+         * @function verify
+         * @memberof protobuf.TheaterVideoPlayer
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        TheaterVideoPlayer.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            if (message.theaterId != null && message.hasOwnProperty("theaterId"))
+                if (!$util.isString(message.theaterId))
+                    return "theaterId: string expected";
+            if (message.source != null && message.hasOwnProperty("source"))
+                if (!$util.isString(message.source))
+                    return "source: string expected";
+            if (message.poster != null && message.hasOwnProperty("poster"))
+                if (!$util.isString(message.poster))
+                    return "poster: string expected";
+            if (message.currentTime != null && message.hasOwnProperty("currentTime"))
+                if (typeof message.currentTime !== "number")
+                    return "currentTime: number expected";
+            if (message.userId != null && message.hasOwnProperty("userId"))
+                if (!$util.isString(message.userId))
+                    return "userId: string expected";
+            if (message.sentAt != null && message.hasOwnProperty("sentAt")) {
+                var error = $root.google.protobuf.Timestamp.verify(message.sentAt);
+                if (error)
+                    return "sentAt." + error;
+            }
+            return null;
+        };
+
+        /**
+         * Creates a TheaterVideoPlayer message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof protobuf.TheaterVideoPlayer
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {protobuf.TheaterVideoPlayer} TheaterVideoPlayer
+         */
+        TheaterVideoPlayer.fromObject = function fromObject(object) {
+            if (object instanceof $root.protobuf.TheaterVideoPlayer)
+                return object;
+            var message = new $root.protobuf.TheaterVideoPlayer();
+            if (object.theaterId != null)
+                message.theaterId = String(object.theaterId);
+            if (object.source != null)
+                message.source = String(object.source);
+            if (object.poster != null)
+                message.poster = String(object.poster);
+            if (object.currentTime != null)
+                message.currentTime = Number(object.currentTime);
+            if (object.userId != null)
+                message.userId = String(object.userId);
+            if (object.sentAt != null) {
+                if (typeof object.sentAt !== "object")
+                    throw TypeError(".protobuf.TheaterVideoPlayer.sentAt: object expected");
+                message.sentAt = $root.google.protobuf.Timestamp.fromObject(object.sentAt);
+            }
+            return message;
+        };
+
+        /**
+         * Creates a plain object from a TheaterVideoPlayer message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof protobuf.TheaterVideoPlayer
+         * @static
+         * @param {protobuf.TheaterVideoPlayer} message TheaterVideoPlayer
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        TheaterVideoPlayer.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.defaults) {
+                object.theaterId = "";
+                object.source = "";
+                object.poster = "";
+                object.currentTime = 0;
+                object.userId = "";
+                object.sentAt = null;
+            }
+            if (message.theaterId != null && message.hasOwnProperty("theaterId"))
+                object.theaterId = message.theaterId;
+            if (message.source != null && message.hasOwnProperty("source"))
+                object.source = message.source;
+            if (message.poster != null && message.hasOwnProperty("poster"))
+                object.poster = message.poster;
+            if (message.currentTime != null && message.hasOwnProperty("currentTime"))
+                object.currentTime = options.json && !isFinite(message.currentTime) ? String(message.currentTime) : message.currentTime;
+            if (message.userId != null && message.hasOwnProperty("userId"))
+                object.userId = message.userId;
+            if (message.sentAt != null && message.hasOwnProperty("sentAt"))
+                object.sentAt = $root.google.protobuf.Timestamp.toObject(message.sentAt, options);
+            return object;
+        };
+
+        /**
+         * Converts this TheaterVideoPlayer to JSON.
+         * @function toJSON
+         * @memberof protobuf.TheaterVideoPlayer
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        TheaterVideoPlayer.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+
+        return TheaterVideoPlayer;
+    })();
+
     return protobuf;
 })();
 
-$root.google = (function() {
+$root.enums = (function() {
 
     /**
-     * Namespace google.
-     * @exports google
+     * Namespace enums.
+     * @exports enums
      * @namespace
      */
-    var google = {};
+    var enums = {};
 
-    google.protobuf = (function() {
-
-        /**
-         * Namespace protobuf.
-         * @memberof google
-         * @namespace
-         */
-        var protobuf = {};
-
-        protobuf.Timestamp = (function() {
-
-            /**
-             * Properties of a Timestamp.
-             * @memberof google.protobuf
-             * @interface ITimestamp
-             * @property {number|Long|null} [seconds] Timestamp seconds
-             * @property {number|null} [nanos] Timestamp nanos
-             */
-
-            /**
-             * Constructs a new Timestamp.
-             * @memberof google.protobuf
-             * @classdesc Represents a Timestamp.
-             * @implements ITimestamp
-             * @constructor
-             * @param {google.protobuf.ITimestamp=} [properties] Properties to set
-             */
-            function Timestamp(properties) {
-                if (properties)
-                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
-                        if (properties[keys[i]] != null)
-                            this[keys[i]] = properties[keys[i]];
-            }
-
-            /**
-             * Timestamp seconds.
-             * @member {number|Long} seconds
-             * @memberof google.protobuf.Timestamp
-             * @instance
-             */
-            Timestamp.prototype.seconds = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
-
-            /**
-             * Timestamp nanos.
-             * @member {number} nanos
-             * @memberof google.protobuf.Timestamp
-             * @instance
-             */
-            Timestamp.prototype.nanos = 0;
-
-            /**
-             * Creates a new Timestamp instance using the specified properties.
-             * @function create
-             * @memberof google.protobuf.Timestamp
-             * @static
-             * @param {google.protobuf.ITimestamp=} [properties] Properties to set
-             * @returns {google.protobuf.Timestamp} Timestamp instance
-             */
-            Timestamp.create = function create(properties) {
-                return new Timestamp(properties);
-            };
-
-            /**
-             * Encodes the specified Timestamp message. Does not implicitly {@link google.protobuf.Timestamp.verify|verify} messages.
-             * @function encode
-             * @memberof google.protobuf.Timestamp
-             * @static
-             * @param {google.protobuf.ITimestamp} message Timestamp message or plain object to encode
-             * @param {$protobuf.Writer} [writer] Writer to encode to
-             * @returns {$protobuf.Writer} Writer
-             */
-            Timestamp.encode = function encode(message, writer) {
-                if (!writer)
-                    writer = $Writer.create();
-                if (message.seconds != null && message.hasOwnProperty("seconds"))
-                    writer.uint32(/* id 1, wireType 0 =*/8).int64(message.seconds);
-                if (message.nanos != null && message.hasOwnProperty("nanos"))
-                    writer.uint32(/* id 2, wireType 0 =*/16).int32(message.nanos);
-                return writer;
-            };
-
-            /**
-             * Encodes the specified Timestamp message, length delimited. Does not implicitly {@link google.protobuf.Timestamp.verify|verify} messages.
-             * @function encodeDelimited
-             * @memberof google.protobuf.Timestamp
-             * @static
-             * @param {google.protobuf.ITimestamp} message Timestamp message or plain object to encode
-             * @param {$protobuf.Writer} [writer] Writer to encode to
-             * @returns {$protobuf.Writer} Writer
-             */
-            Timestamp.encodeDelimited = function encodeDelimited(message, writer) {
-                return this.encode(message, writer).ldelim();
-            };
-
-            /**
-             * Decodes a Timestamp message from the specified reader or buffer.
-             * @function decode
-             * @memberof google.protobuf.Timestamp
-             * @static
-             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-             * @param {number} [length] Message length if known beforehand
-             * @returns {google.protobuf.Timestamp} Timestamp
-             * @throws {Error} If the payload is not a reader or valid buffer
-             * @throws {$protobuf.util.ProtocolError} If required fields are missing
-             */
-            Timestamp.decode = function decode(reader, length) {
-                if (!(reader instanceof $Reader))
-                    reader = $Reader.create(reader);
-                var end = length === undefined ? reader.len : reader.pos + length, message = new $root.google.protobuf.Timestamp();
-                while (reader.pos < end) {
-                    var tag = reader.uint32();
-                    switch (tag >>> 3) {
-                    case 1:
-                        message.seconds = reader.int64();
-                        break;
-                    case 2:
-                        message.nanos = reader.int32();
-                        break;
-                    default:
-                        reader.skipType(tag & 7);
-                        break;
-                    }
-                }
-                return message;
-            };
-
-            /**
-             * Decodes a Timestamp message from the specified reader or buffer, length delimited.
-             * @function decodeDelimited
-             * @memberof google.protobuf.Timestamp
-             * @static
-             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
-             * @returns {google.protobuf.Timestamp} Timestamp
-             * @throws {Error} If the payload is not a reader or valid buffer
-             * @throws {$protobuf.util.ProtocolError} If required fields are missing
-             */
-            Timestamp.decodeDelimited = function decodeDelimited(reader) {
-                if (!(reader instanceof $Reader))
-                    reader = new $Reader(reader);
-                return this.decode(reader, reader.uint32());
-            };
-
-            /**
-             * Verifies a Timestamp message.
-             * @function verify
-             * @memberof google.protobuf.Timestamp
-             * @static
-             * @param {Object.<string,*>} message Plain object to verify
-             * @returns {string|null} `null` if valid, otherwise the reason why it is not
-             */
-            Timestamp.verify = function verify(message) {
-                if (typeof message !== "object" || message === null)
-                    return "object expected";
-                if (message.seconds != null && message.hasOwnProperty("seconds"))
-                    if (!$util.isInteger(message.seconds) && !(message.seconds && $util.isInteger(message.seconds.low) && $util.isInteger(message.seconds.high)))
-                        return "seconds: integer|Long expected";
-                if (message.nanos != null && message.hasOwnProperty("nanos"))
-                    if (!$util.isInteger(message.nanos))
-                        return "nanos: integer expected";
-                return null;
-            };
-
-            /**
-             * Creates a Timestamp message from a plain object. Also converts values to their respective internal types.
-             * @function fromObject
-             * @memberof google.protobuf.Timestamp
-             * @static
-             * @param {Object.<string,*>} object Plain object
-             * @returns {google.protobuf.Timestamp} Timestamp
-             */
-            Timestamp.fromObject = function fromObject(object) {
-                if (object instanceof $root.google.protobuf.Timestamp)
-                    return object;
-                var message = new $root.google.protobuf.Timestamp();
-                if (object.seconds != null)
-                    if ($util.Long)
-                        (message.seconds = $util.Long.fromValue(object.seconds)).unsigned = false;
-                    else if (typeof object.seconds === "string")
-                        message.seconds = parseInt(object.seconds, 10);
-                    else if (typeof object.seconds === "number")
-                        message.seconds = object.seconds;
-                    else if (typeof object.seconds === "object")
-                        message.seconds = new $util.LongBits(object.seconds.low >>> 0, object.seconds.high >>> 0).toNumber();
-                if (object.nanos != null)
-                    message.nanos = object.nanos | 0;
-                return message;
-            };
-
-            /**
-             * Creates a plain object from a Timestamp message. Also converts values to other types if specified.
-             * @function toObject
-             * @memberof google.protobuf.Timestamp
-             * @static
-             * @param {google.protobuf.Timestamp} message Timestamp
-             * @param {$protobuf.IConversionOptions} [options] Conversion options
-             * @returns {Object.<string,*>} Plain object
-             */
-            Timestamp.toObject = function toObject(message, options) {
-                if (!options)
-                    options = {};
-                var object = {};
-                if (options.defaults) {
-                    if ($util.Long) {
-                        var long = new $util.Long(0, 0, false);
-                        object.seconds = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
-                    } else
-                        object.seconds = options.longs === String ? "0" : 0;
-                    object.nanos = 0;
-                }
-                if (message.seconds != null && message.hasOwnProperty("seconds"))
-                    if (typeof message.seconds === "number")
-                        object.seconds = options.longs === String ? String(message.seconds) : message.seconds;
-                    else
-                        object.seconds = options.longs === String ? $util.Long.prototype.toString.call(message.seconds) : options.longs === Number ? new $util.LongBits(message.seconds.low >>> 0, message.seconds.high >>> 0).toNumber() : message.seconds;
-                if (message.nanos != null && message.hasOwnProperty("nanos"))
-                    object.nanos = message.nanos;
-                return object;
-            };
-
-            /**
-             * Converts this Timestamp to JSON.
-             * @function toJSON
-             * @memberof google.protobuf.Timestamp
-             * @instance
-             * @returns {Object.<string,*>} JSON object
-             */
-            Timestamp.prototype.toJSON = function toJSON() {
-                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
-            };
-
-            return Timestamp;
-        })();
-
-        return protobuf;
+    /**
+     * EMSG_PERSONAL_STATE enum.
+     * @name enums.EMSG_PERSONAL_STATE
+     * @enum {string}
+     * @property {number} OFFLINE=0 OFFLINE value
+     * @property {number} ONLINE=1 ONLINE value
+     * @property {number} IDLE=2 IDLE value
+     * @property {number} BUSY=3 BUSY value
+     * @property {number} INVISIBLE=4 INVISIBLE value
+     */
+    enums.EMSG_PERSONAL_STATE = (function() {
+        var valuesById = {}, values = Object.create(valuesById);
+        values[valuesById[0] = "OFFLINE"] = 0;
+        values[valuesById[1] = "ONLINE"] = 1;
+        values[valuesById[2] = "IDLE"] = 2;
+        values[valuesById[3] = "BUSY"] = 3;
+        values[valuesById[4] = "INVISIBLE"] = 4;
+        return values;
     })();
 
-    return google;
+    /**
+     * EMSG enum.
+     * @name enums.EMSG
+     * @enum {string}
+     * @property {number} INVALID=0 INVALID value
+     * @property {number} LOGON=1 LOGON value
+     * @property {number} LOGOUT=2 LOGOUT value
+     * @property {number} PERSONAL_STATE_CHANGED=3 PERSONAL_STATE_CHANGED value
+     * @property {number} PERSONAL_ACTIVITY_CHANGED=4 PERSONAL_ACTIVITY_CHANGED value
+     * @property {number} AUTHORIZED=5 AUTHORIZED value
+     * @property {number} UNAUTHORIZED=6 UNAUTHORIZED value
+     * @property {number} CHAT_MESSAGES=7 CHAT_MESSAGES value
+     * @property {number} LOG_MESSAGES=8 LOG_MESSAGES value
+     * @property {number} NEW_CHAT_MESSAGE=9 NEW_CHAT_MESSAGE value
+     * @property {number} NEW_LOG_MESSAGE=10 NEW_LOG_MESSAGE value
+     * @property {number} MEMBER_STATE_CHANGED=11 MEMBER_STATE_CHANGED value
+     * @property {number} THEATER_MEMBERS=12 THEATER_MEMBERS value
+     * @property {number} THEATER_PLAY=13 THEATER_PLAY value
+     * @property {number} THEATER_PAUSE=14 THEATER_PAUSE value
+     */
+    enums.EMSG = (function() {
+        var valuesById = {}, values = Object.create(valuesById);
+        values[valuesById[0] = "INVALID"] = 0;
+        values[valuesById[1] = "LOGON"] = 1;
+        values[valuesById[2] = "LOGOUT"] = 2;
+        values[valuesById[3] = "PERSONAL_STATE_CHANGED"] = 3;
+        values[valuesById[4] = "PERSONAL_ACTIVITY_CHANGED"] = 4;
+        values[valuesById[5] = "AUTHORIZED"] = 5;
+        values[valuesById[6] = "UNAUTHORIZED"] = 6;
+        values[valuesById[7] = "CHAT_MESSAGES"] = 7;
+        values[valuesById[8] = "LOG_MESSAGES"] = 8;
+        values[valuesById[9] = "NEW_CHAT_MESSAGE"] = 9;
+        values[valuesById[10] = "NEW_LOG_MESSAGE"] = 10;
+        values[valuesById[11] = "MEMBER_STATE_CHANGED"] = 11;
+        values[valuesById[12] = "THEATER_MEMBERS"] = 12;
+        values[valuesById[13] = "THEATER_PLAY"] = 13;
+        values[valuesById[14] = "THEATER_PAUSE"] = 14;
+        return values;
+    })();
+
+    return enums;
 })();
 
 $root.messages = (function() {
@@ -3044,6 +3348,254 @@ $root.messages = (function() {
     })();
 
     return messages;
+})();
+
+$root.google = (function() {
+
+    /**
+     * Namespace google.
+     * @exports google
+     * @namespace
+     */
+    var google = {};
+
+    google.protobuf = (function() {
+
+        /**
+         * Namespace protobuf.
+         * @memberof google
+         * @namespace
+         */
+        var protobuf = {};
+
+        protobuf.Timestamp = (function() {
+
+            /**
+             * Properties of a Timestamp.
+             * @memberof google.protobuf
+             * @interface ITimestamp
+             * @property {number|Long|null} [seconds] Timestamp seconds
+             * @property {number|null} [nanos] Timestamp nanos
+             */
+
+            /**
+             * Constructs a new Timestamp.
+             * @memberof google.protobuf
+             * @classdesc Represents a Timestamp.
+             * @implements ITimestamp
+             * @constructor
+             * @param {google.protobuf.ITimestamp=} [properties] Properties to set
+             */
+            function Timestamp(properties) {
+                if (properties)
+                    for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                        if (properties[keys[i]] != null)
+                            this[keys[i]] = properties[keys[i]];
+            }
+
+            /**
+             * Timestamp seconds.
+             * @member {number|Long} seconds
+             * @memberof google.protobuf.Timestamp
+             * @instance
+             */
+            Timestamp.prototype.seconds = $util.Long ? $util.Long.fromBits(0,0,false) : 0;
+
+            /**
+             * Timestamp nanos.
+             * @member {number} nanos
+             * @memberof google.protobuf.Timestamp
+             * @instance
+             */
+            Timestamp.prototype.nanos = 0;
+
+            /**
+             * Creates a new Timestamp instance using the specified properties.
+             * @function create
+             * @memberof google.protobuf.Timestamp
+             * @static
+             * @param {google.protobuf.ITimestamp=} [properties] Properties to set
+             * @returns {google.protobuf.Timestamp} Timestamp instance
+             */
+            Timestamp.create = function create(properties) {
+                return new Timestamp(properties);
+            };
+
+            /**
+             * Encodes the specified Timestamp message. Does not implicitly {@link google.protobuf.Timestamp.verify|verify} messages.
+             * @function encode
+             * @memberof google.protobuf.Timestamp
+             * @static
+             * @param {google.protobuf.ITimestamp} message Timestamp message or plain object to encode
+             * @param {$protobuf.Writer} [writer] Writer to encode to
+             * @returns {$protobuf.Writer} Writer
+             */
+            Timestamp.encode = function encode(message, writer) {
+                if (!writer)
+                    writer = $Writer.create();
+                if (message.seconds != null && message.hasOwnProperty("seconds"))
+                    writer.uint32(/* id 1, wireType 0 =*/8).int64(message.seconds);
+                if (message.nanos != null && message.hasOwnProperty("nanos"))
+                    writer.uint32(/* id 2, wireType 0 =*/16).int32(message.nanos);
+                return writer;
+            };
+
+            /**
+             * Encodes the specified Timestamp message, length delimited. Does not implicitly {@link google.protobuf.Timestamp.verify|verify} messages.
+             * @function encodeDelimited
+             * @memberof google.protobuf.Timestamp
+             * @static
+             * @param {google.protobuf.ITimestamp} message Timestamp message or plain object to encode
+             * @param {$protobuf.Writer} [writer] Writer to encode to
+             * @returns {$protobuf.Writer} Writer
+             */
+            Timestamp.encodeDelimited = function encodeDelimited(message, writer) {
+                return this.encode(message, writer).ldelim();
+            };
+
+            /**
+             * Decodes a Timestamp message from the specified reader or buffer.
+             * @function decode
+             * @memberof google.protobuf.Timestamp
+             * @static
+             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+             * @param {number} [length] Message length if known beforehand
+             * @returns {google.protobuf.Timestamp} Timestamp
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            Timestamp.decode = function decode(reader, length) {
+                if (!(reader instanceof $Reader))
+                    reader = $Reader.create(reader);
+                var end = length === undefined ? reader.len : reader.pos + length, message = new $root.google.protobuf.Timestamp();
+                while (reader.pos < end) {
+                    var tag = reader.uint32();
+                    switch (tag >>> 3) {
+                    case 1:
+                        message.seconds = reader.int64();
+                        break;
+                    case 2:
+                        message.nanos = reader.int32();
+                        break;
+                    default:
+                        reader.skipType(tag & 7);
+                        break;
+                    }
+                }
+                return message;
+            };
+
+            /**
+             * Decodes a Timestamp message from the specified reader or buffer, length delimited.
+             * @function decodeDelimited
+             * @memberof google.protobuf.Timestamp
+             * @static
+             * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+             * @returns {google.protobuf.Timestamp} Timestamp
+             * @throws {Error} If the payload is not a reader or valid buffer
+             * @throws {$protobuf.util.ProtocolError} If required fields are missing
+             */
+            Timestamp.decodeDelimited = function decodeDelimited(reader) {
+                if (!(reader instanceof $Reader))
+                    reader = new $Reader(reader);
+                return this.decode(reader, reader.uint32());
+            };
+
+            /**
+             * Verifies a Timestamp message.
+             * @function verify
+             * @memberof google.protobuf.Timestamp
+             * @static
+             * @param {Object.<string,*>} message Plain object to verify
+             * @returns {string|null} `null` if valid, otherwise the reason why it is not
+             */
+            Timestamp.verify = function verify(message) {
+                if (typeof message !== "object" || message === null)
+                    return "object expected";
+                if (message.seconds != null && message.hasOwnProperty("seconds"))
+                    if (!$util.isInteger(message.seconds) && !(message.seconds && $util.isInteger(message.seconds.low) && $util.isInteger(message.seconds.high)))
+                        return "seconds: integer|Long expected";
+                if (message.nanos != null && message.hasOwnProperty("nanos"))
+                    if (!$util.isInteger(message.nanos))
+                        return "nanos: integer expected";
+                return null;
+            };
+
+            /**
+             * Creates a Timestamp message from a plain object. Also converts values to their respective internal types.
+             * @function fromObject
+             * @memberof google.protobuf.Timestamp
+             * @static
+             * @param {Object.<string,*>} object Plain object
+             * @returns {google.protobuf.Timestamp} Timestamp
+             */
+            Timestamp.fromObject = function fromObject(object) {
+                if (object instanceof $root.google.protobuf.Timestamp)
+                    return object;
+                var message = new $root.google.protobuf.Timestamp();
+                if (object.seconds != null)
+                    if ($util.Long)
+                        (message.seconds = $util.Long.fromValue(object.seconds)).unsigned = false;
+                    else if (typeof object.seconds === "string")
+                        message.seconds = parseInt(object.seconds, 10);
+                    else if (typeof object.seconds === "number")
+                        message.seconds = object.seconds;
+                    else if (typeof object.seconds === "object")
+                        message.seconds = new $util.LongBits(object.seconds.low >>> 0, object.seconds.high >>> 0).toNumber();
+                if (object.nanos != null)
+                    message.nanos = object.nanos | 0;
+                return message;
+            };
+
+            /**
+             * Creates a plain object from a Timestamp message. Also converts values to other types if specified.
+             * @function toObject
+             * @memberof google.protobuf.Timestamp
+             * @static
+             * @param {google.protobuf.Timestamp} message Timestamp
+             * @param {$protobuf.IConversionOptions} [options] Conversion options
+             * @returns {Object.<string,*>} Plain object
+             */
+            Timestamp.toObject = function toObject(message, options) {
+                if (!options)
+                    options = {};
+                var object = {};
+                if (options.defaults) {
+                    if ($util.Long) {
+                        var long = new $util.Long(0, 0, false);
+                        object.seconds = options.longs === String ? long.toString() : options.longs === Number ? long.toNumber() : long;
+                    } else
+                        object.seconds = options.longs === String ? "0" : 0;
+                    object.nanos = 0;
+                }
+                if (message.seconds != null && message.hasOwnProperty("seconds"))
+                    if (typeof message.seconds === "number")
+                        object.seconds = options.longs === String ? String(message.seconds) : message.seconds;
+                    else
+                        object.seconds = options.longs === String ? $util.Long.prototype.toString.call(message.seconds) : options.longs === Number ? new $util.LongBits(message.seconds.low >>> 0, message.seconds.high >>> 0).toNumber() : message.seconds;
+                if (message.nanos != null && message.hasOwnProperty("nanos"))
+                    object.nanos = message.nanos;
+                return object;
+            };
+
+            /**
+             * Converts this Timestamp to JSON.
+             * @function toJSON
+             * @memberof google.protobuf.Timestamp
+             * @instance
+             * @returns {Object.<string,*>} JSON object
+             */
+            Timestamp.prototype.toJSON = function toJSON() {
+                return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+            };
+
+            return Timestamp;
+        })();
+
+        return protobuf;
+    })();
+
+    return google;
 })();
 
 module.exports = $root;

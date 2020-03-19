@@ -234,7 +234,6 @@
         name: 'Message',
         data() {
             return {
-                scrolled: false,
                 friend: null,
                 messages: [],
                 loading: true,
@@ -328,16 +327,17 @@
                 if (senderString !== '' || senderString !== undefined){
                     sender = JSON.parse(decoded.from.trim());
                 }
-
-                let message = {
-                    content: String.fromCharCode.apply(String, decoded.message),
-                    sender: sender,
-                    created_at: decoded.createdAt,
-                };
-                if (this.messages == null){
-                    this.messages = [];
+                if (sender.id === this.friend.id){
+                    let message = {
+                        content: String.fromCharCode.apply(String, decoded.message),
+                        sender: sender,
+                        created_at: decoded.createdAt,
+                    };
+                    if (this.messages == null){
+                        this.messages = [];
+                    }
+                    this.messages.push(message);
                 }
-                this.messages.push(message);
             });
         },
         destroyed() {
