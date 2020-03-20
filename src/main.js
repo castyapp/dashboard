@@ -1,9 +1,11 @@
 import Vue from 'vue'
-import VTitle from 'v-title';
+import VTitle from 'v-title'
 import routes from './routes'
+import 'v-title/lib/element-ui'
 import VueRouter from 'vue-router'
 import apiConfig from './store/api'
 import { store } from './store/store'
+import VueAnalytics from 'vue-analytics'
 import VueChatScroll from 'vue-chat-scroll'
 import Notifications from 'vue-notification'
 import vueTopProgress from 'vue-top-progress'
@@ -13,8 +15,6 @@ import GSignInButton from 'vue-google-signin-button'
 
 Vue.config.productionTip = false;
 
-import 'v-title/lib/element-ui';
-
 Vue.use(VTitle);
 Vue.use(VueRouter);
 Vue.use(GSignInButton);
@@ -23,6 +23,10 @@ Vue.use(Notifications);
 Vue.use(VueSpinnersCss);
 Vue.use(vueTopProgress);
 Vue.use(require('vue-jalali-moment'));
+
+Vue.use(VueAnalytics, {
+    id: process.env.VUE_APP_API_GOOGLE_ANALYTICS_TRACK_ID,
+});
 
 let newVueApp = new Vue();
 window.eventBus = newVueApp;
