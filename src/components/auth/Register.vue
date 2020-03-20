@@ -153,6 +153,7 @@
                 email: '',
                 password: '',
                 password_confirmation: '',
+                sitekey: process.env.VUE_APP_API_RECAPTCHA_KEY,
             }
         },
         mounted() {
