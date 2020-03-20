@@ -130,6 +130,7 @@
 <script>
 
     const jQuery = require("jquery");
+    import VueRecaptcha from 'vue-recaptcha';
 
     export default {
         name: 'register',
@@ -137,6 +138,9 @@
             dataSuccessMessage: {
                 type: String,
             }
+        },
+        components: {
+            VueRecaptcha
         },
         data() {
             return {
