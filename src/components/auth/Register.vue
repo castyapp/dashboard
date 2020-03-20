@@ -95,20 +95,26 @@
         <div class="form-group login-bottom-action-buttons">
 
             <div class="buttons">
+                <VueRecaptcha :sitekey="sitekey"
+                              ref="recaptcha"
+                              @verify="onCaptchaVerified"
+                              @expired="onCaptchaExpired"
+                              size="invisible"
+                              :loadRecaptchaScript="true" />
                 <button class="btn btn-primary">Register</button>
                 <a class="btn">Forget password?</a>
             </div>
 
             <div class="oauthButtons">
 
-                <strong>Or you can sign up with:</strong>
+                <strong>Or you can sign in with:</strong>
 
-                <button type="button" class="clickable oauthBtn oauthGoogleBtn"  >
+                <button type="button" class="clickable oauthBtn oauthGoogleBtn" @click="GoogleOAUTHPage">
                     <i class="icofont-google-plus"></i>
                     Google
                 </button>
 
-                <button type="button" class="clickable oauthBtn oauthDiscordBtn" >
+                <button type="button" class="clickable oauthBtn oauthDiscordBtn" @click="DiscordOAUTHPage">
                     <i class="discord-icon"></i>
                     Discord
                 </button>
@@ -152,8 +158,7 @@
             }
         },
         methods: {
-            register() {
-
+            onCaptchaVerified(recaptchaToken) {
                 jQuery('#serverError').removeClass();
 
                 this.$parent.$refs.topProgress.start();
@@ -166,6 +171,7 @@
                     username: this.username,
                     password: this.password,
                     password_confirmation: this.password_confirmation,
+                    gToken: recaptchaToken,
                 }).then(() => {
 
                     this.errors = {};
@@ -219,6 +225,18 @@
 
                     this.$parent.$refs.topProgress.done();
                 })
+            },
+            onCaptchaExpired() {
+                this.$refs.recaptcha.reset();
+            },
+            login() {
+                this.$refs.recaptcha.execute();
+            },
+            GoogleOAUTHPage() {
+                this.$router.push({ name: "google_oauth_connect" });
+            },
+            DiscordOAUTHPage() {
+                this.$router.push({ name: "discord_oauth_connect" });
             }
         }
     }

@@ -239,6 +239,7 @@ export const store = new Vuex.Store({
                 params.append('username', data.username);
                 params.append('password', data.password);
                 params.append('password_confirmation', data.password_confirmation);
+                params.append('g-recaptcha-response', data.gToken);
 
                 axios.post('/user/@create', params, {
                     headers: {

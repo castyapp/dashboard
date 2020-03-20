@@ -45,7 +45,7 @@
                               @expired="onCaptchaExpired"
                               size="invisible"
                               :loadRecaptchaScript="true" />
-                <button class="btn btn-primary ">Login</button>
+                <button class="btn btn-primary">Login</button>
                 <a class="btn">Forget password?</a>
             </div>
 
