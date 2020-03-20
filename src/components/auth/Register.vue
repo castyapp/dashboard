@@ -234,7 +234,7 @@
             onCaptchaExpired() {
                 this.$refs.recaptcha.reset();
             },
-            login() {
+            register() {
                 this.$refs.recaptcha.execute();
             },
             GoogleOAUTHPage() {
