@@ -485,6 +485,7 @@ tr.new-log > td:first-child {
 .footer img.avatar {
     border: 0;
     width: 45px;
+    height: 45px;
     margin: 10px auto;
 }
 

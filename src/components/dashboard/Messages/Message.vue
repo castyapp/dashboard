@@ -214,7 +214,8 @@
     }
 
     .small-avatar > img {
-        width: 100%;
+        width: 30px;
+        height: 30px;
         border-radius: 50%;
     }
 

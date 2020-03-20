@@ -38,8 +38,9 @@
                     <i class="icofont-ui-movie text-primary mr-2"></i>
                     {{ theater.title }}
                 </strong>
-                <small class="border-left-title">
-                    Shared by: Josh
+                <small class="border-left-title" v-if="theater.user !== undefined">
+                    <i class="icofont-user-alt-4 text-primary"></i>
+                    Created by: {{ theater.user.fullname }}
                 </small>
             </div>
 

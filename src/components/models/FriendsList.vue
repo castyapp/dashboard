@@ -222,7 +222,8 @@
     }
 
     .friends_list > ul > li > .friend > .avatar > img {
-        width: 100%;
+        width: 28px;
+        height: 28px;
         border-radius: 50%;
     }
 

@@ -1,8 +1,8 @@
 import {store} from "./store";
 import {bus} from "./../main";
-import {protobuf, enums} from "./../protocol/protobuf/base";
 import {emit} from "./../protocol/messages";
 import {Packet} from "./../protocol/protobuf/packet";
+import {protobuf, enums} from "./../protocol/protobuf/base";
 
 class UserWebsocket {
     connect() {
@@ -12,7 +12,7 @@ class UserWebsocket {
         }
 
         let user = store.state.user;
-        this.ws = new WebSocket(`ws://localhost:3000/user`);
+        this.ws = new WebSocket(process.env.VUE_APP_API_USER_WEBSOCKET_URI);
         this.ws.binaryType = 'arraybuffer';
 
         this.ws.onopen = () => {
@@ -67,7 +67,7 @@ class TheaterWebsocket {
             return
         }
 
-        this.ws = new WebSocket(`ws://localhost:3000/theater`);
+        this.ws = new WebSocket(process.env.VUE_APP_API_THEATER_WEBSOCKET_URI);
         this.ws.binaryType = 'arraybuffer';
 
         this.ws.onopen = () => {

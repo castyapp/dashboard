@@ -1,6 +1,6 @@
 casty.ir, www.casty.ir {
     gzip
-    root /casty.caddy/dist
+    root /casty.caddy/dist/web
     rewrite {
         regexp .*
         to {path} /

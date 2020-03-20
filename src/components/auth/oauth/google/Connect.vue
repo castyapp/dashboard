@@ -6,10 +6,13 @@
 
 <script>
 
+    let client_id = process.env.VUE_APP_API_GOOGLE_CLIENT_ID,
+        redirect_uri = process.env.VUE_APP_API_GOOGLE_REDIRECT_URI;
+
     let redirect_url = "https://accounts.google.com/o/oauth2/auth?" +
         "access_type=offline&" +
-        "client_id=333498721206-5s2s31pbh26rlquclst8frr8pml873sc.apps.googleusercontent.com&" +
-        "redirect_uri=http%3A%2F%2Flocalhost%3A8000%2Foauth%2Fgoogle%2Fcallback&" +
+        `client_id=${client_id}&` +
+        `redirect_uri=${redirect_uri}&` +
         "response_type=code&" +
         "scope=profile+email+openid&" +
         "state=state";
