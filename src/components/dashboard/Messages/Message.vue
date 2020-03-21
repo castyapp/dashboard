@@ -2,7 +2,7 @@
 
     <div class="messages-section p-2" v-if="friend !== null">
 
-        <div class="title-border-bottom pb-2 offline">
+        <div class="title-border-bottom pb-2" :class="getFriendStateElementClass()">
             <strong>
                 <i class="icofont-user"></i>
                 {{ friend.fullname }}
@@ -228,7 +228,7 @@
     import moment from 'moment-timezone';
     import {websocket} from "../../../store/ws";
     import {EllipsisLoader} from 'vue-spinners-css';
-    import {enums} from "../../../protocol/protobuf/base";
+    import {enums, protobuf} from "../../../protocol/protobuf/base";
     import TheaterMessage from "../../models/TheaterMessage";
 
     export default {
@@ -245,6 +245,12 @@
             EllipsisLoader,
         },
         methods: {
+            getFriendStateElementClass() {
+                return {
+                    'online': this.friend.state === 1,
+                    'offline': this.friend.state === 0 || this.friend.state === undefined,
+                };
+            },
             hasMetaData(message) {
                 let matches = /<(.*?)>/s.exec(message.data);
                 if (matches !== null){
@@ -302,6 +308,12 @@
         },
         mounted() {
 
+            bus.$on('friend-state-changed', pState => {
+                if (pState.user.id === this.friend.id){
+                    this.friend.state = pState.state;
+                }
+            });
+
             this.messages = [];
             let friend_username = this.$route.params.friend_id;
 
@@ -330,7 +342,7 @@
                 }
                 if (sender.id === this.friend.id){
                     let message = {
-                        content: String.fromCharCode.apply(String, decoded.message),
+                        content: new TextDecoder("utf-8").decode(decoded.message),
                         sender: sender,
                         created_at: decoded.createdAt,
                     };

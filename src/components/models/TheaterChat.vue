@@ -214,11 +214,10 @@
                 bus.$emit('new-theater-member', {user, state})
             },
             newChatMessage(chatMsg) {
-                let msgTextDecoder = new TextDecoder("utf-8");
                 this.chats.push({
                     type: 'EMSG_CHATS',
                     user: chatMsg.user,
-                    message: msgTextDecoder.decode(chatMsg.message)
+                    message: new TextDecoder("utf-8").decode(chatMsg.message)
                 });
             },
         },

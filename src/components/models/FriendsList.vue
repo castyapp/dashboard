@@ -463,6 +463,7 @@
 
             bus.$on(enums.EMSG[enums.EMSG.PERSONAL_STATE_CHANGED], data => {
                 let decoded = protobuf.PersonalStateMsgEvent.decode(data);
+                bus.$emit('friend-state-changed', decoded);
                 this.changeUserState(decoded.user, decoded.state);
             });
 

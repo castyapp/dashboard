@@ -43,7 +43,7 @@
         props: ['notification'],
         methods: {
             joinTheater(theater) {
-                this.$router.push({ path: `theater/${theater.id}` });
+                this.$router.push({ path: `/theater/${theater.id}` });
             }
         }
     }
