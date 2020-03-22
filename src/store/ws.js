@@ -4,9 +4,6 @@ import {emit} from "./../protocol/messages";
 import {Packet} from "./../protocol/protobuf/packet";
 import {protobuf, enums} from "./../protocol/protobuf/base";
 
-// send ping request every 5 minutes
-const pingPeriod = 300000;
-
 class UserWebsocket {
     connect() {
 
@@ -15,7 +12,7 @@ class UserWebsocket {
         }
 
         let user = store.state.user;
-        this.ws = new WebSocket(process.env.VUE_APP_API_USER_WEBSOCKET_URI);
+        this.ws = new WebSocket(process.env.VUE_APP_API_USER_WEBSOCKET_URI, ["cp0", "cp1"]);
         this.ws.binaryType = 'arraybuffer';
 
         this.ws.onopen = () => {
@@ -38,19 +35,11 @@ class UserWebsocket {
             let packet = new Packet(message.data);
             if (enums.EMSG.UNAUTHORIZED === packet.emsg){
                 console.log("Unauthorized! try to refresh token!");
-            } else if (enums.EMSG.AUTHORIZED === packet.emsg) {
-                this.ping(this.ws);
             }
             bus.$emit(enums.EMSG[packet.emsg], packet.data);
         };
 
-        setInterval(this.ping, pingPeriod, this.ws);
-
         return this.ws;
-    }
-    ping(ws) {
-        if (ws.readyState !== 1) return;
-        emit(ws, enums.EMSG.PING, protobuf.PingMsgEvent, {});
     }
     sendPacket(eNUM, pROTO, payload) {
         emit(this.ws, eNUM, pROTO, payload);
@@ -78,7 +67,7 @@ class TheaterWebsocket {
             return
         }
 
-        this.ws = new WebSocket(process.env.VUE_APP_API_THEATER_WEBSOCKET_URI);
+        this.ws = new WebSocket(process.env.VUE_APP_API_THEATER_WEBSOCKET_URI, ["cp0", "cp1"]);
         this.ws.binaryType = 'arraybuffer';
 
         this.ws.onopen = () => {
@@ -100,20 +89,13 @@ class TheaterWebsocket {
         this.ws.onmessage = (message) => {
             let packet = new Packet(message.data);
             if (packet.emsg === enums.EMSG.AUTHORIZED) {
-                this.ping(this.ws);
                 bus.$emit("theater-connected", this);
             } else {
                 bus.$emit(enums.EMSG[packet.emsg], packet.data);
             }
         };
 
-        setInterval(this.ping, pingPeriod, this.ws);
-
         return this;
-    }
-    ping(ws) {
-        if (ws.readyState !== 1) return;
-        emit(ws, enums.EMSG.PING, protobuf.PingMsgEvent, {});
     }
     sendMessage(message) {
         emit(this.ws, enums.EMSG.NEW_CHAT_MESSAGE, protobuf.ChatMsgEvent, {
