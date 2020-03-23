@@ -1,5 +1,7 @@
+import {bus} from './main'
 import axios from 'axios';
 import {store} from './store/store';
+import {websocket} from "./store/ws";
 
 let isAlreadyFetchingAccessToken = false;
 let subscribers = [];
@@ -34,6 +36,23 @@ axios.interceptors.response.use(function (response) {
                 onAccessTokenFetched(response.data.result.token);
             }).catch(err => {
                 console.log("Not Refreshed", err);
+
+                store.dispatch('logout').then(() => {
+
+                    localStorage.removeItem("user");
+                    websocket.user.disconnect();
+
+                    bus.$router.push({ name: 'login', params: {
+                        err: {
+                            group: 'auth',
+                            type: 'error',
+                            text: "Login failed, Try to login again!",
+                            title: "Failed",
+                            duration: 2000,
+                        }
+                    }})
+                })
+
             })
         }
 

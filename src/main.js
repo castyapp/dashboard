@@ -5,7 +5,6 @@ import 'v-title/lib/element-ui'
 import VueRouter from 'vue-router'
 import apiConfig from './store/api'
 import { store } from './store/store'
-import VueAnalytics from 'vue-analytics'
 import VueChatScroll from 'vue-chat-scroll'
 import Notifications from 'vue-notification'
 import vueTopProgress from 'vue-top-progress'
@@ -24,13 +23,7 @@ Vue.use(VueSpinnersCss);
 Vue.use(vueTopProgress);
 Vue.use(require('vue-jalali-moment'));
 
-Vue.use(VueAnalytics, {
-    id: process.env.VUE_APP_API_GOOGLE_ANALYTICS_TRACK_ID,
-});
-
-let newVueApp = new Vue();
-window.eventBus = newVueApp;
-export const bus = newVueApp;
+// process.env.VUE_APP_API_GOOGLE_ANALYTICS_TRACK_ID
 
 const router = new VueRouter({
     mode: 'history',
@@ -93,10 +86,13 @@ Vue.mixin({
     }
 });
 
-new Vue({
+let newVueApp = new Vue({
     el: '#app',
     router: router,
     store: store,
     components: { Master },
     template: '<Master />'
 });
+
+window.eventBus = newVueApp;
+export const bus = newVueApp;
