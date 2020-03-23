@@ -12,7 +12,7 @@ class UserWebsocket {
         }
 
         let user = store.state.user;
-        this.ws = new WebSocket(process.env.VUE_APP_API_USER_WEBSOCKET_URI, ["cp0", "cp1"]);
+        this.ws = new WebSocket(process.env.VUE_APP_API_USER_WEBSOCKET_URI);
         this.ws.binaryType = 'arraybuffer';
 
         this.ws.onopen = () => {
@@ -39,7 +39,13 @@ class UserWebsocket {
             bus.$emit(enums.EMSG[packet.emsg], packet.data);
         };
 
+        setInterval(this.ping, 50000, this.ws);
+
         return this.ws;
+    }
+    ping(ws) {
+        if (ws.readyState !== 1) return;
+        emit(ws, enums.EMSG.PING, protobuf.PingMsgEvent, {});
     }
     sendPacket(eNUM, pROTO, payload) {
         emit(this.ws, eNUM, pROTO, payload);
@@ -67,7 +73,7 @@ class TheaterWebsocket {
             return
         }
 
-        this.ws = new WebSocket(process.env.VUE_APP_API_THEATER_WEBSOCKET_URI, ["cp0", "cp1"]);
+        this.ws = new WebSocket(process.env.VUE_APP_API_THEATER_WEBSOCKET_URI);
         this.ws.binaryType = 'arraybuffer';
 
         this.ws.onopen = () => {
@@ -95,7 +101,13 @@ class TheaterWebsocket {
             }
         };
 
+        setInterval(this.ping, 50000, this.ws);
+
         return this;
+    }
+    ping(ws) {
+        if (ws.readyState !== 1) return;
+        emit(ws, enums.EMSG.PING, protobuf.PingMsgEvent, {});
     }
     sendMessage(message) {
         emit(this.ws, enums.EMSG.NEW_CHAT_MESSAGE, protobuf.ChatMsgEvent, {
