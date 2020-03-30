@@ -1,8 +1,10 @@
 <template>
 
-    <div v-if="notification.loaded">
-        <FriendRequest :notification="notification" v-if="notification.type === 1" />
-        <TheaterInvite :notification="notification" v-if="notification.type === 2" />
+    <div>
+        <FriendRequest :notification="notification" 
+            v-if="notification.type === 1" />
+        <TheaterInvite :notification="notification" 
+            v-if="notification.type === 2" />
     </div>
 
 </template>

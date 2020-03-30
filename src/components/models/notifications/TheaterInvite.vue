@@ -2,9 +2,7 @@
 
     <div class="theater-invite">
 
-        <img :src="apiBaseUrl + '/uploads/avatars/' + notification.from_user.avatar + '.png'"
-             class="avatar"
-             :alt="notification.from_user.fullname" />
+        <img :src="apiBaseUrl + '/uploads/avatars/' + notification.from_user.avatar + '.png'" class="avatar" :alt="notification.from_user.fullname" />
 
         <div class="notification-details">
             <div class="notification-title">
@@ -15,19 +13,20 @@
             </div>
             <div class="nc-th">
                 <div class="theater-image">
-                    <div class="default-nc-poster" v-if="notification.theater.movie.poster === 'default'">
+                    <div class="default-nc-poster" v-if="notification.data.movie.poster === 'default'">
                         <i class="poster icofont-file-mov"></i>
                     </div>
                     <img v-else
-                         :src="apiBaseUrl + '/uploads/posters/' + notification.theater.movie.poster + '.png'"
+                         :src="apiBaseUrl + '/uploads/posters/' + notification.data.movie.poster + '.png'"
                          alt="Poster" />
                 </div>
                 <div class="th-details">
                     <span class="th-name">
-                        {{ notification.theater.title }}
+                        {{ notification.data.title }}
                     </span>
                 </div>
-                <button class="nc-button nc-btn-join-th" @click="joinTheater(notification.theater)">
+                <button class="nc-button nc-btn-join-th" 
+                    @click="joinTheater(notification.data)">
                     Join <i class="icofont-plus"></i>
                 </button>
             </div>

@@ -2,9 +2,7 @@
 
     <div class="friend-invite">
 
-        <img :src="apiBaseUrl + '/uploads/avatars/' + notification.from_user.avatar + '.png'"
-             class="avatar"
-             :alt="notification.from_user.fullname" />
+        <img :src="apiBaseUrl + '/uploads/avatars/' + notification.from_user.avatar + '.png'" class="avatar" :alt="notification.from_user.fullname" />
 
         <div class="notification-details">
 
@@ -16,9 +14,8 @@
             </div>
 
             <VueLoadingButton class="nc-button nc-btn-accept-fr"
-                              v-if="!notification.accepted"
-                              :loading="loading"
-                              @click.native="acceptFriendRequest($event, notification.extra)">
+                              v-if="!notification.data.accepted"
+                              @click.native="acceptFriendRequest($event, notification.data.id)">
                 Accept
             </VueLoadingButton>
 
@@ -97,7 +94,8 @@
                             title: "Success",
                             duration: 2000,
                         });
-                        this.notification.accepted = true;
+                        this.$parent.$parent.close();
+                        this.notification.data.accepted = true;
                         this.loading = false;
                     }).catch(() => {
                         this.$notify({

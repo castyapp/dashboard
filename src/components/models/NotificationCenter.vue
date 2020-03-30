@@ -18,7 +18,7 @@
                 <span class="text-left">Notifications</span>
             </div>
 
-            <div class="notifications" v-if="!loading && notifications.data.length > 0">
+            <div class="notifications" v-if="notifications.data.length > 0">
 
                 <div class="notification"
                      :key="notification.id"
@@ -31,11 +31,9 @@
 
             </div>
 
-            <div class="no-notifications" v-if="!loading && notifications.data.length === 0">
+            <div class="no-notifications" v-if="notifications.data.length === 0">
                 You have no notifications yet!
             </div>
-
-            <vue-loaders-ball-beat class="notification-spinner" v-if="loading" />
 
         </div>
 
@@ -115,8 +113,6 @@
         data() {
             return {
                 opened: false,
-                loading: true,
-                loaded_once: false,
             }
         },
         directives: {
@@ -126,48 +122,11 @@
             Notification,
         },
         methods: {
-            loadNotification() {
-                if (this.notifications.data.length === 0){
-                    this.loading = false;
-                    this.loaded_once = true;
-                } else {
-                    this.notifications.data.forEach(async (_, index) => {
-                        if (!this.notifications.data[index].hasOwnProperty("read")){
-                            this.notifications.data[index].read = false;
-                        }
-                        if (!this.notifications.data[index].hasOwnProperty("accepted")){
-                            this.notifications.data[index].accepted = false;
-                        }
-                        if (!this.notifications.data[index].hasOwnProperty("loaded")){
-                            this.notifications.data[index].loaded = false;
-                        }
-                        if (this.notifications.data[index].type === 1) {
-                            await this.$store.dispatch("getFriendRequest", this.notifications.data[index].extra).then(response => {
-                                this.notifications.data[index].accepted = response.data.result.accepted;
-                                this.notifications.data[index].loaded = true;
-                            }).catch(() => {
-                                // this.notifications.data.splice(1, index);
-                            });
-                        } else if(this.notifications.data[index].type === 2) {
-                            await this.$store.dispatch("getTheater", this.notifications.data[index].extra).then(response => {
-                                this.notifications.data[index].theater = response.data.result;
-                                this.notifications.data[index].loaded = true;
-                            }).catch(() => {
-                                // this.notifications.data.splice(1, index);
-                            });
-                        }
-                        if (index === (this.notifications.data.length - 1)){
-                            this.loading = false;
-                            this.loaded_once = true;
-                        }
-                    });
-                }
-            },
             toggle() {
                 this.opened = !this.opened;
-                if (!this.loaded_once){
-                    this.loadNotification();
-                }
+                setInterval(() => {
+                    this.notifications.unread_count = 0;
+                }, 1000);
             },
             close() {
                 this.opened = false;
