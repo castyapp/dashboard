@@ -423,7 +423,11 @@
             getNotifications() {
                 this.$store.dispatch("getNotifications").then(response => {
                     this.notifications.unread_count = response.data.result.unread_count;
-                    this.notifications.data = response.data.result.notifications;
+                    let notifications = response.data.result.notifications;
+                    notifications.forEach((notif, index) => {
+                        notifications[index].data = JSON.parse(notif.data);
+                    });
+                    this.notifications.data = notifications;
                 }).catch(console.log);
             }
         },
