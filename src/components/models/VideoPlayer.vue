@@ -82,16 +82,29 @@
                 });
             });
 
-            this.player.source = {
-                type: 'video',
-                sources: [
-                    {
-                        src: this.theater.movie.movie_uri,
-                        type: 'video/mp4',
-                        size: 720,
-                    },
-                ],
-            };
+            // check if theater's movie type is youtube
+            if (this.theater.movie.type === 1){
+                this.player.source = {
+                    type: 'video',
+                    sources: [
+                        {
+                            src: this.theater.movie.uri,
+                            provider: 'youtube',
+                        },
+                    ],
+                };
+            } else {
+                this.player.source = {
+                    type: 'video',
+                    sources: [
+                        {
+                            src: this.theater.movie.movie_uri,
+                            type: 'video/mp4',
+                            size: 720,
+                        },
+                    ],
+                };
+            }
         }
     }
 

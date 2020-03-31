@@ -183,6 +183,7 @@ export const store = new Vuex.Store({
                 let params = new FormData();
                 params.append('title', theater.title);
                 params.append('movie_uri', theater.movie_uri);
+                params.append('type', theater.type);
                 params.append('privacy', theater.privacy);
                 params.append('video_player_access', theater.player_access);
                 if (theater.poster !== null){

@@ -42,6 +42,7 @@
                 <label for="movie_uri">
                     <i class="icofont-link mr-1"></i>
                     Movie uri
+                    <small>You can use youtube or movie download uri</small>
                 </label>
 
                 <input type="text"
@@ -221,10 +222,10 @@
                     <i class="icofont-arrow-right"></i>
                 </button>
 
-                <button type="button" class="btn btn-warning pull-right" v-show="privacy.id !== 3" @click="createAndShare">
-                    Create and share it with your friends
-                    <i class="icofont-arrow-right"></i>
-                </button>
+<!--                <button type="button" class="btn btn-warning pull-right" v-show="privacy.id !== 3" @click="createAndShare">-->
+<!--                    Create and share it with your friends-->
+<!--                    <i class="icofont-arrow-right"></i>-->
+<!--                </button>-->
 
             </div>
 
@@ -242,6 +243,12 @@
     import "bootstrap-select/dist/css/bootstrap-select.css";
     import DropdownMenu from "./../../models/dropdown-menu/DropdownMenu";
 
+    const MovieTypeUNKNOWN = 0,
+        MovieTypeYOUTUBE = 1,
+        MovieTypeURI = 2,
+        MovieTypePIRATE_BAY = 3,
+        LOCAL_PATH = 4;
+
     export default {
         name: 'CreateTheater',
         components: {
@@ -252,6 +259,10 @@
                 player_access: true,
                 theater_name: "",
                 movie_uri: "",
+                movie: {
+                    uri: "",
+                    type: MovieTypeUNKNOWN,
+                },
                 poster: null,
                 movie_banner: null,
                 movie_file: null,
@@ -293,7 +304,32 @@
                 },
             }
         },
+        watch: {
+            movie_uri(value) {
+                if (value === null || value === ""){
+                    this.movie = {type: MovieTypeUNKNOWN, uri: ""};
+                } else {
+                    this.movie = this.parseMovieUri(value);
+                }
+            },
+        },
         methods: {
+            parseMovieUri(uri) {
+                try {
+                    let parser = new URL(uri);
+                    let urlParams = new URLSearchParams(parser.search);
+                    if (this.isYoutube(uri)) {
+                        return {type: MovieTypeYOUTUBE, uri: urlParams.get("v")}
+                    }
+                    return {type: MovieTypeURI, uri: uri}
+                } catch (e) {
+                    return {type: MovieTypeURI, uri: uri}
+                }
+            },
+            isYoutube(uri) {
+                const regex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/watch\?v=/s;
+                return regex.exec(uri) !== null;
+            },
             setNewSelectedOption(selectedOption) {
                 this.privacy_config.placeholder = selectedOption.value;
                 this.privacy = selectedOption;
@@ -338,7 +374,8 @@
             getTheaterObject() {
                 return {
                     title:         this.theater_name,
-                    movie_uri:     this.movie_uri,
+                    movie_uri:     this.movie.uri,
+                    type:          this.movie.type,
                     privacy:       this.privacy.id,
                     poster:        this.poster,
                     cc:            this.movie_subtitle,
@@ -348,7 +385,10 @@
             create() {
                 let theater = this.getTheaterObject();
                 this.$store.dispatch("createTheater", theater).then(() => {
-                    this.$router.push({ name: "dashboard" }).then(() => {
+                    this.$router.push({
+                        name: "dashboard",
+                        params: {reload: true},
+                    }).then(() => {
                         this.$notify({
                             group: 'dashboard',
                             type: 'success',
