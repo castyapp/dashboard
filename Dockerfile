@@ -27,6 +27,9 @@ ADD . /casty.caddy
 # Make a copy of Caddyfile
 COPY ./Caddyfile.example ./Caddyfile
 
+# Install node dependencies modules
+RUN npm install
+
 # Build the project
 RUN npm run build
 
