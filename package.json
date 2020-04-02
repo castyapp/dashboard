@@ -4,9 +4,9 @@
   "description": "Casty Vue-JS project",
   "author": "Alireza Josheghani <josheghani.dev@gmail.com>",
   "scripts": {
-    "serve": "vue-cli-service serve",
+    "serve": "./node_modules/.bin/vue-cli-service serve",
     "pbjs:compile": "pbjs -t static-module -w commonjs -o src/protocol/protobuf/base.js src/protocol/protobuf/*.proto src/protocol/protobuf/enums/enums.proto",
-    "build": "export TARGET_BUILD=web && vue-cli-service build"
+    "build": "export TARGET_BUILD=web && ./node_modules/.bin/vue-cli-service build"
   },
   "dependencies": {
     "animate.css": "^3.7.2",
