@@ -1,0 +1,8 @@
+:80 {
+    gzip
+    root /casty.caddy/dist/web
+    rewrite {
+        regexp .*
+        to {path} /
+    }
+}

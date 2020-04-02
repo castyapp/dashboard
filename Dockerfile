@@ -1,28 +1,39 @@
-FROM ubuntu
+FROM iamalirezaj/caddy
 
-# Update packages and install curl
-RUN apt-get update\
-    && apt-get install -y curl iputils-ping nano
-
-# Installing caddy
-RUN curl https://getcaddy.com | bash -s personal http.grpc
-
-# Checking caddy version
+# Check caddy version
 RUN caddy -version
 
-# Creating work directory
+# Create work directory
 RUN mkdir /casty.caddy
 
-# Selecting work directory
+# Select work directory
 WORKDIR /casty.caddy
 
-ADD ./dist ./dist
+# Add nodesource
+RUN curl -sL https://rpm.nodesource.com/setup_10.x | bash -
 
-ADD ./production.caddy .
+# Install nodejs
+RUN yum install -y nodejs
 
-# Exposing port
+# Check nodejs version
+RUN node --version
+
+# Check npm version
+RUN npm --version
+
+# Copy project to destination
+ADD . /casty.caddy
+
+# Make a copy of Caddyfile
+COPY ./Caddyfile.example ./Caddyfile
+
+# Build the project
+RUN npm run build
+
+# Expose ports
 EXPOSE 80
 EXPOSE 443
 
-# Running project with caddy
-CMD ["caddy", "-conf", "/casty.caddy/production.caddy"]
+# Run project with caddy
+ENTRYPOINT ["caddy"]
+CMD ["-conf", "Caddyfile"]
