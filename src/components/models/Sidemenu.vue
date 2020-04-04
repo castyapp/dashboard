@@ -12,12 +12,12 @@
                     <i class="icofont-library"></i>
                 </router-link>
             </li>
-<!--            <li>-->
-<!--                <router-link :to="{ name: 'shared_with_you' }" v-title="'Shared with you'" title-placement="right">-->
-<!--                    <i class="icofont-share-boxed"></i>-->
-<!--                    &lt;!&ndash;<span class="unread-badge-menu">1</span>&ndash;&gt;-->
-<!--                </router-link>-->
-<!--            </li>-->
+           <li>
+               <router-link :to="{ name: 'shared' }" v-title="'Shared with you'" title-placement="right">
+                   <i class="icofont-share-boxed"></i>
+                   <!-- <span class="unread-badge-menu">1</span> -->
+               </router-link>
+           </li>
             <li>
                 <router-link :to="{ name: 'settings' }" v-title="'Settings'" title-placement="right">
                     <i class="icofont-gears"></i>

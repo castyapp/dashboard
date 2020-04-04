@@ -48,8 +48,8 @@ const routes = [
                 },
             },
             {
-                path: 'shared_with_you',
-                name: 'shared_with_you',
+                path: 'shared',
+                name: 'shared',
                 components: {
                     dashboard: SharedWithYou,
                 },

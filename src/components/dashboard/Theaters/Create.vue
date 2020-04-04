@@ -48,7 +48,7 @@
                 <input type="text"
                        class="form-control"
                        id="movie_uri"
-                       placeholder="Enter your movie download uri here"
+                       placeholder="Enter your movie download url or an youtube video"
                        v-model="movie_uri"
                        required="required"
                        autocomplete="off"
@@ -386,7 +386,7 @@
                 let theater = this.getTheaterObject();
                 this.$store.dispatch("createTheater", theater).then(() => {
                     this.$router.push({
-                        name: "dashboard",
+                        name: "library",
                         params: {reload: true},
                     }).then(() => {
                         this.$notify({

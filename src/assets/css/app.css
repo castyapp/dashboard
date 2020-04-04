@@ -744,3 +744,25 @@ span.unread-badge-friendlist {
     color: #ffffff;
     right: 20px;
 }
+
+.refresh-btn {
+    cursor: pointer;
+}
+
+.movie-list {
+    margin: 0;
+}
+
+li.context-menu-item.remove-red-btn {
+    background: #f44336;
+}
+
+.remove-red-btn:hover {
+    background: #a2261d !important;
+}
+
+.vue-loading-button {
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out !important;
+    font-size: 17px !important;
+    padding: 8px;
+}

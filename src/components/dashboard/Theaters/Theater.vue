@@ -42,6 +42,10 @@
                     <i class="icofont-user-alt-4 text-primary"></i>
                     Created by: {{ theater.user.fullname }}
                 </small>
+                <button @click="inviteModal" class="btn btn-primary pull-right th-invite-btn">
+                    <i class="icofont-arrow-left mr-1"></i>
+                    Invite a Friend
+                </button>
             </div>
 
             <div class="clearfix"></div>
@@ -102,6 +106,11 @@
         font-weight: bold;
     }
 
+    .th-invite-btn {
+        padding: 1px 5px !important;
+        margin: -7px 0 !important;
+    }
+
 </style>
 
 <script>
@@ -129,6 +138,9 @@
             }
         },
         methods: {
+            inviteModal() {
+                this.$parent.inviteModal(this.theater);
+            },
             changeMemberState(user, state) {
                 let userIndex = this.findMember(user.id);
                 if (state === 1){

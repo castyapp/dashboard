@@ -201,6 +201,15 @@ export const store = new Vuex.Store({
                 }).then(resolve).catch(reject);
             })
         },
+        removeTheater(context, theater_id) {
+            return new Promise((resolve, reject) => {
+                axios.delete(`/user/@theaters/${theater_id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${context.state.token}`
+                    },
+                }).then(resolve).catch(reject);
+            })
+        },
         sendFriendRequest(context, friend_id) {
 
             return new Promise((resolve, reject) => {

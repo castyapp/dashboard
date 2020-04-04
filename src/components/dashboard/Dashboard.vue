@@ -11,7 +11,7 @@
         <div class="main-container">
             <router-view name="theater" />
             <keep-alive>
-                <router-view name="dashboard" :key="$route.fullPath" />
+                <router-view name="dashboard" :key="$route.fullPath" ref="routerView" />
             </keep-alive>
         </div>
 
@@ -51,10 +51,15 @@
                         Invite a Friend
                     </ContextMenuItem>
 
-                    <!--<ContextMenuItem @click.native="$refs.menu.close">-->
-                    <!--    <i class="icofont-trash mr-1"></i>-->
-                    <!--    Remove Theater-->
-                    <!--</ContextMenuItem>-->
+                    <!-- <ContextMenuItem @click.native="$refs.menu.close">
+                       <i class="icofont-edit mr-1"></i>
+                       Edit
+                    </ContextMenuItem> -->
+
+                    <ContextMenuItem class="remove-red-btn" @click.native="removeTheaterModal(contextData)">
+                       <i class="icofont-trash mr-1"></i>
+                       Remove
+                    </ContextMenuItem>
 
                 </div>
 
@@ -75,6 +80,30 @@
             </template>
 
         </ContextMenu>
+
+        <div class="modal modal-dark fade" id="removeTheaterModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content" v-if="selectedForRemove !== null">
+                    <div class="modal-body pb-0">
+                        <h5>
+                            Are you sure you want remove <span class="th-bold-title">{{ selectedForRemove.title }}</span> theater ?
+                        </h5>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-danger" data-dismiss="modal">
+                            No, Never mind!
+                        </button>
+                        <VueLoadingButton
+                            @click.native="removeTheater"
+                            :loading="removeLoading"
+                            class="btn btn-outline-success"
+                            :disabled="this.selectedForRemove === null">
+                            <span>Yes, Im sure!</span>
+                        </VueLoadingButton>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div class="modal modal-dark fade" id="logoutModal" tabindex="-1" role="dialog">
             <div class="modal-dialog modal-dialog-centered" role="document">
@@ -168,14 +197,26 @@
 </template>
 
 <style>
+
+    .th-bold-title {
+        background: #8a8c8a;
+        padding: 0 5px;
+        border-radius: 5px;
+        font-size: 17px;
+        font-weight: bold;
+        color: #000000;
+    }
+
     .invite-ico {
         font-size: 20px;
         color: #007bff;
     }
+    
     .modal-header {
         border-bottom: none !important;
         display: inline-block !important;
     }
+
 </style>
 
 <script>
@@ -192,6 +233,7 @@
     import VueLoadingButton from 'vue-loading-button'
 
     export default {
+        name: "Dashboard",
         components: {
             Sidemenu,
             FriendsList,
@@ -207,6 +249,8 @@
                 friends: [],
                 selectForInvite: null,
                 inviteLoading: false,
+                removeLoading: false,
+                selectedForRemove: null,
             }
         },
         methods: {
@@ -236,6 +280,47 @@
             goToTheater(theater_id) {
                 this.$refs.menu.close();
                 this.$router.push({ path: `theater/${theater_id}` });
+            },
+            removeTheater() {
+
+                this.removeLoading = true;
+
+                this.$store.dispatch("removeTheater", this.selectedForRemove.id).then(() => {
+
+                    this.$notify({
+                        group: 'dashboard',
+                        type: 'success',
+                        text: "Theater removed successfully!",
+                        title: "Success",
+                        duration: 2000,
+                    });
+
+                    this.$refs.routerView.removeTheaterFromArray(this.selectedForRemove.id);
+
+                    this.removeLoading = false;
+                    $("#removeTheaterModal").modal('hide');
+
+                }).catch(() => {
+
+                    this.$notify({
+                        group: 'dashboard',
+                        type: 'error',
+                        text: "Something went wrong, please try again later!",
+                        title: "Failed",
+                        duration: 2000,
+                    });
+
+                    this.removeLoading = false;
+
+                });
+
+            },
+            removeTheaterModal(theater) {
+                this.selectedForRemove = theater;
+                this.$refs.menu.close();
+                if (this.selectedForRemove != null){
+                    $("#removeTheaterModal").modal();
+                }
             },
             setFriends(friends) {
                 if (friends !== null){
