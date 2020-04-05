@@ -12,7 +12,7 @@
         <div class="notification-center" v-show="opened">
 
             <div class="nc-title">
-                <button class="mark-all-as-read-btn">
+                <button class="mark-all-as-read-btn" @click="readAllNotifications">
                     Mark all as read
                 </button>
                 <span class="text-left">Notifications</span>
@@ -122,11 +122,16 @@
             Notification,
         },
         methods: {
+            readAllNotifications() {
+                this.$store.dispatch("readAllNotifications").then(() => {
+                    this.notifications.unread_count = 0;
+                    this.notifications.data.forEach( (_, index) => {
+                        this.notifications.data[index].read = true;
+                    });
+                });
+            },
             toggle() {
                 this.opened = !this.opened;
-                setInterval(() => {
-                    this.notifications.unread_count = 0;
-                }, 1000);
             },
             close() {
                 this.opened = false;

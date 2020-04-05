@@ -306,7 +306,10 @@
                 return false
             }
         },
-        mounted() {
+        activated() {
+            bus.$emit("open-message-page", this.friend)
+        },
+        async mounted() {
 
             bus.$on('friend-state-changed', pState => {
                 if (pState.user.id === this.friend.id){
@@ -322,10 +325,12 @@
             }
 
             if (this.friend === null){
-                this.$store.dispatch("getFriend", friend_username).then(response => {
+                await this.$store.dispatch("getFriend", friend_username).then(response => {
                     this.friend = response.data.result;
                 });
             }
+
+            bus.$emit("open-message-page", this.friend)
 
             let v = this;
             this.$store.dispatch("getMessages", friend_username).then(response => {

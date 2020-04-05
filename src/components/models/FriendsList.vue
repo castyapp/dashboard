@@ -455,14 +455,30 @@
                 this.setFriends(response.data.result);
             });
 
+            bus.$on("open-message-page", friend => {
+                let friendElement = this.findFriendBadgeById(friend.id);
+                let currentCount = parseInt(friendElement.text());
+                if (currentCount !== 0) {
+                    friendElement.addClass("d-none");
+                    friendElement.text(0);
+                }
+            });
+
             bus.$on(enums.EMSG[enums.EMSG.CHAT_MESSAGES], data => {
+
                 let decoded = protobuf.ChatMsgEvent.decode(data);
                 bus.$emit(enums.EMSG[enums.EMSG.NEW_CHAT_MESSAGE], decoded);
                 let friend = JSON.parse(decoded.from);
-                let friendElement = this.findFriendBadgeById(friend.id);
-                let currentCount = parseInt(friendElement.text());
-                friendElement.removeClass("d-none");
-                friendElement.text(currentCount + 1);
+
+                if (this.$route.name !== "messages") {
+                    if (this.$route.params.friend_id !== friend.username) {
+                        let friendElement = this.findFriendBadgeById(friend.id);
+                        let currentCount = parseInt(friendElement.text());
+                        friendElement.removeClass("d-none");
+                        friendElement.text(currentCount + 1);
+                    }
+                }
+
             });
 
             bus.$on(enums.EMSG[enums.EMSG.PERSONAL_STATE_CHANGED], data => {

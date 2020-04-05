@@ -24,9 +24,6 @@ RUN npm --version
 # Copy project to destination
 ADD . /casty.caddy
 
-# Make a copy of Caddyfile
-COPY ./Caddyfile.example ./Caddyfile
-
 # Install node dependencies modules
 RUN npm install
 
