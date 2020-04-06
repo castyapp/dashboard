@@ -42,11 +42,6 @@ VUE_APP_API_DISCORD_REDIRECT_URI=http://localhost:8000/oauth/discord/callback
 VUE_APP_API_RECAPTCHA_KEY=
 ```
 
-### Compile Protobufers 
-```bash
-$ npm run pbjs:compile
-```
-
 ### Serve project on development server
 ```bash
 $ npm run serve
