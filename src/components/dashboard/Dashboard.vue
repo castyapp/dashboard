@@ -265,8 +265,10 @@
                 return `${fullname}`
             },
             redirect(route_name){
+                if (route_name !== this.$route.name){
+                    this.$router.push({ name: route_name });
+                }
                 this.$refs.menu.close();
-                this.$router.push({ name: route_name });
             },
             redirectWithModal(route_name){
                 this.$router.push({ name: route_name }).then(() => {

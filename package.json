@@ -29,6 +29,7 @@
     "vue-click-outside": "^1.0.7",
     "vue-content-loading": "^1.6.0",
     "vue-dynamic-dropdown": "^1.0.51",
+    "vue-emoji-picker": "^1.0.1",
     "vue-google-oauth2": "^1.4.0",
     "vue-google-signin-button": "^1.0.4",
     "vue-jalali-moment": "^1.0.0",

@@ -1,8 +1,11 @@
 <template>
 
-    <div>
+    <div class="theater-div">
 
-        <div class="members">
+        <div class="members" :class="{ 'closed': membersStatus === 'closed' }">
+
+            <i @click="openMembers"
+                class="icofont-arrow-right open-members clickable"></i>
 
             <div class="title-border-bottom pb-2">
                 <strong class="side-component-title">
@@ -10,6 +13,8 @@
                         <i class="icofont-users text-primary mr-2"></i>
                         Members
                     </div>
+                    <i @click="closeMembers" 
+                        class="icofont-arrow-left close-members clickable"></i>
                 </strong>
             </div>
 
@@ -31,7 +36,7 @@
 
         </div>
 
-        <div class="theater-page">
+        <div class="theater-page" :class="{ 'opened': membersStatus === 'closed' }">
 
             <div class="title-border-bottom pb-2">
                 <strong class="side-component-title">
@@ -60,6 +65,59 @@
 </template>
 
 <style>
+
+    .members.closed {
+        width: 50px;
+        padding-top: 10px;
+    }
+
+    .members.closed > .member {
+        padding: 5px !important;
+        margin-bottom: 0 !important;
+        display: flex;
+    }
+
+    .members.closed > .member:hover {
+        background: transparent !important;
+    }
+
+    .members.closed > .title-border-bottom {
+        display: none;
+    }
+
+    .theater-page.opened {
+        padding-left: 60px !important;
+    }
+
+    .members.closed > .member > div > span.user_name {
+        display: none;
+    }
+
+    .members > .open-members {
+        display: none;
+    }
+
+    .members.closed > .open-members {
+        display: block !important;
+    }
+
+    .open-members {
+        float: right;
+        background: #272929;
+        padding: 5px;
+        border-radius: 4px;
+        margin-bottom: 5px !important; 
+    }
+
+    .close-members {
+        float: right;
+        position: absolute;
+        top: 13px;
+        right: 15px;
+        background: #272929;
+        padding: 5px;
+        border-radius: 4px;
+    }
 
     .members {
         width: 200px;
@@ -95,10 +153,10 @@
 
     img.theater_connected_user_avatar {
         width: 25px;
-        background: #FFFFFF;
+        background: #272929;
         border-radius: 50%;
         float: left;
-        margin-right: 5px;
+        margin-right: 6px;
     }
 
     span.user_name {
@@ -135,9 +193,24 @@
                 ready:   false,
                 members: [],
                 loadingMembers: true,
+                membersStatus: "closed",
             }
         },
         methods: {
+            closeMembers() {
+                localStorage.setItem("members-container", "closed");
+                $(".members").addClass("closed");
+                $(".theater-page").addClass("opened");
+                $(".close-members").css({ "display": "none" });
+                $(".open-members").css({ "display": "block" });
+            },
+            openMembers() {
+                localStorage.setItem("members-container", "opened");
+                $(".members").removeClass("closed");
+                $(".theater-page").removeClass("opened");
+                $(".open-members").css({ "display": "none" });
+                $(".close-members").css({ "display": "block" });
+            },
             inviteModal() {
                 this.$parent.inviteModal(this.theater);
             },
@@ -163,6 +236,9 @@
             }
         },
         mounted() {
+
+            let status = localStorage.getItem("members-container")
+            this.membersStatus = ( status === null ? "opened" : status )
 
             let theater_id = this.$route.params.theater_id;
 

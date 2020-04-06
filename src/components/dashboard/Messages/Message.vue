@@ -60,9 +60,12 @@
                 <div class="clearfix"></div>
 
                 <div class="chat-input-message">
-                    <input class="send-input-messager"
+                    <div class="chatbox-container">
+                        <textarea class="send-input-messager"
                            placeholder="Send a message"
                            @keyup.enter.exact="sendMessage" />
+                        <!-- <i class="icofont-simple-smile choose-emote clickable"></i> -->
+                    </div>
                 </div>
 
             </div>
@@ -74,10 +77,29 @@
 
 <style scoped>
 
+    .emote-picker-messages-box {
+        position: absolute;
+        bottom: 0px;
+        margin-bottom: 170px;
+        right: 375px;
+    }
+
+    .choose-emote {
+        position: absolute;
+        right: 375px;
+        font-size: 20px;
+        margin-top: 25px;
+        color: #757575;
+    }
+
+    .choose-emote:hover {
+        color: #FFFFFF;
+    }
+
     .send-input-messager {
         width: 100%;
         margin: 10px 0;
-        padding: 5px 10px !important;
+        padding: 10px !important;
         background: #181818;
         border: 0;
         border-radius: 5px;
@@ -86,6 +108,7 @@
         resize: none;
         white-space: nowrap;
         overflow-x: scroll;
+        padding-right: 50px !important;
     }
 
     .col-msg-container {
@@ -103,7 +126,7 @@
     .messages {
         height: 100%;
         width: 100%;
-        padding-bottom: 145px !important;
+        padding-bottom: 170px !important;
         padding-right: 20px !important;
     }
 
@@ -226,6 +249,7 @@
     import $ from "jquery";
     import {bus} from "../../../main";
     import moment from 'moment-timezone';
+    import EmojiPicker from 'vue-emoji-picker';
     import {websocket} from "../../../store/ws";
     import {EllipsisLoader} from 'vue-spinners-css';
     import {enums, protobuf} from "../../../protocol/protobuf/base";
@@ -243,6 +267,7 @@
         components: {
             TheaterMessage,
             EllipsisLoader,
+            EmojiPicker,
         },
         methods: {
             getFriendStateElementClass() {

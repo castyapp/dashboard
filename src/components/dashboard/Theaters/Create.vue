@@ -217,15 +217,19 @@
 
             <div class="buttons clearfix">
 
-                <button type="button" class="btn btn-primary pull-right ml-3" @click="create">
+                <VueLoadingButton
+                    @click.native="create"
+                    :loading="loading"
+                    type="button"
+                    class="btn btn-outline-primary pull-right ml-3">
                     Create
                     <i class="icofont-arrow-right"></i>
-                </button>
+                </VueLoadingButton>
 
-<!--                <button type="button" class="btn btn-warning pull-right" v-show="privacy.id !== 3" @click="createAndShare">-->
-<!--                    Create and share it with your friends-->
-<!--                    <i class="icofont-arrow-right"></i>-->
-<!--                </button>-->
+               <!-- <button type="button" class="btn btn-warning pull-right" v-show="privacy.id !== 3" @click="createAndShare">
+                   Create and share it with your friends
+                   <i class="icofont-arrow-right"></i>
+                </button> -->
 
             </div>
 
@@ -239,6 +243,7 @@
 
     const $ = require("jquery");
 
+    import VueLoadingButton from 'vue-loading-button'
     import "bootstrap-select/dist/js/bootstrap-select.js";
     import "bootstrap-select/dist/css/bootstrap-select.css";
     import DropdownMenu from "./../../models/dropdown-menu/DropdownMenu";
@@ -253,6 +258,7 @@
         name: 'CreateTheater',
         components: {
             DropdownMenu,
+            VueLoadingButton,
         },
         data() {
             return {
@@ -263,6 +269,7 @@
                     uri: "",
                     type: MovieTypeUNKNOWN,
                 },
+                loading: false,
                 poster: null,
                 movie_banner: null,
                 movie_file: null,
@@ -383,6 +390,9 @@
                 };
             },
             create() {
+
+                this.loading = true;
+
                 let theater = this.getTheaterObject();
                 this.$store.dispatch("createTheater", theater).then(() => {
                     this.$router.push({
@@ -396,6 +406,7 @@
                             title: "Success",
                             duration: 2000,
                         });
+                        this.loading = false;
                     });
                 }).catch(err => {
                     this.errors = err.response.data.result;
@@ -406,6 +417,7 @@
                         title: "Failed",
                         duration: 2000,
                     });
+                    this.loading = false;
                 });
             },
             createAndShare() {

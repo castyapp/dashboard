@@ -104,6 +104,7 @@
         position: absolute;
         width: 100%;
         left: 0;
+        background: #171717;
     }
 
     img.avatar {

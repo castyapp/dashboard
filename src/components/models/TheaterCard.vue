@@ -5,7 +5,7 @@
         <div class="poster">
 
             <div class="default-movie-poster" v-if="theater.movie.poster === 'default'">
-                <i class="icofont-file-mov"></i>
+                <i class="icofont-popcorn"></i>
             </div>
 
             <img v-else :src="apiBaseUrl + '/uploads/posters/' + theater.movie.poster + '.png'" alt="Poster" />
@@ -68,7 +68,7 @@
 
     .default-movie-poster > i {
         font-size: 100px;
-        color: #316cff;
+        color: #272929;
     }
 
     .movie-progress {
