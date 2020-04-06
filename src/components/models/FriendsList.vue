@@ -292,9 +292,9 @@
     import $ from "jquery";
     import {bus} from "../../main";
     import {websocket} from "../../store/ws";
+    import {proto} from 'casty-proto/pbjs/proto';
     import {VueContentLoading} from 'vue-content-loading';
     import NotificationCenter from "./NotificationCenter";
-    import {protobuf, enums} from "../../protocol/protobuf/base";
 
     export default {
         props: ['status'],
@@ -464,10 +464,10 @@
                 }
             });
 
-            bus.$on(enums.EMSG[enums.EMSG.CHAT_MESSAGES], data => {
+            bus.$on(proto.EMSG[proto.EMSG.CHAT_MESSAGES], data => {
 
-                let decoded = protobuf.ChatMsgEvent.decode(data);
-                bus.$emit(enums.EMSG[enums.EMSG.NEW_CHAT_MESSAGE], decoded);
+                let decoded = proto.ChatMsgEvent.decode(data);
+                bus.$emit(proto.EMSG[proto.EMSG.NEW_CHAT_MESSAGE], decoded);
                 let friend = JSON.parse(decoded.from);
 
                 if (this.$route.name !== "messages") {
@@ -481,8 +481,8 @@
 
             });
 
-            bus.$on(enums.EMSG[enums.EMSG.PERSONAL_STATE_CHANGED], data => {
-                let decoded = protobuf.PersonalStateMsgEvent.decode(data);
+            bus.$on(proto.EMSG[proto.EMSG.PERSONAL_STATE_CHANGED], data => {
+                let decoded = proto.PersonalStateMsgEvent.decode(data);
                 bus.$emit('friend-state-changed', decoded);
                 this.changeUserState(decoded.user, decoded.state);
             });

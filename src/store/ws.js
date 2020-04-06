@@ -1,8 +1,8 @@
 import {store} from "./store";
 import {bus} from "./../main";
-import {emit} from "./../protocol/messages";
-import {Packet} from "./../protocol/protobuf/packet";
-import {protobuf, enums} from "./../protocol/protobuf/base";
+import {proto} from "casty-proto/pbjs/proto";
+import {Packet} from "casty-proto/pbjs/packet";
+import {emit} from "casty-proto/pbjs/protocol";
 
 class UserWebsocket {
     connect() {
@@ -17,7 +17,7 @@ class UserWebsocket {
 
         this.ws.onopen = () => {
             console.log(`Connected to user[${user.id}] ws!`);
-            emit(this.ws, enums.EMSG.LOGON, protobuf.LogOnEvent, {
+            emit(this.ws, proto.EMSG.LOGON, proto.LogOnEvent, {
                 token: new Buffer(store.state.token),
             });
         };
@@ -33,10 +33,10 @@ class UserWebsocket {
 
         this.ws.onmessage = (message) => {
             let packet = new Packet(message.data);
-            if (enums.EMSG.UNAUTHORIZED === packet.emsg){
+            if (proto.EMSG.UNAUTHORIZED === packet.emsg){
                 console.log("Unauthorized! try to refresh token!");
             }
-            bus.$emit(enums.EMSG[packet.emsg], packet.data);
+            bus.$emit(proto.EMSG[packet.emsg], packet.data);
         };
 
         setInterval(this.ping, 50000, this.ws);
@@ -45,13 +45,13 @@ class UserWebsocket {
     }
     ping(ws) {
         if (ws.readyState !== 1) return;
-        emit(ws, enums.EMSG.PING, protobuf.PingMsgEvent, {});
+        emit(ws, proto.EMSG.PING, proto.PingMsgEvent, {});
     }
     sendPacket(eNUM, pROTO, payload) {
         emit(this.ws, eNUM, pROTO, payload);
     }
     sendMessage(message, to) {
-        emit(this.ws, enums.EMSG.NEW_CHAT_MESSAGE, protobuf.ChatMsgEvent, {
+        emit(this.ws, proto.EMSG.NEW_CHAT_MESSAGE, proto.ChatMsgEvent, {
             message: new Buffer(message),
             to,
         });
@@ -77,7 +77,7 @@ class TheaterWebsocket {
         this.ws.binaryType = 'arraybuffer';
 
         this.ws.onopen = () => {
-            emit(this.ws, enums.EMSG.LOGON, protobuf.TheaterLogOnEvent, {
+            emit(this.ws, proto.EMSG.LOGON, proto.TheaterLogOnEvent, {
                 room:  new Buffer(room),
                 token: new Buffer(store.state.token),
             });
@@ -94,10 +94,10 @@ class TheaterWebsocket {
 
         this.ws.onmessage = (message) => {
             let packet = new Packet(message.data);
-            if (packet.emsg === enums.EMSG.AUTHORIZED) {
+            if (packet.emsg === proto.EMSG.AUTHORIZED) {
                 bus.$emit("theater-connected", this);
             } else {
-                bus.$emit(enums.EMSG[packet.emsg], packet.data);
+                bus.$emit(proto.EMSG[packet.emsg], packet.data);
             }
         };
 
@@ -107,10 +107,10 @@ class TheaterWebsocket {
     }
     ping(ws) {
         if (ws.readyState !== 1) return;
-        emit(ws, enums.EMSG.PING, protobuf.PingMsgEvent, {});
+        emit(ws, proto.EMSG.PING, proto.PingMsgEvent, {});
     }
     sendMessage(message) {
-        emit(this.ws, enums.EMSG.NEW_CHAT_MESSAGE, protobuf.ChatMsgEvent, {
+        emit(this.ws, proto.EMSG.NEW_CHAT_MESSAGE, proto.ChatMsgEvent, {
             message: new Buffer(message),
         });
     }

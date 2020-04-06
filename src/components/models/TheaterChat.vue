@@ -178,9 +178,10 @@
 
     import $ from "jquery";
     import {bus} from "../../main";
-    import {Packet} from "../../protocol/protobuf/packet";
-    import {protobuf, enums} from "../../protocol/protobuf/base";
-
+    
+    import {proto} from 'casty-proto/pbjs/proto';
+    import {Packet} from 'casty-proto/pbjs/packet';
+    
     export default {
         props: ['theater', 'ready'],
         data() {
@@ -198,7 +199,7 @@
                     messageInput.val("");
                     if (this.theaterWebsocket.ws !== null){
                         let newMessage = {
-                            type: enums.EMSG.NEW_CHAT_MESSAGE,
+                            type: proto.EMSG.NEW_CHAT_MESSAGE,
                             message: msg
                         };
                         this.theaterWebsocket.sendMessage(msg);
@@ -236,20 +237,20 @@
                     let packet = new Packet(message.data);
 
                     switch (packet.emsg) {
-                        case enums.EMSG.THEATER_MEMBERS:
-                            let membersDecoded = protobuf.TheaterMembers.decode(packet.data);
+                        case proto.EMSG.THEATER_MEMBERS:
+                            let membersDecoded = proto.TheaterMembers.decode(packet.data);
                             bus.$emit("new-theater-members", membersDecoded.members);
                             break;
-                        case enums.EMSG.MEMBER_STATE_CHANGED:
-                            let decoded = protobuf.PersonalStateMsgEvent.decode(packet.data);
+                        case proto.EMSG.MEMBER_STATE_CHANGED:
+                            let decoded = proto.PersonalStateMsgEvent.decode(packet.data);
                             this.changeMemberState(decoded.user, decoded.state);
                             break;
-                        case enums.EMSG.CHAT_MESSAGES:
-                            let chatMsg = protobuf.ChatMsgEvent.decode(packet.data);
+                        case proto.EMSG.CHAT_MESSAGES:
+                            let chatMsg = proto.ChatMsgEvent.decode(packet.data);
                             this.newChatMessage(chatMsg);
                             break;
                         default:
-                            bus.$emit(enums.EMSG[packet.emsg], packet);
+                            bus.$emit(proto.EMSG[packet.emsg], packet);
                             break
                     }
 

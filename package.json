@@ -5,7 +5,6 @@
   "author": "Alireza Josheghani <josheghani.dev@gmail.com>",
   "scripts": {
     "serve": "./node_modules/.bin/vue-cli-service serve",
-    "pbjs:compile": "pbjs -t static-module -w commonjs -o src/protocol/protobuf/base.js src/protocol/protobuf/*.proto src/protocol/protobuf/enums/enums.proto",
     "build": "export TARGET_BUILD=web && ./node_modules/.bin/vue-cli-service build"
   },
   "dependencies": {
@@ -14,6 +13,7 @@
     "bootstrap": "^4.4.1",
     "bootstrap-select": "^1.13.10",
     "can-autoplay": "^3.0.0",
+    "casty-proto": "^1.0.0",
     "font-awesome": "^4.7.0",
     "jquery": "^3.4.1",
     "mini-css-extract-plugin": "^0.8.0",

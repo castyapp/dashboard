@@ -43,8 +43,8 @@
 
     import canAutoPlay from 'can-autoplay';
 
-    import {emit} from "./../../protocol/messages";
-    import {enums, protobuf} from "../../protocol/protobuf/base";
+    import {emit} from 'casty-proto/pbjs/protocol'; 
+    import {proto} from 'casty-proto/pbjs/proto';
 
     export default {
         props: ['theater'],
@@ -78,8 +78,8 @@
 
                 this.player.fromSocket = false;
 
-                bus.$on(enums.EMSG[enums.EMSG.THEATER_PLAY], packet => {
-                    let decoded = protobuf.TheaterVideoPlayer.decode(packet.data);
+                bus.$on(proto.EMSG[proto.EMSG.THEATER_PLAY], packet => {
+                    let decoded = proto.TheaterVideoPlayer.decode(packet.data);
                     if (decoded.userId !== undefined) {
                         if (decoded.userId !== this.user.id) {
                             this.player.fromSocket = true;
@@ -90,8 +90,8 @@
                     }
                 });
 
-                bus.$on(enums.EMSG[enums.EMSG.THEATER_PAUSE], packet => {
-                    let decoded = protobuf.TheaterVideoPlayer.decode(packet.data);
+                bus.$on(proto.EMSG[proto.EMSG.THEATER_PAUSE], packet => {
+                    let decoded = proto.TheaterVideoPlayer.decode(packet.data);
                     if (decoded.userId !== undefined) {
                         if (decoded.userId !== this.user.id) {
                             this.player.fromSocket = true;
@@ -105,7 +105,7 @@
                 this.player.on('play', () => {
                     console.log(`Played at ${this.player.currentTime}!`);
                     if (!this.player.fromSocket) {
-                        emit(socketConnection, enums.EMSG.THEATER_PLAY, protobuf.TheaterVideoPlayer, {
+                        emit(socketConnection, proto.EMSG.THEATER_PLAY, proto.TheaterVideoPlayer, {
                             theaterId:     this.theater_id,
                             userId:        this.user.id,
                             currentTime:   this.player.currentTime,
@@ -119,7 +119,7 @@
                 this.player.on('pause', () => {
                     console.log(`Paused at ${this.player.currentTime}!`);
                     if (!this.player.fromSocket) {
-                        emit(socketConnection, enums.EMSG.THEATER_PAUSE, protobuf.TheaterVideoPlayer, {
+                        emit(socketConnection, proto.EMSG.THEATER_PAUSE, proto.TheaterVideoPlayer, {
                             theaterId:     this.theater_id,
                             userId:        this.user.id,
                             currentTime:   this.player.currentTime,

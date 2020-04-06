@@ -251,8 +251,8 @@
     import moment from 'moment-timezone';
     import EmojiPicker from 'vue-emoji-picker';
     import {websocket} from "../../../store/ws";
+    import {proto} from 'casty-proto/pbjs/proto';
     import {EllipsisLoader} from 'vue-spinners-css';
-    import {enums, protobuf} from "../../../protocol/protobuf/base";
     import TheaterMessage from "../../models/TheaterMessage";
 
     export default {
@@ -364,7 +364,7 @@
                 v.$parent.$emit("ready");
             });
 
-            bus.$on(enums.EMSG[enums.EMSG.NEW_CHAT_MESSAGE], decoded => {
+            bus.$on(proto.EMSG[proto.EMSG.NEW_CHAT_MESSAGE], decoded => {
                 let sender;
                 let senderString = decoded.from.trim();
                 if (senderString !== '' || senderString !== undefined){
