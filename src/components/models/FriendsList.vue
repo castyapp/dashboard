@@ -420,8 +420,12 @@
                     path: `/messages/${user.id}`
                 })
             },
-            getNotifications() {
-                this.$store.dispatch("getNotifications").then(response => {
+            async getNotifications() {
+                this.notifications = {
+                    data: [],
+                    unread_count: 0,
+                };
+                await this.$store.dispatch("getNotifications").then(response => {
                     this.notifications.unread_count = response.data.result.unread_count;
                     let notifications = response.data.result.notifications;
                     notifications.forEach((notif, index) => {
@@ -445,6 +449,12 @@
         },
         mounted() {
             websocket.user.connect();
+
+            bus.$on(proto.EMSG[proto.EMSG.FRIEND_REQUEST_ACCEPTED], data => {
+                let decoded = proto.FriendRequestAcceptedMsgEvent.decode(data);
+                decoded.friend.activity = undefined;
+                this.friends.push(decoded.friend);
+            });
 
             bus.$on("new-friend", friend => {
                 this.friends.push(friend);
@@ -479,6 +489,10 @@
                     }
                 }
 
+            });
+
+            bus.$on(proto.EMSG[proto.EMSG.NEW_NOTIFICATION], () => {
+                this.getNotifications();
             });
 
             bus.$on(proto.EMSG[proto.EMSG.PERSONAL_STATE_CHANGED], data => {
