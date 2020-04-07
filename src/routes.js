@@ -28,7 +28,16 @@ import GoogleCallback from './components/auth/oauth/google/Callback'
 import DiscordOAUTH from './components/auth/oauth/discord/Connect'
 import DiscordCallback from './components/auth/oauth/discord/Callback'
 
+import Splash from './components/Splash';
+
 const routes = [
+    {
+        name: 'splash',
+        path: '/splash',
+        components: {
+            main: Splash
+        },
+    },
     {
         path: '/',
         components: {

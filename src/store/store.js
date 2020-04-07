@@ -178,6 +178,28 @@ export const store = new Vuex.Store({
                 }).catch(reject);
             })
         },
+        getTheaterSubtitles(context, theater_id) {
+            return new Promise((resolve, reject) => {
+                axios.get(`/user/@theaters/${theater_id}/subtitles`, {
+                    headers: {
+                        'Authorization': `Bearer ${context.state.token}`,
+                    }
+                }).then(resolve).catch(reject);
+            })
+        },
+        addSubtitleToTheater(context, {subtitle, insertedID}) {
+            return new Promise((resolve, reject) => {
+                let params = new FormData();
+                params.append('lang', subtitle.lang);
+                params.append('subtitle', subtitle.file, subtitle.file.name);
+                axios.post(`/user/@theaters/${insertedID}/subtitles`, params, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'Authorization': `Bearer ${context.state.token}`,
+                    }
+                }).then(resolve).catch(reject);
+            })
+        },
         createTheater(context, theater) {
             return new Promise((resolve, reject) => {
                 let params = new FormData();
@@ -187,12 +209,28 @@ export const store = new Vuex.Store({
                 params.append('privacy', theater.privacy);
                 params.append('video_player_access', theater.player_access);
                 if (theater.poster !== null){
+                    console.log(theater.poster.name);
                     params.append(
                         'poster',
                         theater.poster,
-                        theater.poster.filename
+                        theater.poster.name
                     );
                 }
+                if (theater.subtitles.length > 0){
+                    if (
+                        theater.subtitles[0].lang != "" && 
+                        theater.subtitles[0].file.name != undefined
+                    ) {
+                        theater.subtitles.forEach((subtitle, index) => {
+                            params.append(
+                                `subtitles[]`, 
+                                subtitle.file,
+                                subtitle.lang
+                            );
+                        });
+                    }
+                }
+                console.log(params);
                 axios.post('/user/@theaters', params, {
                     headers: {
                         'Content-Type': 'multipart/form-data',

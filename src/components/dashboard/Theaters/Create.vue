@@ -99,7 +99,7 @@
                         <label for="movie_banner" class="ml-2">
                             <i class="icofont-picture mr-1"></i>
                             Movie banner
-                            <small class="text-warning">*optional</small>
+                            <small class="text-warning">optional</small>
                         </label>
 
                         <div class="clearfix"></div>
@@ -155,57 +155,49 @@
 
                     <div class="col-md-6">
 
-                        <label for="movie_subtitle" class="ml-2">
+                        <label for="movie_subtitles" class="ml-2">
                             <i class="icofont-cc mr-1"></i>
-                            Movie subtitle
-                            <small class="text-warning">*optional</small>
+                            Movie subtitles
+                            <small class="text-warning">optional</small>
                         </label>
 
                         <div class="clearfix"></div>
 
-                        <div class="box has-advanced-upload full-width file-upload"
-                             @drop="onDropInMovieSubtitle"
-                             @click="onClickFileInput">
+                        <div class="box">
 
-                            <div class="box__input">
+                            <div class="subtitles">
 
-                                <div class="preview" v-if="movie_subtitle">
-                                    <div class="file-upload-preview">
+                                <div class="subtitle row" :key="index" v-for="(subtitle, index) in subtitles">
 
-                                        <div class="selected-subtitle">
-                                            Subtitle selected!
-                                            <small>{{ movie_subtitle.name }}</small>
-                                        </div>
+                                    <input type="text"
+                                        class="form-control subtitle-language col-md-2"
+                                        placeholder="Lang"
+                                        v-model="subtitle.lang"
+                                        autocomplete="off" />
 
-                                        <button type="button" class="btn btn-danger" @click="removeMovieSubtitle">
-                                            <i class="icofont-close"></i>
-                                        </button>
+                                    <input :id="'subtitle-' + index" 
+                                        type="file"
+                                        class="form-control hidden"
+                                        autocomplete="off"
+                                        @change="onChangeSubtitle($event, index)" />
 
-                                    </div>
-                                </div>
+                                    <button type="button" class="choose-subtitle-btn col-md-8" @click="onClickAddSubtitle(index)">
+                                        {{ subtitle.file.name !== undefined ? subtitle.file.name : 'Choose your subtitle' }}
+                                        <i class="icofont-file-text"></i>
+                                    </button>
 
-                                <div v-if="!movie_subtitle">
-
-                                    <i class="box__icon icofont-cc"></i>
-                                    <div class="clearfix"></div>
-
-                                    <input class="box__file"
-                                           type="file"
-                                           id="movie_subtitle"
-                                           @change="onChangeMovieSubtitle"
-                                           accept="image/*" />
-
-                                    <label for="movie_banner">
-                                        <strong class="border-bottom">
-                                            Choose a file
-                                        </strong>
-                                        <span class="box__dragndrop">
-                                    or drag it here.
-                                </span>
-                                    </label>
+                                    <button type="button" class="remove-subtitle-btn" v-if="index !== 0" @click="removeSubtitle(index)">
+                                        <i class="icofont-trash"></i>
+                                    </button>
 
                                 </div>
+
                             </div>
+
+                            <button type="button" class="plus-subtitle-btn" @click="addSubtitle" v-if="subtitles.length < 10">
+                                <i class="icofont-plus"></i>
+                                Add another one
+                            </button>
 
                         </div>
 
@@ -239,6 +231,55 @@
 
 </template>
 
+<style scoped>
+
+    .form-dark > .form-group input.subtitle-language {
+        float: left;
+        background: #202020 !important;
+    }
+
+    button.choose-subtitle-btn:hover {
+        background: #141313 !important;
+        color: #6c757d;
+    }
+
+    .subtitles {
+        margin: 8px 0;
+    }
+
+    button.choose-subtitle-btn {
+        background: #202020;
+        color: #6c757d;
+        border-radius: 3px;
+        border: none;
+        padding: 7px 20px;
+        margin-left: 10px;
+    }
+
+    .subtitle {
+        width: 100%;
+        margin: 0 0 10px 0;
+    }
+
+    button.plus-subtitle-btn {
+        background: #077bff;
+        border: none;
+        border-radius: 2px;
+        font-size: 14px;
+        font-weight: 100;
+        color: #ffffff;
+        margin-left: 2px;
+    }
+
+    button.remove-subtitle-btn {
+        border: none;
+        padding: 5px 15px;
+        background: transparent;
+        color: #F44336;
+    }
+
+</style>
+
 <script>
 
     const $ = require("jquery");
@@ -269,11 +310,16 @@
                     uri: "",
                     type: MovieTypeUNKNOWN,
                 },
+                subtitles: [
+                    {
+                        lang: "",
+                        file: {},
+                    },
+                ],
                 loading: false,
                 poster: null,
                 movie_banner: null,
                 movie_file: null,
-                movie_subtitle: null,
                 errors: {},
                 privacy: {
                     id: 1,
@@ -321,6 +367,24 @@
             },
         },
         methods: {
+            onChangeSubtitle(e, index) {
+                let files = e.target.files;
+                this.subtitles[index].file = files[0];
+            },
+            onClickAddSubtitle(index) {
+                $(`input#subtitle-${index}`).trigger("click");
+            },
+            removeSubtitle(index) {
+                this.subtitles.splice(index, 1)
+            },
+            addSubtitle() {
+                if (this.subtitles.length < 10) {
+                    this.subtitles.push({
+                        lang: "",
+                        file: {},
+                    });
+                }
+            },
             parseMovieUri(uri) {
                 try {
                     let parser = new URL(uri);
@@ -341,12 +405,6 @@
                 this.privacy_config.placeholder = selectedOption.value;
                 this.privacy = selectedOption;
             },
-            onDropInMovieSubtitle(e) {
-                e.stopPropagation();
-                e.preventDefault();
-                let files = e.dataTransfer.files;
-                this.movie_subtitle = files[0];
-            },
             onDropInMovieBanner(e) {
                 e.stopPropagation();
                 e.preventDefault();
@@ -356,13 +414,6 @@
             onChangeMovieBanner(e) {
                 let files = e.target.files;
                 this.readMovieBannerFile(files[0]);
-            },
-            onChangeMovieSubtitle(e) {
-                let files = e.target.files;
-                this.movie_subtitle = files[0];
-            },
-            removeMovieSubtitle() {
-                this.movie_subtitle = null;
             },
             readMovieBannerFile(file) {
                 let reader = new FileReader();
@@ -385,7 +436,7 @@
                     type:          this.movie.type,
                     privacy:       this.privacy.id,
                     poster:        this.poster,
-                    cc:            this.movie_subtitle,
+                    subtitles:     this.subtitles,
                     player_access: this.player_access,
                 };
             },
@@ -394,7 +445,14 @@
                 this.loading = true;
 
                 let theater = this.getTheaterObject();
-                this.$store.dispatch("createTheater", theater).then(() => {
+                this.$store.dispatch("createTheater", theater).then(async (response) => {
+
+                    let insertedID = response.data.result.result;
+
+                    await theater.subtitles.forEach(subtitle => {
+                        this.$store.dispatch('addSubtitleToTheater', {subtitle, insertedID});
+                    });
+
                     this.$router.push({
                         name: "library",
                         params: {reload: true},
@@ -409,7 +467,9 @@
                         this.loading = false;
                     });
                 }).catch(err => {
-                    this.errors = err.response.data.result;
+                    if (err.response !== undefined) {
+                        this.errors = err.response.data.result;
+                    }
                     this.$notify({
                         group: 'dashboard',
                         type: 'error',

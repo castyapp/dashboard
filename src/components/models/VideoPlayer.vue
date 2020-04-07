@@ -68,12 +68,34 @@
                 }
                 return `${hours}:${minutes}:${seconds}`;
             },
-            mountVideoPlayer() {
+            async mountVideoPlayer() {
                 let socketConnection = this.$parent.socket.ws;
 
                 this.player = new Plyr('#theater', {
                     poster: `${this.apiBaseUrl}/uploads/posters/${this.theater.movie.poster}.png`,
                     autoplay: false,
+                    controls: [
+                        'play-large', 
+                        'play', 
+                        'progress', 
+                        'current-time', 
+                        'mute', 
+                        'volume', 
+                        'captions', 
+                        'settings', 
+                        'pip', 
+                        'airplay', 
+                        'fullscreen'
+                    ],
+                    settings: [
+                        'captions', 
+                        'quality', 
+                    ],
+                    captions: { 
+                        active: true, 
+                        language: 'auto', 
+                        update: true,
+                    },
                 });
 
                 this.player.fromSocket = false;
@@ -130,6 +152,19 @@
                     }
                 });
 
+                // get theater subtitles
+                let tracks = [];
+                await this.$store.dispatch('getTheaterSubtitles', this.theater.id).then(response => {
+                    response.data.result.forEach(subtitle => {
+                        tracks.push({
+                            kind: 'captions',
+                            label: subtitle.lang,
+                            srclang: subtitle.lang,
+                            src: `${this.apiBaseUrl}/uploads/subtitles/${subtitle.file}.vtt`,
+                        });
+                    });
+                });
+
                 // check if theater's movie type is youtube
                 if (this.theater.movie.type === 1){
                     this.player.source = {
@@ -140,6 +175,7 @@
                                 provider: 'youtube',
                             },
                         ],
+                        tracks: tracks
                     };
                 } else {
                     this.player.source = {
@@ -151,6 +187,7 @@
                                 size: 720,
                             },
                         ],
+                        tracks: tracks
                     };
                 }
             }
