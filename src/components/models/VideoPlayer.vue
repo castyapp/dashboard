@@ -7,7 +7,7 @@
         </div>
 
         <div v-else>
-            <video id="theater" class="full-width"></video>
+            <video id="theater" class="full-width" crossorigin></video>
         </div>
 
         <small class="movie-creator" v-if="theater.movie.length !== undefined">
