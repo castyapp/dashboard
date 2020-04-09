@@ -52,7 +52,7 @@
             loadTheaters() {
                 this.loading = true;
                 this.theaters = [];
-                this.$store.dispatch("getTheaters").then(response => {
+                this.$store.dispatch("getSharedTheaters").then(response => {
                     this.loading = false;
                     this.theaters = response.data.result;
                 }).catch(() => {

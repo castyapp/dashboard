@@ -160,6 +160,15 @@ export const store = new Vuex.Store({
                 }).then(resolve).catch(reject);
             })
         },
+        getSharedTheaters(context) {
+            return new Promise((resolve, reject) => {
+                axios.get('/user/@shared_theaters', {
+                    headers: {
+                        'Authorization': `Bearer ${context.state.token}`
+                    },
+                }).then(resolve).catch(reject);
+            })
+        },
         updateProfile(context, form) {
             return new Promise((resolve, reject) => {
                 let params = new FormData();

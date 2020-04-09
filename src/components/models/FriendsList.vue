@@ -453,7 +453,7 @@
             bus.$on(proto.EMSG[proto.EMSG.FRIEND_REQUEST_ACCEPTED], data => {
                 let decoded = proto.FriendRequestAcceptedMsgEvent.decode(data);
                 decoded.friend.activity = undefined;
-                this.friends.push(decoded.friend);
+                bus.$emit("new-friend", decoded.friend);
             });
 
             bus.$on("new-friend", friend => {
