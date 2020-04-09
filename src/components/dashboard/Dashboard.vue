@@ -232,6 +232,8 @@
 
     import VueLoadingButton from 'vue-loading-button'
 
+    import {bus} from "../../main";
+
     export default {
         name: "Dashboard",
         components: {
