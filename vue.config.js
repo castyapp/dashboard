@@ -3,6 +3,7 @@ module.exports = {
     devServer: {
         port: "8000",
     },
+    publicPath: process.env.TARGET_BUILD === 'electron' ? `${process.cwd()}/dist/` : "/",
     configureWebpack: config => {
         config.performance = {
             hints: false,

@@ -239,7 +239,6 @@ export const store = new Vuex.Store({
                         });
                     }
                 }
-                console.log(params);
                 axios.post('/user/@theaters', params, {
                     headers: {
                         'Content-Type': 'multipart/form-data',

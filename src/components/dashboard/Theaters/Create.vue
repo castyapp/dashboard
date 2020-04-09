@@ -450,7 +450,9 @@
                     let insertedID = response.data.result.result;
 
                     await theater.subtitles.forEach(subtitle => {
-                        this.$store.dispatch('addSubtitleToTheater', {subtitle, insertedID});
+                        if (subtitle.lang !== '') {
+                            this.$store.dispatch('addSubtitleToTheater', {subtitle, insertedID});
+                        }
                     });
 
                     this.$router.push({
