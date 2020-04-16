@@ -304,6 +304,9 @@
                 this.synced = true;
             });
         },
+        deactivated() {
+            this.player.destroy();
+        },
         destroyed() {
             this.player.destroy();
         }

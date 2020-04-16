@@ -74,6 +74,8 @@
                         duration: 2000,
                     });
 
+                    this.verified = true;
+
                     setTimeout(() => {
                         this.$refs.topProgress.done();
                         this.$router.push({ name: 'dashboard' })
