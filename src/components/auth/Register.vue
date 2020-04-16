@@ -164,9 +164,8 @@
             onCaptchaVerified(recaptchaToken) {
                 jQuery('#serverError').removeClass();
 
+                this.loading = true;
                 this.$parent.$refs.topProgress.start();
-
-                this.$parent.loading = true;
 
                 this.$store.dispatch('register', {
                     fullname: this.fullname,
@@ -178,9 +177,8 @@
                 }).then(() => {
 
                     this.errors = {};
-                    this.$parent.loading = false;
+                    this.loading = false;
                     this.$parent.serverError = "";
-                    this.$parent.successMessage = 'Login successfully! Please wait ...';
 
                     this.$notify({
                         group: 'auth',
@@ -197,7 +195,7 @@
 
                 }).catch(error => {
 
-                    this.$parent.loading = false;
+                    this.loading = false;
 
                     if (typeof error.response !== "undefined"){
 
@@ -206,7 +204,7 @@
                             this.$parent.serverError = error.response.data.message;
                         } else {
                             this.errors = error.response.data.result;
-                            this.$parent.serverError = "Please correct the following error(s) in form!";
+                            this.$parent.serverError = "Please check the following error(s)!";
                         }
 
                         this.password = '';

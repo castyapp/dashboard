@@ -130,6 +130,9 @@
                     });
                 });
             },
+            readNotification(id) {
+                this.$parent.readNotification(id);
+            },
             toggle() {
                 this.opened = !this.opened;
             },

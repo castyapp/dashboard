@@ -366,12 +366,12 @@
             setFriends(friends) {
                 this.loading = false;
                 if (friends !== null){
-                    this.friends = friends;
+                    this.$parent.friends = friends;
                     this.$parent.setFriends(friends);
                 }
             },
             clearFriendsList() {
-                this.friends = [];
+                this.$parent.friends = [];
             },
             toggleSearchBox() {
                 let searchFriendsBox = $(".search_friends");
@@ -420,6 +420,14 @@
                     path: `/messages/${user.id}`
                 })
             },
+            readNotification(id) {
+                this.notifications.data.forEach((notification, index) => {
+                    if (notification.id === id){
+                        this.notifications.data[index].read = true;
+                        this.notifications.unread_count --;
+                    }
+                })
+            },
             async getNotifications() {
                 this.notifications = {
                     data: [],
@@ -447,7 +455,7 @@
                 }
             }
         },
-        mounted() {
+        async mounted() {
             websocket.user.connect();
 
             bus.$on(proto.EMSG[proto.EMSG.FRIEND_REQUEST_ACCEPTED], data => {
@@ -457,13 +465,15 @@
             });
 
             bus.$on("new-friend", friend => {
-                this.friends.push(friend);
+                this.$parent.friends.push(friend);
             });
 
-            this.$store.dispatch("getFriendsList").then(response => {
+            await this.$store.dispatch("getFriendsList").then(response => {
                 this.clearFriendsList();
                 this.setFriends(response.data.result);
             });
+
+            this.friends = this.$parent.friends;
 
             bus.$on("open-message-page", friend => {
                 let friendElement = this.findFriendBadgeById(friend.id);

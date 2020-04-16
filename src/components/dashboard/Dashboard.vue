@@ -386,9 +386,6 @@
             });
         },
         mounted() {
-            bus.$on("new-friend", friend => {
-                this.friends.push(friend);
-            });
             $("#inviteFriendToTheaterModal").on('hidden.bs.modal', () => {
                 this.selectForInvite = null;
                 this.selectedFriends = [];

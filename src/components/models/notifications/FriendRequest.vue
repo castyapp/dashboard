@@ -97,6 +97,9 @@
                         this.$parent.$parent.close();
                         this.notification.data.accepted = true;
                         this.loading = false;
+
+                        this.$parent.$parent.readNotification(this.notification.id);
+
                     }).catch(() => {
                         this.$notify({
                             group: 'dashboard',

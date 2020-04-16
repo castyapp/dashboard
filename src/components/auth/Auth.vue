@@ -58,7 +58,6 @@
         },
         data() {
             return {
-                loading: false,
                 serverError: '',
                 successMessage: this.dataSuccessMessage,
             }
