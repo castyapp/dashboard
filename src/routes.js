@@ -1,13 +1,13 @@
 // Auth components
-import Login from './components/auth/Login'
 import Auth from './components/auth/Auth'
-import Register from './components/auth/Register'
+import Login from './components/auth/Login'
 import Logout from './components/auth/Logout'
+import IForgot from './components/auth/IForgot'
+import Register from './components/auth/Register'
 
 // Dashboard components
 import Dashboard from './components/dashboard/Dashboard'
 import Settings from './components/dashboard/Settings'
-import Popular from './components/dashboard/Popular'
 import Library from './components/dashboard/Library'
 import SharedWithYou from './components/dashboard/SharedWithYou'
 
@@ -85,13 +85,6 @@ const routes = [
                 },
             },
             {
-                path: 'popular',
-                name: 'popular',
-                components: {
-                    dashboard: Popular,
-                },
-            },
-            {
                 path: 'settings',
                 name: 'settings',
                 components: {
@@ -162,6 +155,16 @@ const routes = [
                 name: 'register',
                 components: {
                     auth: Register,
+                },
+                meta: {
+                    requiresVisitor: true,
+                }
+            },
+            {
+                path: '/iforgot',
+                name: 'iforgot',
+                components: {
+                    auth: IForgot,
                 },
                 meta: {
                     requiresVisitor: true,

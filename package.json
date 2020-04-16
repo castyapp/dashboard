@@ -13,7 +13,7 @@
     "bootstrap": "^4.4.1",
     "bootstrap-select": "^1.13.10",
     "can-autoplay": "^3.0.0",
-    "casty-proto": "^1.0.2",
+    "casty-proto": "^1.0.4",
     "font-awesome": "^4.7.0",
     "jquery": "^3.4.1",
     "mini-css-extract-plugin": "^0.8.2",

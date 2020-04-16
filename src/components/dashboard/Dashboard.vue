@@ -28,10 +28,10 @@
                         Send Message
                     </ContextMenuItem>
 
-                    <ContextMenuItem @click.native="$refs.menu.close">
-                        <i class="icofont-ui-mute mr-1"></i>
-                        Mute Notifications
-                    </ContextMenuItem>
+                    <!--<ContextMenuItem @click.native="$refs.menu.close">-->
+                    <!--    <i class="icofont-ui-mute mr-1"></i>-->
+                    <!--    Mute Notifications-->
+                    <!--</ContextMenuItem>-->
 
                     <!--<ContextMenuItem @click.native="$refs.menu.close">-->
                     <!--    <i class="icofont-trash mr-1"></i>-->

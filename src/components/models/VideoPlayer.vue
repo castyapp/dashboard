@@ -8,6 +8,13 @@
 
         <div v-else>
             <video id="theater" class="full-width" crossorigin></video>
+            <div class="members-loading" v-if="syncing">
+                Syncing...
+                <RingLoader class="members-loading-spinner"
+                            :size="25"
+                            :color="'#FFFFFF'"
+                            :loading="true" />
+            </div>
         </div>
 
         <small class="movie-creator" v-if="theater.movie.length !== undefined">
@@ -22,6 +29,23 @@
 </template>
 
 <style scoped>
+
+    .members-loading-spinner {
+        float: right;
+        margin-left: 20px;
+    }
+
+    .members-loading {
+        background: #181818;
+        color: #ffffff;
+        padding: 10px 20px;
+        position: absolute;
+        top: 75px;
+        border-radius: 3px;
+        font-size: 15px;
+        box-shadow: 2px 3px 12px #000;
+        margin-left: 10px;
+    }
 
     .autoplay-warning {
         background: #000000;
@@ -40,21 +64,32 @@
 
     import Plyr from 'plyr';
     import {bus} from "../../main";
-
-    import canAutoPlay from 'can-autoplay';
-
-    import {emit} from 'casty-proto/pbjs/protocol'; 
-    import {proto} from 'casty-proto/pbjs/proto';
+    import {RingLoader} from 'vue-spinners-css';
+    import {proto} from "casty-proto/pbjs/proto";
+    import {emit} from 'casty-proto/pbjs/protocol';
 
     export default {
+        name: 'video-player',
         props: ['theater'],
         data() {
             return {
                 autoPlayEnabled: true,
                 player: null,
+                syncing: false,
+                synced: false,
             }
         },
+        components: {
+            RingLoader,
+        },
         methods: {
+            log(message, color) {
+                console.log(
+                    `%c[VIDEO PLAYER]` + `%c ${message}`, 
+                    "font-size: 13px; color:#FFFFFF;", 
+                    `font-size: 13px; color:${color};`
+                );
+            },
             secondsToHms(d) {
                 d = Number(d);
                 let h = Math.floor(d / 3600);
@@ -68,7 +103,20 @@
                 }
                 return `${hours}:${minutes}:${seconds}`;
             },
+            // async sync(socketConnection) {
+            //     if(this.synced){
+            //         return new Promise(resolve => {
+            //             this.player.play();
+            //             resolve(true);
+            //         });
+            //     }
+            //     this.syncing = true;
+            //     this.player.pause();
+            //     emit(socketConnection, proto.EMSG.SYNC_ME, proto.TheaterVideoPlayer, {});
+            //     this.log("Syncing other clients...", 'green');
+            // },
             async mountVideoPlayer() {
+
                 let socketConnection = this.$parent.socket.ws;
 
                 this.player = new Plyr('#theater', {
@@ -124,8 +172,64 @@
                     }
                 });
 
-                this.player.on('play', () => {
-                    console.log(`Played at ${this.player.currentTime}!`);
+                this.player.on('loadstart', () => {
+                    this.player.loaded = false;
+                });
+
+                this.player.on('ended', () => {
+                    this.log('video ended!', 'red');
+                    // send video ended event to gateway
+                });
+
+                if (this.theater.movie.type !== 1){
+                    // check video buffer if video type is not youtube
+                    const refreshId = setInterval(() => {
+                        if (this.player.buffered > 0) {
+                            this.$emit('buffered', true);
+                            clearInterval(refreshId);
+                        }
+                    }, 1000)
+                }
+
+                this.player.on('waiting', () => {
+                    this.log('Waiting to load...', 'yellow');
+                    const refreshId = setInterval(() => {
+                        if (this.player.buffered > 0) {
+                            this.$emit('buffered', true);
+                            clearInterval(refreshId);
+                        }
+                    }, 1000)
+                });
+
+                // this.$on('buffered', async () => {
+                //     this.log("Buffered!", 'green');
+                //     this.sync(socketConnection);
+                // });
+
+                // const Unstarted = -1,
+                //     Ended = 0,
+                //     Playing = 1,
+                //     Paused = 2,
+                //     Buffering = 3,
+                //     VideoCued = 4;
+
+                /* YOUTUBE ONLY */
+                // this.player.on('statechange', state => {
+                //     switch (state.detail.code) {
+                //         case Buffering: this.log("Buffering...", 'green'); break;
+                //         case Playing: this.log("Playing...", 'green'); break;
+                //         case Paused: this.log("Paused!", 'green'); break;
+                //         case VideoCued: this.log("VideoCued!", 'yellow'); break;
+                //         case Ended: this.log("Video ended!", 'red'); break;
+                //     }
+                // });
+
+                this.player.on('loadeddata', () => {
+                    this.player.loaded = true;
+                })
+
+                this.player.on('playing', async () => {
+                    this.log(`Playing at ${this.player.currentTime}!`, 'green');
                     if (!this.player.fromSocket) {
                         emit(socketConnection, proto.EMSG.THEATER_PLAY, proto.TheaterVideoPlayer, {
                             theaterId:     this.theater_id,
@@ -139,7 +243,7 @@
                 });
 
                 this.player.on('pause', () => {
-                    console.log(`Paused at ${this.player.currentTime}!`);
+                    this.log(`Paused at ${this.player.currentTime}!`, 'green');
                     if (!this.player.fromSocket) {
                         emit(socketConnection, proto.EMSG.THEATER_PAUSE, proto.TheaterVideoPlayer, {
                             theaterId:     this.theater_id,
@@ -194,6 +298,14 @@
         },
         mounted() {
             this.mountVideoPlayer();
+            bus.$on(proto.EMSG[proto.EMSG.SYNCED], () => {
+                this.log(`Clients are synced, ready to play!`, 'green');
+                this.syncing = false;
+                this.synced = true;
+            });
+        },
+        destroyed() {
+            this.player.destroy();
         }
     }
 

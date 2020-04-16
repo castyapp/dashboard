@@ -8,14 +8,14 @@
                 class="icofont-arrow-right open-members clickable"></i>
 
             <div class="title-border-bottom pb-2">
-                <strong class="side-component-title">
-                    <div class="users_title">
+                <div class="side-component-title">
+                    <strong class="users_title">
                         <i class="icofont-users text-primary mr-2"></i>
                         Members
-                    </div>
+                    </strong>
                     <i @click="closeMembers" 
                         class="icofont-arrow-left close-members clickable"></i>
-                </strong>
+                </div>
             </div>
 
             <div class="member" :key="member.id" v-for="member in members">
@@ -27,7 +27,13 @@
                 </div>
             </div>
 
-            <div v-if="loadingMembers" class="members-loading">
+            <div v-if="membersStatus === 'closed' && loadingMembers" class="members-loading mt-1">
+                <VueContentLoading :width="35" :height="50" style="margin-left: 6px" primary="#333" secondary="#181818" :key="i" v-for="i in 10">
+                    <circle cx="17" cy="17" r="17"></circle>
+                </VueContentLoading>
+            </div>
+
+            <div v-if="membersStatus !== 'closed' && loadingMembers" class="members-loading">
                 <VueContentLoading :width="230" :height="55" primary="#333" secondary="#181818" :key="i" v-for="i in 10">
                     <circle cx="17" cy="17" r="17"></circle>
                     <rect x="47" y="9" rx="9" ry="9" width="170" height="17"></rect>
@@ -55,7 +61,7 @@
 
             <div class="clearfix"></div>
 
-            <VideoPlayer :theater="theater" v-if="ready" />
+            <VideoPlayer :theater="theater" v-if="ready" ref="videoPlayer" />
             <TheaterChat :theater="theater" :ready="ready" />
 
         </div>

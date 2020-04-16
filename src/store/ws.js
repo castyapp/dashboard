@@ -1,8 +1,16 @@
+import {bus} from "../main";
 import {store} from "./store";
-import {bus} from "./../main";
 import {proto} from "casty-proto/pbjs/proto";
 import {Packet} from "casty-proto/pbjs/packet";
 import {emit} from "casty-proto/pbjs/protocol";
+
+function log(gateway, message, color) {
+    console.log(
+        `%c[${gateway}]` + `%c ${message}`, 
+        "font-size: 13px; color:#FFFFFF;", 
+        `font-size: 13px; color:${color};`
+    );
+}
 
 class UserWebsocket {
     connect() {
@@ -16,7 +24,7 @@ class UserWebsocket {
         this.ws.binaryType = 'arraybuffer';
 
         this.ws.onopen = () => {
-            console.log(`Connected to user[${user.id}] ws!`);
+            log("USER GATEWAY", `Connected to user[${user.id}] gateway!`, 'green');
             emit(this.ws, proto.EMSG.LOGON, proto.LogOnEvent, {
                 token: new Buffer(store.state.token),
             });
@@ -28,13 +36,13 @@ class UserWebsocket {
         };
 
         this.ws.onclose = () => {
-            console.log(`disconnect from user [${user.id}] ws!`);
+            log("USER GATEWAY", `disconnected from user [${user.id}] gateway!`, 'red');
         };
 
         this.ws.onmessage = (message) => {
             let packet = new Packet(message.data);
             if (proto.EMSG.UNAUTHORIZED === packet.emsg){
-                console.log("Unauthorized! try to refresh token!");
+                log("USER GATEWAY", "Unauthorized! try to refresh token!", 'red');
             }
             bus.$emit(proto.EMSG[packet.emsg], packet.data);
         };
@@ -46,9 +54,6 @@ class UserWebsocket {
     ping(ws) {
         if (ws.readyState !== 1) return;
         emit(ws, proto.EMSG.PING, proto.PingMsgEvent, {});
-    }
-    sendPacket(eNUM, pROTO, payload) {
-        emit(this.ws, eNUM, pROTO, payload);
     }
     sendMessage(message, to) {
         emit(this.ws, proto.EMSG.NEW_CHAT_MESSAGE, proto.ChatMsgEvent, {
@@ -89,7 +94,7 @@ class TheaterWebsocket {
         };
 
         this.ws.onclose = () => {
-            console.log(`disconnect from theater [${room}] ws!`);
+            log("THEATER GATEWAY", `disconnected from theater [${room}] gateway!`, 'red');
         };
 
         this.ws.onmessage = (message) => {

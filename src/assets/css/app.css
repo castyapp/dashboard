@@ -588,54 +588,6 @@ div#serverError > div.alert {
     margin-top: 20px;
 }
 
-.oauthBtn {
-    display: inline-block;
-    padding: 4px 8px;
-    border-radius: 3px;
-
-}
-
-.oauthGoogleBtn {
-    background-color: #3c82f7;
-    color: #fff;
-    box-shadow: 0 3px 0 #0f69ff;
-}
-
-.oauthDiscordBtn {
-    background-color: #7289DA;
-    color: #fff;
-    box-shadow: 0 3px 0 #546bbd;
-}
-
-i.discord-icon {
-    background: url("../../assets/icons/social/discord-brand.png");
-    width: 18px;
-    height: 13px;
-    display: block;
-    background-size: cover;
-    float: left;
-    margin: 5px 6px 5px 0;
-}
-
-.btn-discord {
-    background: transparent !important;
-    border: none !important;
-}
-
-.discord-brand {
-    height: 40px;
-}
-
-.oauthButtons > button {
-    display: block;
-    margin: 10px auto;
-    border: none !important;
-}
-
-.oauthButtons {
-    text-align: center;
-}
-
 .login-bottom-action-buttons > .buttons > button.loginBTN {
     padding: 3px 20px;
 }
@@ -769,4 +721,14 @@ li.context-menu-item.remove-red-btn {
 
 .hidden {
     display: none;
+}
+
+.logo {
+    cursor: pointer;
+}
+
+.logo > img {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
 }

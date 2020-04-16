@@ -1,8 +1,28 @@
 <template>
-    <div>
-        <h5>Redirecting...</h5>
+    <div class="oauth-connect-container">
+        <ring-loader :loading="true" :color="'#ffffff'" />
+        <p>Redirecting to Discord...</p>
+
+        <router-link :to="{name: 'login'}" class="btn btn-primary">
+            Back to authentication page
+        </router-link>
+
     </div>
 </template>
+
+<style>
+
+    .oauth-connect-container {
+        text-align: center;
+        padding: 100px;
+    }
+
+    .oauth-connect-container {
+        font-size: 20px;
+        font-weight: bold;
+    }
+
+</style>
 
 <script>
 
@@ -16,9 +36,19 @@
         "scope=identify%20email";
 
     export default {
-        name: "DiscordOAUTH",
+        name: "discord-oauth",
+        data() {
+            return {
+                timeoutId: 0,
+            }
+        },
         mounted() {
-            location.replace(redirect_url);
+            this.timeoutId = setTimeout(() => {
+                location.replace(redirect_url);
+            }, 2000)
+        },
+        destroyed() {
+            clearTimeout(this.timeoutId)
         }
     }
 

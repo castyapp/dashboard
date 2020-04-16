@@ -3,7 +3,7 @@
     <div class="sidemenu">
 
         <div class="logo" @click="redirect('dashboard')">
-            <img src="../../assets/icons/brand.svg" alt="Brand" />
+            <img src="../../assets/icons/brand-2.svg" alt="Brand" />
         </div>
 
         <ul class="menu">
@@ -69,16 +69,8 @@
 
 <style>
 
-    .logo {
-        cursor: pointer;
-    }
-
     .logo > img {
-        width: 40px;
-        height: 40px;
-        background: #316bff;
-        border-radius: 50%;
-        padding: 5px;
+
     }
 
     li.custom-btn-menu > a {

@@ -13,7 +13,8 @@
                    placeholder="Fullname"
                    autofocus="autofocus"
                    v-model="fullname"
-                   required="required" />
+                   required="required"
+                   autocomplete="fullname" />
 
             <small v-if="errors.fullname" class="text-danger fa-pull-left text-left">
                     <span class="clearfix">
@@ -31,7 +32,8 @@
                    placeholder="Username"
                    autofocus="autofocus"
                    v-model="username"
-                   required="required" />
+                   required="required"
+                   autocomplete="username" />
 
             <small v-if="errors.username" class="text-danger fa-pull-left text-left">
                 <span class="clearfix" v-for="err in errors.username">
@@ -49,7 +51,8 @@
                    placeholder="Email"
                    autofocus="autofocus"
                    v-model="email"
-                   required="required" />
+                   required="required"
+                   autocomplete="email" />
 
             <small v-if="errors.email" class="text-danger fa-pull-left text-left">
                 <span class="clearfix" v-for="err in errors.email">
@@ -66,7 +69,8 @@
                    id="password"
                    placeholder="Password"
                    v-model="password"
-                   required="required" />
+                   required="required"
+                   autocomplete="password" />
 
             <small v-if="errors.password" class="text-danger fa-pull-left text-left">
                 <span class="clearfix" v-for="err in errors.password">
@@ -83,7 +87,8 @@
                    id="password_confirmation"
                    placeholder="Password Confirmation"
                    v-model="password_confirmation"
-                   required="required" />
+                   required="required"
+                   autocomplete="password" />
 
             <small v-if="errors.password_confirmation" class="text-danger fa-pull-left text-left">
                 <span class="clearfix" v-for="err in errors.password_confirmation">
@@ -93,7 +98,6 @@
         </div>
 
         <div class="form-group login-bottom-action-buttons">
-
             <div class="buttons">
                 <VueRecaptcha :sitekey="sitekey"
                               ref="recaptcha"
@@ -101,26 +105,15 @@
                               @expired="onCaptchaExpired"
                               size="invisible"
                               :loadRecaptchaScript="true" />
-                <button class="btn btn-primary">Register</button>
-                <a class="btn">Forget password?</a>
+                <VueLoadingButton
+                        type="submit"
+                        :loading="loading"
+                        class="btn btn-primary full-width"
+                        :disabled="loading">
+                    <span>Register</span>
+                </VueLoadingButton>
             </div>
-
-            <div class="oauthButtons">
-
-                <strong>Or you can sign in with:</strong>
-
-                <button type="button" class="clickable oauthBtn oauthGoogleBtn" @click="GoogleOAUTHPage">
-                    <i class="icofont-google-plus"></i>
-                    Google
-                </button>
-
-                <button type="button" class="clickable oauthBtn oauthDiscordBtn" @click="DiscordOAUTHPage">
-                    <i class="discord-icon"></i>
-                    Discord
-                </button>
-
-            </div>
-
+            <OAuthButtons />
         </div>
 
     </form>
@@ -131,6 +124,8 @@
 
     const jQuery = require("jquery");
     import VueRecaptcha from 'vue-recaptcha';
+    import OAuthButtons from "./oauth/OAuthButtons";
+    import VueLoadingButton from 'vue-loading-button'
 
     export default {
         name: 'register',
@@ -140,10 +135,13 @@
             }
         },
         components: {
-            VueRecaptcha
+            VueRecaptcha,
+            OAuthButtons,
+            VueLoadingButton,
         },
         data() {
             return {
+                loading: false,
                 googleSignInParams: {
                     client_id: process.env.VUE_APP_API_GOOGLE_CLIENT_ID,
                 },

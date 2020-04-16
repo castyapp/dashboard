@@ -5,12 +5,12 @@
         <div class="col-container pull-left">
 
             <div class="title-border-bottom pb-2">
-                <strong class="side-component-title">
-                    <div class="users_title">
+                <div class="side-component-title">
+                    <strong class="users_title">
                         <i class="icofont-ui-chat text-primary mr-2"></i>
                         Chat
-                    </div>
-                </strong>
+                    </strong>
+                </div>
             </div>
 
             <div class="chat-container">
@@ -55,9 +55,9 @@
 
         <div class="chat-input">
             <input class="chat-box-text"
-                      placeholder="Send a message"
-                      multiple="multiple"
-                      @keyup.enter.exact="sendMessage" />
+                   placeholder="Send a message"
+                   multiple="multiple"
+                   @keyup.enter.exact="sendMessage" />
         </div>
 
     </div>
@@ -65,15 +65,6 @@
 </template>
 
 <style>
-
-    .users {
-        position: absolute;
-        right: 0;
-        background: #007bff;
-        border-radius: 20px;
-        padding: 3px;
-        margin: 0 9px;
-    }
 
     .col-container {
         display: flex;
@@ -192,6 +183,13 @@
             }
         },
         methods: {
+            log(message, color) {
+                console.log(
+                    `%c[THEATER GATEWAY]` + `%c ${message}`, 
+                    "font-size: 13px; color:#FFFFFF;", 
+                    `font-size: 13px; color:${color};`
+                );
+            },
             sendMessage() {
                 let messageInput = $(".chat-box-text");
                 let msg = messageInput.val();
@@ -230,7 +228,7 @@
 
                 this.theaterWebsocket = socket;
 
-                console.log(`Connected to theater[${this.theater.id}] ws!`);
+                this.log(`Connected to theater[${this.theater.id}] gateway!`, 'green');
 
                 this.theaterWebsocket.ws.onmessage = (message) => {
 

@@ -9,7 +9,7 @@
             <vue-topprogress ref="topProgress" />
 
             <div class="logo">
-                <img src="../../assets/icons/brand.svg"
+                <img src="../../assets/icons/brand-2.svg"
                      alt="Brand"
                      class="img-logo"/>
                 <span class="brand-name">Casty</span>
@@ -32,6 +32,9 @@
                 </router-link>
                 <router-link :to="{ name: 'register' }">
                     Register
+                </router-link>
+                <router-link :to="{ name: 'iforgot' }">
+                    Forgot password?
                 </router-link>
             </div>
 

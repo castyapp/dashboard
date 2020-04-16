@@ -12,7 +12,8 @@
                    placeholder="E-mail Address or Username"
                    autofocus="autofocus"
                    v-model="user"
-                   required="required" />
+                   required="required"
+                   autocomplete="user" />
             <small v-if="errors.username" class="text-danger pull-left text-left">
                 <span class="clearfix" v-for="err in errors.username">
                     {{ err }}
@@ -28,7 +29,8 @@
                    name="password"
                    placeholder="Password"
                    v-model="pass"
-                   required="required" />
+                   required="required"
+                   autocomplete="current-password" />
 
             <small v-if="errors.password" class="text-danger pull-left text-left">
                 <span class="clearfix" v-for="err in errors.password">
@@ -45,25 +47,18 @@
                               @expired="onCaptchaExpired"
                               size="invisible"
                               :loadRecaptchaScript="true" />
-                <button class="btn btn-primary">Login</button>
-                <a class="btn">Forget password?</a>
-            </div>
 
-            <div class="oauthButtons">
-
-                <strong>Or you can sign in with:</strong>
-
-                <button type="button" class="clickable oauthBtn oauthGoogleBtn" @click="GoogleOAUTHPage">
-                    <i class="icofont-google-plus"></i>
-                    Google
-                </button>
-
-                <button type="button" class="clickable oauthBtn oauthDiscordBtn" @click="DiscordOAUTHPage">
-                    <i class="discord-icon"></i>
-                    Discord
-                </button>
+                <VueLoadingButton
+                        type="submit"
+                        :loading="loading"
+                        class="btn btn-primary full-width"
+                        :disabled="loading">
+                    <span>Login</span>
+                </VueLoadingButton>
 
             </div>
+
+            <OAuthButtons />
 
         </div>
 
@@ -75,14 +70,19 @@
 
     const jQuery = require("jquery");
     import VueRecaptcha from 'vue-recaptcha';
+    import VueLoadingButton from 'vue-loading-button'
+    import OAuthButtons from "./oauth/OAuthButtons";
 
     export default {
         name: 'login',
         components: {
             VueRecaptcha,
+            VueLoadingButton,
+            OAuthButtons,
         },
         data() {
             return {
+                loading: false,
                 errors: {},
                 user: '',
                 pass: '',
@@ -92,11 +92,11 @@
         methods: {
             onCaptchaVerified(recaptchaToken) {
 
+                this.loading = true;
+
                 jQuery('#serverError').removeClass();
 
                 this.$parent.$refs.topProgress.start();
-
-                this.loading = true;
 
                 this.$store.dispatch('createAuthToken', {
                     user: this.user,
@@ -107,7 +107,7 @@
                     this.errors = {};
                     this.loading = false;
                     this.$parent.serverError = "";
-                    this.$parent.successMessage = 'Login successfully! Please wait ...';
+                    // this.$parent.successMessage = 'Login successfully! Please wait ...';
 
                     this.$notify({
                         group: 'auth',
@@ -133,7 +133,7 @@
                             this.$parent.serverError = error.response.data.message;
                         } else {
                             this.errors = error.response.data.result;
-                            this.$parent.serverError = "Please correct the following error(s) in form!";
+                            this.$parent.serverError = "Invalid credentials!";
                         }
 
                         this.password = '';
@@ -164,12 +164,6 @@
             login() {
                 this.$refs.recaptcha.execute();
             },
-            GoogleOAUTHPage() {
-                this.$router.push({ name: "google_oauth_connect" });
-            },
-            DiscordOAUTHPage() {
-                this.$router.push({ name: "discord_oauth_connect" });
-            }
         },
         mounted() {
             let err = this.$route.params.err;
