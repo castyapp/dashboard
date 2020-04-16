@@ -65,6 +65,8 @@
                     code: this.$route.query.code,
                 }).then(() => {
 
+                    this.loading = false;
+
                     this.$notify({
                         group: 'auth',
                         type: 'success',
@@ -81,6 +83,8 @@
                     }, 1000);
 
                 }).catch(() => {
+
+                    this.loading = false;
 
                     this.$router.push({
                         name: "login",
