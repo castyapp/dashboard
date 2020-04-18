@@ -27,7 +27,7 @@
                          v-for="(message, index) in messages">
 
                         <div class="small-avatar">
-                            <img :src="apiBaseUrl + '/uploads/avatars/' + message.sender.avatar + '.png'"
+                            <img :src="cdnUrl + '/avatars/' + message.sender.avatar + '.png'"
                                  alt="Avatar">
                         </div>
 
@@ -37,7 +37,7 @@
                                     <span>{{ message.sender.fullname }}</span>
                                     <div class="details pull-right" v-if="!isLastOneThisUser(index)">
                                         <small class="ml-2">
-                                            {{ message.created_at.seconds | moment('timezone', 'Asia/Tehran', 'dddd, MMM Do, h:mm a') }}
+                                            {{ message.createdAt.seconds | moment('timezone', 'Asia/Tehran', 'dddd, MMM Do, h:mm a') }}
                                         </small>
                                     </div>
                                 </div>
@@ -251,8 +251,9 @@
     import moment from 'moment-timezone';
     import EmojiPicker from 'vue-emoji-picker';
     import {websocket} from "../../../store/ws";
-    import {proto} from 'casty-proto/pbjs/proto';
     import {EllipsisLoader} from 'vue-spinners-css';
+
+    import {proto} from 'casty-proto/pbjs/ws.bundle';
     import TheaterMessage from "../../models/TheaterMessage";
 
     export default {
@@ -297,7 +298,7 @@
                     content,
                     sender: this.user,
                     reciever: this.friend,
-                    created_at: {
+                    createdAt: {
                         seconds: Math.floor(Date.now() /1000),
                     },
                 };
@@ -323,8 +324,8 @@
                 if (index !== 0){
 
                     let lastIndex = index - 1;
-                    let diff = moment(this.messages[index].created_at.seconds)
-                        .diff(this.messages[lastIndex].created_at.seconds);
+                    let diff = moment(this.messages[index].createdAt.seconds)
+                        .diff(this.messages[lastIndex].createdAt.seconds);
 
                     return diff <= 300000;
                 }
@@ -350,16 +351,16 @@
             }
 
             if (this.friend === null){
-                await this.$store.dispatch("getFriend", friend_username).then(response => {
-                    this.friend = response.data.result;
+                await this.$store.dispatch("getFriend", friend_username).then(friend => {
+                    this.friend = friend;
                 });
             }
 
             bus.$emit("open-message-page", this.friend)
 
             let v = this;
-            this.$store.dispatch("getMessages", friend_username).then(response => {
-                this.messages = response.data.result;
+            this.$store.dispatch("getMessages", friend_username).then(messages => {
+                this.messages = messages;
                 this.loading = false;
                 v.$parent.$emit("ready");
             });
@@ -374,7 +375,7 @@
                     let message = {
                         content: new TextDecoder("utf-8").decode(decoded.message),
                         sender: sender,
-                        created_at: decoded.createdAt,
+                        createdAt: decoded.createdAt,
                     };
                     if (this.messages == null){
                         this.messages = [];

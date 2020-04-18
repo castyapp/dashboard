@@ -170,7 +170,7 @@
                             <template slot="option" slot-scope="props">
 
                                 <img class="option__image"
-                                     :src="apiBaseUrl +  '/uploads/avatars/' + props.option.avatar + '.png'"
+                                     :src="cdnUrl +  '/avatars/' + props.option.avatar + '.png'"
                                      :alt="props.option.fullname">
 
 

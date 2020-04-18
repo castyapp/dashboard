@@ -2,13 +2,13 @@
 
     <div class="theater-invite">
 
-        <img :src="apiBaseUrl + '/uploads/avatars/' + notification.from_user.avatar + '.png'" class="avatar" :alt="notification.from_user.fullname" />
+        <img :src="cdnUrl + '/avatars/' + notification.fromUser.avatar + '.png'" class="avatar" :alt="notification.fromUser.fullname" />
 
         <div class="notification-details">
             <div class="notification-title">
                 <span>New theater invite from:</span>
                 <div class="nc-new-friend-name">
-                    {{ notification.from_user.fullname }}
+                    {{ notification.fromUser.fullname }}
                 </div>
             </div>
             <div class="nc-th">
@@ -17,7 +17,7 @@
                         <i class="poster icofont-file-mov"></i>
                     </div>
                     <img v-else
-                         :src="apiBaseUrl + '/uploads/posters/' + notification.data.movie.poster + '.png'"
+                         :src="cdnUrl + '/posters/' + notification.data.movie.poster + '.png'"
                          alt="Poster" />
                 </div>
                 <div class="th-details">

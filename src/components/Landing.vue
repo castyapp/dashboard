@@ -7,7 +7,7 @@
             <div class="authentication-section pull-right">
                 <router-link v-if="loggedIN" :to="{ name: 'library' }" class="btn btn-primary user-landing-btn">
                     {{ user.fullname }}
-                    <img :src="apiBaseUrl + '/uploads/avatars/' + user.avatar + '.png'"
+                    <img :src="cdnUrl + '/avatars/' + user.avatar + '.png'"
                         :alt="user.username" />
                 </router-link>
                 <router-link v-if="loggedIN" :to="{ name: 'logout' }" class="m-3 text-white">

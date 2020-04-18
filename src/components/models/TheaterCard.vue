@@ -8,7 +8,7 @@
                 <i class="icofont-popcorn"></i>
             </div>
 
-            <img v-else :src="apiBaseUrl + '/uploads/posters/' + theater.movie.poster + '.png'" alt="Poster" />
+            <img v-else :src="cdnUrl + '/posters/' + theater.movie.poster + '.png'" alt="Poster" />
 
             <span class="movie-title">{{ theater.title }}</span>
             <div class="movie-progress">

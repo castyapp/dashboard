@@ -32,7 +32,7 @@
                        autocomplete="off" />
 
                 <div v-if="errors.title !== null" class="text-danger text-left errors">
-                    <p v-for="err in errors.title">{{ err }}</p>
+                    <p>{{ errors.title }}</p>
                 </div>
 
             </div>
@@ -55,7 +55,7 @@
                        aria-describedby="movie-uri" />
 
                 <div v-if="errors.movie_uri !== null" class="text-danger text-left errors">
-                    <p v-for="err in errors.movie_uri">{{ err }}</p>
+                    <p>{{ errors.movie_uri }}</p>
                 </div>
 
             </div>
@@ -70,7 +70,7 @@
                 <DropdownMenu :config="privacy_config" @setSelectedOption="setNewSelectedOption($event)" />
 
                 <div v-if="errors.privacy !== null" class="text-danger text-left errors">
-                    <p v-for="err in errors.privacy">{{ err }}</p>
+                    <p>{{ errors.privacy }}</p>
                 </div>
 
                 <div class="custom-control custom-switch mt-3" v-show="privacy.id !== 3">
@@ -85,7 +85,7 @@
                 </div>
 
                 <div v-if="errors.video_player_access !== null" class="text-danger text-left">
-                    <p v-for="err in errors.video_player_access">{{ err }}</p>
+                    <p>{{ errors.video_player_access }}</p>
                 </div>
 
             </div>
@@ -170,10 +170,11 @@
                                 <div class="subtitle row" :key="index" v-for="(subtitle, index) in subtitles">
 
                                     <input type="text"
-                                        class="form-control subtitle-language col-md-2"
-                                        placeholder="Lang"
-                                        v-model="subtitle.lang"
-                                        autocomplete="off" />
+                                           class="form-control subtitle-language col-md-2"
+                                           placeholder="Lang"
+                                           v-model="subtitle.lang"
+                                           id="movie_subtitles"
+                                           autocomplete="off" />
 
                                     <input :id="'subtitle-' + index" 
                                         type="file"
@@ -217,11 +218,6 @@
                     Create
                     <i class="icofont-arrow-right"></i>
                 </VueLoadingButton>
-
-               <!-- <button type="button" class="btn btn-warning pull-right" v-show="privacy.id !== 3" @click="createAndShare">
-                   Create and share it with your friends
-                   <i class="icofont-arrow-right"></i>
-                </button> -->
 
             </div>
 
@@ -282,8 +278,7 @@
 
 <script>
 
-    const $ = require("jquery");
-
+    const jQuery = require("jquery");
     import VueLoadingButton from 'vue-loading-button'
     import "bootstrap-select/dist/js/bootstrap-select.js";
     import "bootstrap-select/dist/css/bootstrap-select.css";
@@ -291,9 +286,7 @@
 
     const MovieTypeUNKNOWN = 0,
         MovieTypeYOUTUBE = 1,
-        MovieTypeURI = 2,
-        MovieTypePIRATE_BAY = 3,
-        LOCAL_PATH = 4;
+        MovieTypeURI = 2;
 
     export default {
         name: 'CreateTheater',
@@ -322,7 +315,7 @@
                 movie_file: null,
                 errors: {},
                 privacy: {
-                    id: 1,
+                    id: 2,
                     value: "Public",
                     icon: "icofont-globe",
                     description: "Everybody has access to your theater!"
@@ -330,19 +323,19 @@
                 privacy_config: {
                     options: [
                         {
-                            id: 1,
+                            id: 2,
                             value: "Public",
                             icon: "icofont-globe",
                             description: "Everybody has access to your theater!"
                         },
                         {
-                            id: 2,
+                            id: 1,
                             value: "Friends",
                             icon: "icofont-users",
                             description: "Only your friends have access to your theater!"
                         },
                         {
-                            id: 3,
+                            id: 0,
                             value: "Private",
                             icon: "icofont-user",
                             description: "Only you have access to your theater!"
@@ -372,7 +365,7 @@
                 this.subtitles[index].file = files[0];
             },
             onClickAddSubtitle(index) {
-                $(`input#subtitle-${index}`).trigger("click");
+                jQuery(`input#subtitle-${index}`).trigger("click");
             },
             removeSubtitle(index) {
                 this.subtitles.splice(index, 1)
@@ -427,7 +420,7 @@
                 this.movie_banner = null;
             },
             onClickFileInput(e) {
-                $(e.target).find("input[type=file]").trigger("click");
+                jQuery(e.target).find("input[type=file]").trigger("click");
             },
             getTheaterObject() {
                 return {
@@ -445,20 +438,20 @@
                 this.loading = true;
 
                 let theater = this.getTheaterObject();
-                this.$store.dispatch("createTheater", theater).then(async (response) => {
+                this.$store.dispatch("createTheater", theater).then(async (theater_id) => {
 
-                    let insertedID = response.data.result.result;
+                    await this.$store.dispatch('uploadTheaterPoster', {
+                        theater_id,
+                        poster: theater.poster,
+                    });
 
                     await theater.subtitles.forEach(subtitle => {
                         if (subtitle.lang !== '') {
-                            this.$store.dispatch('addSubtitleToTheater', {subtitle, insertedID});
+                            this.$store.dispatch('addSubtitleToTheater', {subtitle, theater_id});
                         }
                     });
 
-                    this.$router.push({
-                        name: "library",
-                        params: {reload: true},
-                    }).then(() => {
+                    this.$router.push({ name: "library", params: {reload: true} }).then(() => {
                         this.$notify({
                             group: 'dashboard',
                             type: 'success',
@@ -468,10 +461,13 @@
                         });
                         this.loading = false;
                     });
-                }).catch(err => {
-                    if (err.response !== undefined) {
-                        this.errors = err.response.data.result;
+
+                }).catch(error => {
+
+                    if (error.code === 3){
+                        this.errors = this.getGrpcErrors(error);
                     }
+
                     this.$notify({
                         group: 'dashboard',
                         type: 'error',
@@ -479,12 +475,10 @@
                         title: "Failed",
                         duration: 2000,
                     });
+
                     this.loading = false;
+
                 });
-            },
-            createAndShare() {
-                let theater = this.getTheaterObject();
-                console.log(theater);
             }
         },
     }

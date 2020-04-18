@@ -65,14 +65,14 @@
                     <label for="email">Email</label>
 
                     <div class="pull-right">
-                        <small class="ml-1 text-success" v-show="user.verified_by_email">
+                        <small class="ml-1 text-success" v-show="user.emailVerified">
                             Verified
-                            <i class="fa fa-check"></i>
+                            <i class="icofont-check"></i>
                         </small>
 
-                        <small class="ml-1 text-danger" v-show="!user.verified_by_email">
+                        <small class="ml-1 text-danger" v-show="!user.emailVerified">
                             Not verified
-                            <i class="fa fa-times"></i>
+                            <i class="icofont-warning-alt"></i>
                             <a href="" class="ml-2">
                                 Resend verification link
                             </a>
@@ -292,7 +292,7 @@
 
 <script>
 
-    const $ = require("jquery");
+    const jQuery = require("jquery");
 
     import {bus} from "../../main";
     import TwoFactoryAuthButton from "../models/2FAEnableButton";
@@ -320,7 +320,7 @@
         methods: {
             getUserAvatar() {
                 if (this.selected_avatar === ''){
-                    return this.apiBaseUrl + '/uploads/avatars/' + this.user.avatar + '.png'
+                    return this.cdnUrl + '/avatars/' + this.user.avatar + '.png'
                 }
                 return this.selected_avatar;
             },
@@ -337,16 +337,23 @@
                 this.readAvatarFile(files[0]);
             },
             selectNewAvatar() {
-                $("#user_avatar_input").trigger("click");
+                jQuery("#user_avatar_input").trigger("click");
             },
-            updatePassword() {
-
-            },
+            updatePassword() {},
             updateProfile() {
                 this.$parent.$refs.topProgress.start();
-                this.$store.dispatch("updateProfile", this.form).then(response => {
-                    this.user = response.data.result;
+                this.$store.dispatch("updateProfile", this.form).then(async user => {
+
+                    if (this.form.avatar !== null){
+                        await this.$store.dispatch("updateAvatar", this.form.avatar).then(response => {
+                            user.avatar = response.data.result.avatar;
+                            bus.$emit('updated-avatar', user.avatar);
+                        });
+                    }
+
+                    this.user = user;
                     bus.$emit('updated-user', this.user);
+
                     this.$notify({
                         group: 'dashboard',
                         type: 'success',
@@ -354,8 +361,11 @@
                         title: "Success",
                         duration: 2000,
                     });
+
                     this.$parent.$refs.topProgress.done();
+
                 }).catch(err => {
+                    
                     this.$notify({
                         group: 'dashboard',
                         type: 'error',
@@ -363,18 +373,19 @@
                         title: "Failed",
                         duration: 2000,
                     });
-                    console.log(err);
+
                     this.$parent.$refs.topProgress.done();
+
                 });
             }
         },
         mounted() {
             this.form.fullname = this.user.fullname;
-            $(".user_avatar_img").hover(() => {
-                $(".change_avatar_overlay").show();
+            jQuery(".user_avatar_img").hover(() => {
+                jQuery(".change_avatar_overlay").show();
             });
-            $(".change_avatar_overlay").hover(() => {}, () => {
-                $(".change_avatar_overlay").hide();
+            jQuery(".change_avatar_overlay").hover(() => {}, () => {
+                jQuery(".change_avatar_overlay").hide();
             });
         }
     }

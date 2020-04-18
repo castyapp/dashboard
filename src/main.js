@@ -11,6 +11,7 @@ import vueTopProgress from 'vue-top-progress'
 import Master from './components/layouts/Master'
 import * as VueSpinnersCss from "vue-spinners-css"
 import GSignInButton from 'vue-google-signin-button'
+const {Status} = require("@stackpath/node-grpc-error-details");
 
 Vue.config.productionTip = false;
 
@@ -38,6 +39,7 @@ import "./assets/css/icofont.css";
 
 import 'vue-loaders/dist/vue-loaders.css';
 import VueLoaders from 'vue-loaders';
+import {websocket} from "./store/ws";
 Vue.use(VueLoaders);
 
 router.beforeEach(async (to, from, next) => {
@@ -62,8 +64,32 @@ router.beforeEach(async (to, from, next) => {
     if (to.matched.some(record => record.meta.requiresAuth)) {
         if (store.getters.loggedIn) {
             if (store.state.user == null){
-                await store.dispatch("getUser").then(response => {
-                    store.state.user = response.data.result;
+                await store.dispatch("getUser").then(user => {
+                    store.state.user = user;
+                }).catch(err => {
+
+                    console.log(err);
+
+                    // instead of this store call you would put your code to get new token
+                    store.dispatch("refreshToken").then(response => {
+                        console.log("Refreshed: ", response);
+                    }).catch(async err => {
+                        console.log("Not Refreshed", err);
+                        await store.dispatch('logout').then(() => {
+                            localStorage.removeItem("user");
+                            websocket.user.disconnect();
+                            bus.$router.push({ name: 'login', params: {
+                                err: {
+                                    group: 'auth',
+                                    type: 'error',
+                                    text: "Login failed, Try to login again!",
+                                    title: "Failed",
+                                    duration: 2000,
+                                }
+                            }});
+                        });
+                    });
+
                 });
             }
         }
@@ -71,13 +97,11 @@ router.beforeEach(async (to, from, next) => {
     next()
 });
 
-import "./axios";
-
 Vue.mixin({
     data() {
         return {
-            get apiBaseUrl() {
-                return `${apiConfig.schema}://${apiConfig.baseURL}`;
+            get cdnUrl() {
+                return `${apiConfig.cdnUrl}/uploads`;
             },
             get user() {
                 return store.state.user;
@@ -85,6 +109,19 @@ Vue.mixin({
         }
     },
     methods: {
+        getGrpcErrors(error) {
+            const str = atob(error.metadata['grpc-status-details-bin']);
+            let utf8Encode = new TextEncoder();
+            const bytes = utf8Encode.encode(str);
+            const status = Status.deserializeBinary(bytes);
+            let errors = {};
+            const decoder = new TextDecoder("utf-8");
+            status.getDetailsList().forEach(err => {
+                errors[err.getTypeUrl()] =
+                    decoder.decode(err.getValue());
+            })
+            return errors;
+        },
         log(message, color) {
             color = color || "black";
             switch (color) {
@@ -100,8 +137,6 @@ Vue.mixin({
                 case "warning":  
                     color = "Orange";   
                     break;
-                default: 
-                    color = color;
             }
             console.log("%c" + message, "color:" + color);
         }

@@ -18,6 +18,8 @@ axios.interceptors.response.use(function (response) {
     return response
 }, function (error) {
 
+    console.log(error);
+
     const { config, response: { status } } = error;
     const originalRequest = config;
 
@@ -29,31 +31,6 @@ axios.interceptors.response.use(function (response) {
         if (!isAlreadyFetchingAccessToken) {
             isAlreadyFetchingAccessToken = true;
 
-            // instead of this store call you would put your code to get new token
-            store.dispatch("refreshToken").then(response => {
-                console.log("Refreshed");
-                isAlreadyFetchingAccessToken = false;
-                onAccessTokenFetched(response.data.result.token);
-            }).catch(err => {
-                console.log("Not Refreshed", err);
-
-                store.dispatch('logout').then(() => {
-
-                    localStorage.removeItem("user");
-                    websocket.user.disconnect();
-
-                    bus.$router.push({ name: 'login', params: {
-                        err: {
-                            group: 'auth',
-                            type: 'error',
-                            text: "Login failed, Try to login again!",
-                            title: "Failed",
-                            duration: 2000,
-                        }
-                    }})
-                })
-
-            })
         }
 
         return new Promise((resolve) => {

@@ -1,8 +1,8 @@
-import {bus} from "../main";
-import {store} from "./store";
-import {proto} from "casty-proto/pbjs/proto";
-import {Packet} from "casty-proto/pbjs/packet";
-import {emit} from "casty-proto/pbjs/protocol";
+import {bus} from '../main';
+import {store} from './store';
+import {proto} from 'casty-proto/pbjs/ws.bundle';
+import {Packet} from 'casty-proto/protocol/packet';
+import {emit} from 'casty-proto/protocol/protocol';
 
 function log(gateway, message, color) {
     console.log(

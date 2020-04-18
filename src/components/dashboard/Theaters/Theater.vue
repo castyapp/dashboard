@@ -20,7 +20,7 @@
 
             <div class="member" :key="member.id" v-for="member in members">
                 <div class="online">
-                    <img :src="apiBaseUrl + '/uploads/avatars/' + member.avatar + '.png'"
+                    <img :src="cdnUrl + '/avatars/' + member.avatar + '.png'"
                          class="theater_connected_user_avatar"
                          :alt="member.fullname" />
                     <span class="user_name">{{ member.fullname }}</span>
@@ -264,9 +264,9 @@
             this.$parent.$emit('fl:status', 'close');
             $(".main-container").css( { marginRight : "300px" } );
 
-            this.$store.dispatch("getTheater", theater_id).then(response => {
+            this.$store.dispatch("getTheater", theater_id).then(theater => {
                 this.ready = true;
-                this.theater = response.data.result;
+                this.theater = theater;
             }).catch(console.log);
         },
         destroyed() {

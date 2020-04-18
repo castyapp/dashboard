@@ -36,8 +36,8 @@
                    autocomplete="username" />
 
             <small v-if="errors.username" class="text-danger fa-pull-left text-left">
-                <span class="clearfix" v-for="err in errors.username">
-                    {{ err }}
+                <span class="clearfix">
+                    {{ errors.username }}
                 </span>
             </small>
         </div>
@@ -55,8 +55,8 @@
                    autocomplete="email" />
 
             <small v-if="errors.email" class="text-danger fa-pull-left text-left">
-                <span class="clearfix" v-for="err in errors.email">
-                    {{ err }}
+                <span class="clearfix">
+                    {{ errors.email }}
                 </span>
             </small>
         </div>
@@ -73,8 +73,8 @@
                    autocomplete="password" />
 
             <small v-if="errors.password" class="text-danger fa-pull-left text-left">
-                <span class="clearfix" v-for="err in errors.password">
-                    {{ err }}
+                <span class="clearfix">
+                    {{ errors.password }}
                 </span>
             </small>
         </div>
@@ -91,8 +91,8 @@
                    autocomplete="password" />
 
             <small v-if="errors.password_confirmation" class="text-danger fa-pull-left text-left">
-                <span class="clearfix" v-for="err in errors.password_confirmation">
-                    {{ err }}
+                <span class="clearfix">
+                    {{ errors.password_confirmation }}
                 </span>
             </small>
         </div>
@@ -167,7 +167,7 @@
                 this.loading = true;
                 this.$parent.$refs.topProgress.start();
 
-                this.$store.dispatch('register', {
+                this.$store.dispatch("register", {
                     fullname: this.fullname,
                     email: this.email,
                     username: this.username,
@@ -197,20 +197,9 @@
 
                     this.loading = false;
 
-                    if (typeof error.response !== "undefined"){
-
-                        if (error.response.data.message) {
-                            this.errors = {};
-                            this.$parent.serverError = error.response.data.message;
-                        } else {
-                            this.errors = error.response.data.result;
-                            this.$parent.serverError = "Please check the following error(s)!";
-                        }
-
-                        this.password = '';
-                        this.password_confirmation = '';
-                        this.$parent.successMessage = '';
-
+                    if (error.code === 3){
+                        this.errors = this.getGrpcErrors(error);
+                        this.$parent.serverError = "Please check the form error(s)!";
                         jQuery('#serverError')
                             .addClass('shake animated')
                             .one('webkitAnimationEnd' +
@@ -218,11 +207,13 @@
                                 'MSAnimationEnd ' +
                                 'oanimationend ' +
                                 'animationend', () => {
-
                                 jQuery(this).removeClass();
                             });
-
                     }
+
+                    this.password = '';
+                    this.password_confirmation = '';
+                    this.$parent.successMessage = '';
 
                     this.$parent.$refs.topProgress.done();
                 })

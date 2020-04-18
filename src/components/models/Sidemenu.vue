@@ -33,7 +33,7 @@
         <div class="footer">
             <a class="user-avatar-button" @click.prevent.stop="actionsBtn($event)">
                 <div class="online">
-                    <img :src="apiBaseUrl + '/uploads/avatars/' + user.avatar + '.png'"
+                    <img :src="cdnUrl + '/avatars/' + user.avatar + '.png'"
                          class="avatar"
                          :alt="user.fullname" />
                     <i class="sidemenu-state state-dot"></i>
@@ -61,6 +61,9 @@
         mounted() {
             bus.$on("updated-user", user => {
                 this.user = user;
+            });
+            bus.$on('updated-avatar', avatar => {
+                this.user.avatar = avatar;
             });
         }
     }

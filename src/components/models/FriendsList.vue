@@ -34,7 +34,7 @@
             <li class="offline" :key="user.id" v-for="user in search_result">
                 <a class="friend">
                     <div class="avatar">
-                        <img :src="apiBaseUrl + '/uploads/avatars/' + user.avatar + '.png'"
+                        <img :src="cdnUrl + '/avatars/' + user.avatar + '.png'"
                              alt="Avatar" />
                     </div>
                     <div class="innerDetails">
@@ -72,7 +72,7 @@
                              :to="{ name: 'messages', params: { friend_id: friend.username, friend }}">
 
                     <div class="avatar">
-                        <img :src="apiBaseUrl + '/uploads/avatars/' + friend.avatar + '.png'"
+                        <img :src="cdnUrl + '/avatars/' + friend.avatar + '.png'"
                              alt="Avatar" />
                         <i class="state-dot"></i>
                     </div>
@@ -289,12 +289,12 @@
 
 <script>
 
-    import $ from "jquery";
-    import {bus} from "../../main";
-    import {websocket} from "../../store/ws";
-    import {proto} from 'casty-proto/pbjs/proto';
+    import $ from 'jquery';
+    import {bus} from '../../main';
+    import {websocket} from '../../store/ws';
+    import {proto} from 'casty-proto/pbjs/ws.bundle';
     import {VueContentLoading} from 'vue-content-loading';
-    import NotificationCenter from "./NotificationCenter";
+    import NotificationCenter from './NotificationCenter';
 
     export default {
         props: ['status'],
@@ -434,8 +434,8 @@
                     unread_count: 0,
                 };
                 await this.$store.dispatch("getNotifications").then(response => {
-                    this.notifications.unread_count = response.data.result.unread_count;
-                    let notifications = response.data.result.notifications;
+                    this.notifications.unread_count = response.unread_count;
+                    let notifications = response.data;
                     notifications.forEach((notif, index) => {
                         notifications[index].data = JSON.parse(notif.data);
                     });
@@ -447,10 +447,8 @@
             search_keyword(value) {
                 this.search_result = [];
                 if (value.length > 3){
-                    this.$store.dispatch("searchUser", value).then(response => {
-                        if (response.status === 200){
-                            this.search_result = response.data.result;
-                        }
+                    this.$store.dispatch("searchUser", value).then(users => {
+                        this.search_result = users;
                     });
                 }
             }
@@ -468,9 +466,9 @@
                 this.$parent.friends.push(friend);
             });
 
-            await this.$store.dispatch("getFriendsList").then(response => {
+            await this.$store.dispatch("getFriendsList").then(friends => {
                 this.clearFriendsList();
-                this.setFriends(response.data.result);
+                this.setFriends(friends);
             });
 
             this.friends = this.$parent.friends;
@@ -506,12 +504,14 @@
             });
 
             bus.$on(proto.EMSG[proto.EMSG.PERSONAL_STATE_CHANGED], data => {
-                let decoded = proto.PersonalStateMsgEvent.decode(data);
-                bus.$emit('friend-state-changed', decoded);
-                this.changeUserState(decoded.user, decoded.state);
+                if (data !== null){
+                    let decoded = proto.PersonalStateMsgEvent.decode(data);
+                    bus.$emit('friend-state-changed', decoded);
+                    this.changeUserState(decoded.user, decoded.state);
+                }
             });
 
-            this.getNotifications();
+            await this.getNotifications();
         },
         destroyed() {
             websocket.user.disconnect();

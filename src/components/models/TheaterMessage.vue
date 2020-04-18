@@ -1,7 +1,7 @@
 <template>
 
     <div class="theater-invite-message" v-if="ready">
-        <img :src="apiBaseUrl + '/uploads/posters/' + theater.movie.poster + '.png'"
+        <img :src="cdnUrl + '/posters/' + theater.movie.poster + '.png'"
              alt="Theater" />
         <div class="theater">
             <div class="th-details pull-left">
@@ -61,8 +61,8 @@
         },
         methods: {
             async getTheater(theater_id) {
-                await this.$store.dispatch("getTheater", theater_id).then(response => {
-                    this.theater = response.data.result;
+                await this.$store.dispatch("getTheater", theater_id).then(theater => {
+                    this.theater = theater;
                     this.ready = true;
                 });
             },

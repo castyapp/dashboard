@@ -32,7 +32,7 @@
                             <div class="u-msg message" v-if="chat.type === 'EMSG_CHATS' || chat.own_message">
 
                                 <div class="u-avatar pull-left">
-                                    <img :src="apiBaseUrl + '/uploads/avatars/' + chat.user.avatar + '.png'"
+                                    <img :src="cdnUrl + '/avatars/' + chat.user.avatar + '.png'"
                                          alt="Josh" />
                                 </div>
                                 <span class="u-name text-primary">
@@ -167,11 +167,11 @@
 
 <script>
 
-    import $ from "jquery";
-    import {bus} from "../../main";
-    
-    import {proto} from 'casty-proto/pbjs/proto';
-    import {Packet} from 'casty-proto/pbjs/packet';
+    import $ from 'jquery';
+    import {bus} from '../../main';
+
+    import {proto} from 'casty-proto/pbjs/ws.bundle';
+    import {Packet} from 'casty-proto/protocol/packet';
     
     export default {
         props: ['theater', 'ready'],

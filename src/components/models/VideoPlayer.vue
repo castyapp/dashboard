@@ -63,10 +63,10 @@
     import "plyr/dist/plyr.css";
 
     import Plyr from 'plyr';
-    import {bus} from "../../main";
+    import {bus} from '../../main';
     import {RingLoader} from 'vue-spinners-css';
-    import {proto} from "casty-proto/pbjs/proto";
-    import {emit} from 'casty-proto/pbjs/protocol';
+    import {proto} from 'casty-proto/pbjs/ws.bundle';
+    import {emit} from 'casty-proto/protocol/protocol';
 
     export default {
         name: 'video-player',
@@ -120,7 +120,7 @@
                 let socketConnection = this.$parent.socket.ws;
 
                 this.player = new Plyr('#theater', {
-                    poster: `${this.apiBaseUrl}/uploads/posters/${this.theater.movie.poster}.png`,
+                    poster: `${this.cdnUrl}/posters/${this.theater.movie.poster}.png`,
                     autoplay: false,
                     controls: [
                         'play-large', 
@@ -258,13 +258,13 @@
 
                 // get theater subtitles
                 let tracks = [];
-                await this.$store.dispatch('getTheaterSubtitles', this.theater.id).then(response => {
-                    response.data.result.forEach(subtitle => {
+                await this.$store.dispatch("getTheaterSubtitles", this.theater.id).then(subtitles => {
+                    subtitles.forEach(subtitle => {
                         tracks.push({
                             kind: 'captions',
                             label: subtitle.lang,
                             srclang: subtitle.lang,
-                            src: `${this.apiBaseUrl}/uploads/subtitles/${subtitle.file}.vtt`,
+                            src: `${this.cdnUrl}/subtitles/${subtitle.file}.vtt`,
                         });
                     });
                 });

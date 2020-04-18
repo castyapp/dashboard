@@ -8,13 +8,17 @@
     "build": "export TARGET_BUILD=web && ./node_modules/.bin/vue-cli-service build"
   },
   "dependencies": {
+    "@improbable-eng/grpc-web": "^0.12.0",
+    "@stackpath/node-grpc-error-details": "^1.0.0",
     "animate.css": "^3.7.2",
     "axios": "^0.19.2",
     "bootstrap": "^4.4.1",
     "bootstrap-select": "^1.13.10",
     "can-autoplay": "^3.0.0",
-    "casty-proto": "^1.0.4",
+    "casty-proto": "1.1.5",
     "font-awesome": "^4.7.0",
+    "google-protobuf": "^3.11.4",
+    "grpc-web": "^1.0.7",
     "jquery": "^3.4.1",
     "mini-css-extract-plugin": "^0.8.2",
     "moment-timezone": "^0.5.28",

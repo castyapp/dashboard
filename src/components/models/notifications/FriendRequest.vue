@@ -2,14 +2,14 @@
 
     <div class="friend-invite">
 
-        <img :src="apiBaseUrl + '/uploads/avatars/' + notification.from_user.avatar + '.png'" class="avatar" :alt="notification.from_user.fullname" />
+        <img :src="cdnUrl + '/avatars/' + notification.fromUser.avatar + '.png'" class="avatar" :alt="notification.fromUser.fullname" />
 
         <div class="notification-details">
 
             <div class="notification-title">
                 <span>New friend request:</span>
                 <div class="nc-new-friend-name">
-                    {{ notification.from_user.fullname }}
+                    {{ notification.fromUser.fullname }}
                 </div>
             </div>
 
@@ -86,7 +86,7 @@
                 if (!this.notification.accepted) {
                     this.loading = true;
                     this.$store.dispatch("acceptFriendRequest", requestID).then(() => {
-                        bus.$emit("new-friend", this.notification.from_user);
+                        bus.$emit("new-friend", this.notification.fromUser);
                         this.$notify({
                             group: 'dashboard',
                             type: 'success',

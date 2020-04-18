@@ -92,13 +92,11 @@
         methods: {
             onCaptchaVerified(recaptchaToken) {
 
-                this.loading = true;
-
                 jQuery('#serverError').removeClass();
 
                 this.$parent.$refs.topProgress.start();
 
-                this.$store.dispatch('createAuthToken', {
+                this.$store.dispatch('login', {
                     user: this.user,
                     pass: this.pass,
                     gToken: recaptchaToken,
@@ -122,35 +120,25 @@
                         this.$router.push({ name: 'dashboard' })
                     }, 1000);
 
-                }).catch(error => {
+                }).catch(err => {
 
                     this.loading = false;
 
-                    if (typeof error.response !== "undefined"){
+                    this.$parent.serverError = err.message;
 
-                        if (error.response.data.message) {
-                            this.errors = {};
-                            this.$parent.serverError = error.response.data.message;
-                        } else {
-                            this.errors = error.response.data.result;
-                            this.$parent.serverError = "Invalid credentials!";
-                        }
+                    this.password = '';
+                    this.$parent.successMessage = '';
 
-                        this.password = '';
-                        this.$parent.successMessage = '';
+                    jQuery('#serverError')
+                        .addClass('shake animated')
+                        .one('webkitAnimationEnd' +
+                            ' mozAnimationEnd ' +
+                            'MSAnimationEnd ' +
+                            'oanimationend ' +
+                            'animationend', () => {
 
-                        jQuery('#serverError')
-                            .addClass('shake animated')
-                            .one('webkitAnimationEnd' +
-                                ' mozAnimationEnd ' +
-                                'MSAnimationEnd ' +
-                                'oanimationend ' +
-                                'animationend', () => {
-
-                                jQuery(this).removeClass();
-                            });
-
-                    }
+                            jQuery(this).removeClass();
+                        });
 
                     this.$parent.$refs.topProgress.done();
                     this.$refs.recaptcha.reset();
@@ -159,9 +147,11 @@
 
             },
             onCaptchaExpired() {
+                this.loading = false;
                 this.$refs.recaptcha.reset();
             },
             login() {
+                this.loading = true;
                 this.$refs.recaptcha.execute();
             },
         },
