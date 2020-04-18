@@ -278,10 +278,8 @@
 
 <script>
 
-    const jQuery = require("jquery");
     import VueLoadingButton from 'vue-loading-button'
-    import "bootstrap-select/dist/js/bootstrap-select.js";
-    import "bootstrap-select/dist/css/bootstrap-select.css";
+    import jQuery from "jquery";
     import DropdownMenu from "./../../models/dropdown-menu/DropdownMenu";
 
     const MovieTypeUNKNOWN = 0,

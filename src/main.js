@@ -33,6 +33,8 @@ const router = new VueRouter({
 
 import "bootstrap/dist/js/bootstrap.min.js";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap-select/dist/js/bootstrap-select.js";
+import "bootstrap-select/dist/css/bootstrap-select.css";
 import "animate.css/animate.min.css";
 import "./assets/css/app.css";
 import "./assets/css/icofont.css";
