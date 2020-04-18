@@ -1,9 +1,9 @@
 FROM ubuntu
 
-RUN apt update &&\
-    apt -y upgrade
+RUN apt-get update &&\
+    apt-get -y upgrade
 
-RUN apt install -y curl nano
+RUN apt-get install -y curl nano
 
 RUN curl https://getcaddy.com | bash -s personal http.cors,http.grpc
 
@@ -20,7 +20,7 @@ WORKDIR /casty.caddy
 RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
 
 # Install nodejs
-RUN yum install -y nodejs
+RUN apt-get install -y nodejs
 
 # Check nodejs version
 RUN node --version
