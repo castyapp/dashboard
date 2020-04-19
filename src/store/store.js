@@ -583,20 +583,23 @@ export const store = new Vuex.Store({
             })
         },
         OAUTHCallback(context, {service, code}) {
-            return new Promise((resolve, reject) => {
 
+            let serviceId = 0;
+            switch (service) {
+                case "google": serviceId = 1; break;
+                case "discord": serviceId = 2; break;
+            }
+
+            return new Promise((resolve, reject) => {
                 const request = new OAUTHRequest();
                 request.setCode(code);
-                request.setService(service);
-
+                request.setService(serviceId);
                 const call = authService.callbackOAUTH(request, {}, (err, response) => {
                     if (!err) {
                         resolve(response.getMessage());
                     }
                 });
-                call.on('error', err => {
-                    reject(err);
-                });
+                call.on('error', reject);
             })
         }
     },
