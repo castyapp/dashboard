@@ -596,7 +596,11 @@ export const store = new Vuex.Store({
                 request.setService(serviceId);
                 const call = authService.callbackOAUTH(request, {}, (err, response) => {
                     if (!err) {
-                        resolve(response.getMessage());
+                        const decoder = new TextDecoder("utf-8");
+                        const token = decoder.decode(response.getToken());
+                        const refreshed_token = decoder.decode(response.getRefreshedToken());
+                        context.commit('retrieveToken', {token, refreshed_token});
+                        resolve(response)
                     }
                 });
                 call.on('error', reject);
