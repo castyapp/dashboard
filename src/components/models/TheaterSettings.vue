@@ -1,0 +1,988 @@
+<template>
+
+    <div id="settings">
+
+        <div class="modal modal-dark fade" id="mediaSource" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+
+                    <div class="modal-body pb-0">
+
+                        <h5>Manage your media sources here</h5>
+
+                        <form class="form-dark">
+                            <div class="form-group p-0">
+                                <label for="media_source" class="pull-left">
+                                    <i class="icofont-ui-movie mr-1"></i>
+                                    Media Source Uri
+                                </label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="media_source"
+                                       v-model="newMediaSourceUri"
+                                       placeholder="Enter your media source uri here"
+                                       required="required"
+                                       autocomplete="off" />
+                            </div>
+                        </form>
+
+                        <div v-if="newMediaSource.loading">
+                            Loading...
+                        </div>
+
+                        <div class="media-source-preview mb-3" v-if="newMediaSource.loaded">
+
+                            <img v-if="newMediaSource.data.banner !== undefined" :src="newMediaSource.data.banner"
+                                 :alt="newMediaSource.data.title" />
+
+                            <div v-else class="default-preview-banner">
+                                <i class="icofont-ui-movie"></i>
+                            </div>
+
+                            <div class="preview-info">
+                                <div class="form-dark">
+                                    <div class="form-group p-0 editable-preview-title">
+                                        <input type="text"
+                                               v-model="newMediaSource.data.title"
+                                               class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="preview-duration">
+                                    <span class="badge badge-warning">
+                                        <i class="icofont-clock-time"></i>
+                                        {{ getHumanDuration(newMediaSource.data.length * 1000) }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="preview-change">
+                                <VueLoadingButton
+                                        type="button"
+                                        @click.native="saveNewMedia(newMediaSource)"
+                                        :loading="saveNewMediaLoading"
+                                        class="btn-theater-action">
+                                    Select
+                                </VueLoadingButton>
+                            </div>
+                        </div>
+
+                        <div class="loading-media-sources p-3" v-if="mediaSourcesLoading">
+                            Loading ...
+                        </div>
+
+                        <div class="media-sources" v-else>
+
+                            <MediaSource class="selected-media-source"
+                                         :mediaSource="theater.media_source"
+                                         :selected="true" />
+
+                            <MediaSource :key="mediaSource.id"
+                                         v-for="mediaSource in mediaSources"
+                                         :selectedMediaSourceId="theater.media_source.id"
+                                         :mediaSource="mediaSource" />
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ml-3 mr-3 height-full">
+
+            <div class="title-border-bottom pt-3">
+                <strong class="side-component-title">
+                    <i class="icofont-gear mr-2"></i>
+                    Settings
+                </strong>
+                <small class="border-left-title">
+                    You can configure your theater here
+                </small>
+            </div>
+
+            <div class="clearfix"></div>
+
+            <div class="form-dark">
+
+                <div class="form-group">
+
+                    <label for="theater_name">
+                        <i class="icofont-ui-movie mr-1"></i>
+                        Theater description
+                    </label>
+
+                    <input type="text"
+                           class="form-control"
+                           id="theater_name"
+                           v-model="theater_description"
+                           placeholder="Enter your theater description here"
+                           required="required"
+                           autocomplete="off" />
+
+                </div>
+
+                <div class="form-group">
+
+                    <div class="media-source-container">
+                        <div class="add-media-source-title pull-left">
+                            <i class="icofont-link mr-1"></i>
+                            Media Source | <small>You can use youtube or a media download uri</small>
+                        </div>
+                    </div>
+
+                    <div class="media-source-preview" v-if="theater.media_source.uri !== null">
+
+                        <img v-if="theater.media_source.banner !== undefined" :src="theater.media_source.banner"
+                             :alt="theater.media_source.title" />
+
+                        <div v-else class="default-preview-banner">
+                            <i class="icofont-ui-movie"></i>
+                        </div>
+
+                        <div class="preview-info">
+                            <span class="selected-preview-title">
+                                <i :class="getMediaSourceTypeIcon(theater.media_source)"></i>
+                                {{ theater.media_source.title }}
+                            </span>
+                            <div class="preview-duration">
+                                <span class="badge badge-warning">
+                                    <i class="icofont-clock-time"></i>
+                                    {{ getHumanDuration(theater.media_source.length * 1000) }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="preview-change">
+                            <VueLoadingButton
+                                    @click.native="openMediaSourcesModal"
+                                    type="button"
+                                    class="btn btn-primary">
+                                Change
+                            </VueLoadingButton>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="form-group" v-if="theater.media_source.type !== 1">
+
+                    <label for="movie_subtitles">
+                        <i class="icofont-cc mr-1"></i>
+                        Theater movie subtitles
+                        <small class="text-warning">optional</small>
+                    </label>
+                    <div class="clearfix"></div>
+
+                    <div class="v-loading">
+                        <EllipsisLoader :loading="subtitlesLoading" class="v-loading" :color="'#316bff'" />
+                    </div>
+
+                    <div v-if="!subtitlesLoading">
+                        
+                        <div class="subtitles">
+
+                            <div class="subtitle row" :key="index" v-for="(subtitle, index) in subtitles">
+
+                                <div class="col-md-3 pull-left">
+                                    <input :disabled="subtitle.uploading || subtitle.uploaded || subtitle.fromApi"
+                                        :id="'subtitle-lang-' + index"
+                                        type="text"
+                                        class="form-control subtitle-language "
+                                        placeholder="Language"
+                                        v-model="subtitle.lang"
+                                        autocomplete="off" 
+                                        required />
+                                </div>
+                                
+                                <input :disabled="subtitle.uploading || subtitle.uploaded || subtitle.fromApi"
+                                        :id="'subtitle-' + index"
+                                        type="file"
+                                        class="form-control hidden"
+                                        autocomplete="off"
+                                        @change="onChangeSubtitle($event, index)" 
+                                        required />
+
+                                <div class="col-md-6 pull-left">
+                                    <button
+                                        :disabled="subtitle.uploading || subtitle.uploaded || subtitle.fromApi"
+                                        type="button" 
+                                        class="choose-subtitle-btn" 
+                                        @click="onClickAddSubtitle(index)">
+
+                                        {{ subtitle.file.name !== undefined ? subtitle.file.name : 'Choose your subtitle' }}
+                                        <i class="icofont-file-text"></i>
+
+                                    </button>
+                                </div>
+
+                                <div class="col-md-2 pull-left">
+                                    <RingLoader class="file-uploading-spinner pull-left" 
+                                        :color="'#316cff'" 
+                                        :size="25"
+                                        :loading="subtitle.uploading" />
+
+                                    <button type="button" 
+                                        class="remove-subtitle-btn pull-left" 
+                                        v-if="(subtitle.file.name !== undefined || index !== 0) && !subtitle.uploading" 
+                                        @click="removeSubtitle(index)">
+                                        <i class="icofont-trash"></i>
+                                    </button>
+
+                                    <i v-if="subtitle.uploaded" 
+                                        class="succeed-upload-subtitle icofont-check text-success pull-left"></i>
+                                    
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="clearfix"></div>
+
+                        <button type="button" class="plus-subtitle-btn mt-2" @click="addSubtitle" v-if="subtitles.length < 4">
+                            <i class="icofont-plus"></i>
+                            Add another one
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>
+                        <i class="icofont-safety-hat mr-1"></i>
+                        Select your Theater Privacy
+                    </label>
+                    <div class="clearfix"></div>
+
+                    <span>You can config who can join the theater</span>
+                    <DropdownMenu :config="privacy_config"
+                                  @setSelectedOption="setNewPrivacyOption($event)"
+                                  class="mt-2" />
+
+                    <div v-if="errors.privacy" class="text-danger text-left errors">
+                        <p>{{ errors.privacy }}</p>
+                    </div>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>
+                        <i class="icofont-safety-hat mr-1"></i>
+                        Select your Theater Video Player Access
+                    </label>
+                    <div class="clearfix"></div>
+
+                    <span>You can config who can control the video player, for example: Pause, Play, Forward</span>
+                    <DropdownMenu :config="player_access_config"
+                                  @setSelectedOption="setNewVideoPlayerAccessOption($event)"
+                                  class="mt-2" />
+
+                    <div v-if="errors.player_access_control" class="text-danger text-left errors">
+                        <p>{{ errors.player_access_control }}</p>
+                    </div>
+
+                </div>
+
+                <VueLoadingButton 
+                    ref="saveBtn"
+                    @click.native="saveChanges" 
+                    type="button" 
+                    :loading="saveLoading"
+                    class="btn btn-primary m-2 pull-right" 
+                    :disabled="!hasChanges">
+                    Save changes
+                </VueLoadingButton>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</template>
+
+<style>
+
+    .succeed-upload-subtitle {
+        padding: 6px;
+        font-size: 20px;
+    }
+
+    .file-uploading-spinner.ml-2 {
+        padding: 7px 0;
+    }
+
+    .bg-accent-dark {
+        background: #131212;
+    }
+
+    .default-preview-banner {
+        background: #333333;
+        width: 150px;
+        height: 60px;
+        border-radius: 4px;
+        text-align: center;
+        align-content: center;
+        display: grid;
+        font-size: 40px;
+        color: #131212;
+    }
+
+    .preview-change {
+        float: right;
+        font-size: 39px;
+        color: white;
+        padding: 0 15px;
+        align-items: center;
+        align-content: center;
+        display: flex;
+    }
+
+    .media-sources {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+
+    .media-sources > .media-source {
+        width: 100%;
+        background: #131212;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        display: flow-root;
+        align-content: center;
+    }
+
+    .media-source > button {
+        float: right;
+        padding: 1px 7px;
+        margin-top: 3px;
+    }
+
+    .media-source > span.media-source-title {
+        float: left;
+        margin-top: 5px;
+    }
+
+    span.media-source-title {
+        width: 450px;
+        text-align: left;
+    }
+
+    .badge.badge-primary.external-link > a {
+        color: #fff;
+    }
+
+    .badge.badge-primary.external-link {
+        margin-left: 5px;
+    }
+
+    .media-source-details > img {
+        width: 60px;
+        height: 35px;
+        border-radius: 4px;
+        margin-right: 10px;
+    }
+
+    .media-source-details {
+        float: left;
+        align-items: center;
+        display: flex;
+    }
+
+    .media-source-container {
+        display: flow-root;
+        align-items: center;
+    }
+
+    span.preview-title {
+        width: 360px;
+        text-align: left;
+    }
+
+    .loading-media-sources {
+        margin: 20px;
+    }
+
+    .settings-contents {
+        display: flow-root;
+    }
+
+    .settings-menu {
+        width: 210px;
+        /*background: #151515;*/
+        margin: 20px;
+        height: 100vh;
+    }
+
+    .settings-menu > ul > li > a {
+        width: 100%;
+        margin: 5px 0;
+        border-radius: 4px;
+        padding: 4px 10px;
+        float: left;
+        text-decoration: none;
+        color: #FFFFFF;
+    }
+
+    .settings-menu > ul > li > a > i {
+        float: right;
+        margin-top: 3px;
+    }
+
+    .settings-menu > ul > li > a:hover,
+    .settings-menu > ul > li > a.active {
+        background: #316cff;
+    }
+
+    .settings-menu > ul {
+        padding: 10px;
+        margin: 0;
+        list-style: none;
+        background: #181818;
+        display: grid;
+        border-radius: 5px;
+    }
+
+    .preview-duration {
+        clear: both;
+        float: left;
+    }
+
+    .btn-save-new-media {
+        display: flex;
+        align-items: center;
+        float: right;
+        position: absolute;
+        right: 100px;
+        margin: 10px 0;
+    }
+
+    .media-source.selected-media-source {
+        background: #1a7bff;
+    }
+
+    .selected-btn {
+        margin: 5px !important;
+    }
+
+    .editable-preview-title,
+    .form-dark > .form-group.editable-preview-title input {
+        background: #181818 !important;
+        cursor: pointer;
+    }
+
+    .form-dark > .form-group input.subtitle-language {
+        float: left;
+        background: #202020 !important;
+    }
+    button.choose-subtitle-btn:hover {
+        background: #141313 !important;
+        color: #6c757d;
+    }
+    .subtitles {
+        margin: 8px 0;
+    }
+    button.choose-subtitle-btn {
+        background: #202020;
+        color: #6c757d;
+        border-radius: 3px;
+        border: none;
+        padding: 7px 10px;
+        width: 100%;
+    }
+    .subtitle {
+        width: 100%;
+        margin: 0 0 10px 0;
+    }
+    button.plus-subtitle-btn {
+        background: #077bff;
+        border: none;
+        border-radius: 2px;
+        font-size: 14px;
+        font-weight: 100;
+        color: #ffffff;
+        margin-left: 2px;
+    }
+    button.remove-subtitle-btn {
+        border: none;
+        padding: 5px 10px;
+        background: transparent;
+        color: #F44336;
+    }
+
+</style>
+
+<script>
+
+    import $ from 'jquery'
+    import MediaSource from '../models/MediaSource'
+    import VueLoadingButton from 'vue-loading-button'
+    import {proto} from 'casty-proto/pbjs/ws.bundle'
+    import {RingLoader, EllipsisLoader} from 'vue-spinners-css'
+    const humanizeDuration = require('humanize-duration')
+    import DropdownMenu from '../models/dropdown-menu/DropdownMenu'
+
+    export default {
+        name: 'theater-settings',
+        props: ['theater'],
+        components: {
+            VueLoadingButton,
+            DropdownMenu,
+            MediaSource,
+            RingLoader,
+            EllipsisLoader,
+        },
+        data() {
+            return {
+
+                hasChanges: false,
+                saveLoading: false,
+
+                theater_description: null,
+
+                newMediaSourceUri: null,
+                newMediaSource: {
+                    loading: false,
+                    loaded: false,
+                    data: {},
+                },
+
+                saveNewMediaLoading: false,
+
+                mediaSourcesLoading: false,
+                mediaSources: [],
+
+                errors: {},
+
+                poster: null,
+                movie_banner: null,
+                movie_file: null,
+
+                subtitles: [
+                    {
+                        lang: "",
+                        file: {},
+                        uploading: false,
+                        uploaded: false,
+                    },
+                ],
+                subtitlesLoading: true,
+
+                privacy: {},
+                privacy_config: {
+                    options: [
+                        {
+                            id: proto.PRIVACY.PUBLIC,
+                            value: "Public",
+                            icon: "icofont-globe",
+                            description: "Everybody has access to your theater!"
+                        },
+                        {
+                            id: proto.PRIVACY.FRIENDS,
+                            value: "Friends",
+                            icon: "icofont-users",
+                            description: "Only your friends have access to your theater!"
+                        },
+                        {
+                            id: proto.PRIVACY.PRIVATE,
+                            value: "Private",
+                            icon: "icofont-user",
+                            description: "Only you have access to your theater!"
+                        },
+                    ],
+                    placeholder: "Public",
+                    borderRadius: "3px",
+                    backgroundColor: "#131212",
+                    border: "none",
+                    textColor: "#eeeeee",
+                    textSize: 14,
+                },
+
+                player_access_control: {},
+                player_access_config: {
+                    options: [
+                        {
+                            id: proto.VIDEO_PLAYER_ACCESS.ACCESS_BY_EVERYONE,
+                            value: "Public",
+                            icon: "icofont-globe",
+                            description: "Everybody can control theater's video player!"
+                        },
+                        {
+                            id: proto.VIDEO_PLAYER_ACCESS.ACCESS_BY_FRIENDS,
+                            value: "Friends",
+                            icon: "icofont-users",
+                            description: "Only your friends have access to theater's video player!"
+                        },
+                        {
+                            id: proto.VIDEO_PLAYER_ACCESS.ACCESS_BY_USER,
+                            value: "Private",
+                            icon: "icofont-user",
+                            description: "Only you can control theater's video player!"
+                        },
+                    ],
+                    placeholder: "Public",
+                    borderRadius: "3px",
+                    backgroundColor: "#131212",
+                    border: "none",
+                    textColor: "#eeeeee",
+                    textSize: 14,
+                },
+
+                changes: {
+                    description: false,
+                    privacy: false,
+                    video_player_access: false,
+                },
+
+            }
+        },
+        watch: {
+            newMediaSourceUri(value) {
+                if (value !== null || value !== ""){
+                    this.parseMediaSourceUri()
+                }
+            },
+            theater_description(description) {
+                this.$parent.$emit('theater-description-changed', description);
+                if (description !== null && description !== "") {
+                    if (this.theater.description !== description) {
+                        this.changes.description = true
+                    } else {
+                        this.changes.description = false
+                    }
+                }
+            },
+            changes: {
+                deep: true,
+                handler() {
+                    this.checkChanges();
+                },
+            },
+        },
+        methods: {
+            
+            setSubtitlesLoading(loading) {
+                this.subtitlesLoading = loading
+            },
+
+            setSubtitles(subtitles) {
+                this.setSubtitlesLoading(false)
+                if (subtitles.length > 0) {
+                    this.subtitles = []
+                    subtitles.forEach(subtitle => {
+                        subtitle.uploading = false
+                        subtitle.uploaded = false
+                        subtitle.fromApi = true
+                        subtitle.file = {name: `${subtitle.file}.vtt`}
+                        this.subtitles.push(subtitle)
+                    });
+                } else {
+                    this.subtitles = [
+                        {
+                            lang: "",
+                            file: {},
+                            uploading: false,
+                            uploaded: false,
+                        },
+                    ]
+                }
+            },
+
+            async saveChanges() {
+                const data = {
+                    form: {
+                        description: this.theater_description,
+                        privacy: this.privacy.id,
+                        video_player_access: this.player_access_control.id,
+                    },
+                    changes: this.changes,
+                }
+                this.saveLoading = true;
+                await this.$store.dispatch('updateTheater', data).then(response => {
+                    
+                    if (this.changes.description) {
+                        this.theater.description = data.form.description
+                        this.changes.description = false
+                    }
+                    if (this.changes.privacy) {
+                        this.theater.privacy = data.form.privacy
+                        this.changes.privacy = false
+                    }
+                    if (this.changes.video_player_access) {
+                        this.theater.video_player_access = data.form.video_player_access
+                        this.changes.video_player_access = false
+                    }
+
+                    this.$notify({
+                        group: 'dashboard',
+                        type: 'success',
+                        text: "Theater updated successfully!",
+                        title: "Success",
+                        duration: 2000,
+                    });
+
+                }).catch(err => {
+                    this.$notify({
+                        group: 'dashboard',
+                        type: 'error',
+                        text: "Validation error!",
+                        title: "Failed",
+                        duration: 2000,
+                    });
+                })
+
+                this.saveLoading = false;
+            },
+
+            checkChanges() {
+                if(this.changes.description || this.changes.video_player_access || this.changes.privacy) {
+                    this.hasChanges = true
+                } else {
+                    this.hasChanges = false
+                }
+            },
+            
+            setNewPrivacyOption(selectedOption) {
+                this.privacy_config.placeholder = selectedOption.value;
+                this.privacy = selectedOption;
+                if (this.theater.privacy !== selectedOption.id) {
+                    this.changes.privacy = true
+                } else {
+                    this.changes.privacy = false
+                }
+            },
+
+            setNewVideoPlayerAccessOption(selectedOption) {
+                this.player_access_config.placeholder = selectedOption.value;
+                this.player_access_control = selectedOption;
+                if (this.theater.video_player_access !== selectedOption.id) {
+                    this.changes.video_player_access = true
+                } else {
+                    this.changes.video_player_access = false
+                }
+            },
+
+            onDropInMovieBanner(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                let files = e.dataTransfer.files;
+                this.readMovieBannerFile(files[0]);
+            },
+
+            onChangeMovieBanner(e) {
+                let files = e.target.files;
+                this.readMovieBannerFile(files[0]);
+            },
+
+            readMovieBannerFile(file) {
+                let reader = new FileReader();
+                reader.onload = (e) => {
+                    this.movie_banner = e.target.result;
+                    this.poster       = file;
+                };
+                reader.readAsDataURL(file);
+            },
+
+            removeBanner() {
+                this.movie_banner = null;
+            },
+
+            onClickFileInput(e) {
+                $(e.target).find("input[type=file]").trigger("click");
+            },
+
+            getHumanDuration(duration) {
+                return humanizeDuration(duration);
+            },
+
+            saveNewMedia(mediaSource) {
+
+                this.saveNewMediaLoading = true;
+
+                let payload = {
+                    title: mediaSource.data.title,
+                    uri:   mediaSource.data.uri,
+                };
+
+                this.$store.dispatch("saveNewMediaSource", payload).then(response => {
+                    this.saveNewMediaLoading = false;
+
+                    this.$bus.$emit("new-media-source", response.data.result);
+
+                    // empty the parse media source
+                    this.newMediaSource.loading = false;
+                    this.newMediaSource.loaded = false;
+                    this.newMediaSource.data = {};
+                    this.newMediaSourceUri = null;
+
+                }).catch(() => {
+                    this.saveNewMediaLoading = false;
+                });
+
+            },
+
+            parseMediaSourceUri() {
+
+                this.newMediaSource.loading = true;
+                this.newMediaSource.loaded = false;
+                this.newMediaSource.data = {};
+
+                this.$store.dispatch("parseMediaSourceUri", this.newMediaSourceUri).then(response => {
+                    this.newMediaSource.loaded = true;
+                    this.newMediaSource.data = response.data.result;
+                    this.newMediaSource.loading = false;
+                }).catch(() => {
+                    this.newMediaSource.loading = false;
+                });
+
+            },
+
+            loadMediaSources() {
+
+                this.mediaSourcesLoading = true;
+                this.mediaSources = {};
+
+                this.$store.dispatch("loadMediaSources").then(response => {
+                    this.mediaSources = response.data.result;
+                    this.mediaSourcesLoading = false;
+                }).catch(() => {
+                    this.mediaSourcesLoading = false;
+                });
+
+            },
+
+            openMediaSourcesModal() {
+                $("#mediaSource").modal();
+                this.loadMediaSources();
+            },
+
+            async onChangeSubtitle(e, index) {
+                let files = e.target.files;
+                this.subtitles[index].file = files[0];
+                this.subtitles[index].uploading = true
+
+                const form = {
+                    subtitle: this.subtitles[index],
+                    media_source_id: this.theater.media_source.id,
+                }
+
+                await this.$store.dispatch('uploadSubtitle', form).then(response => {
+                    this.subtitles[index].uploaded = true
+                }).catch(console.log)
+
+                this.subtitles[index].uploading = false
+            },
+
+            onClickAddSubtitle(index) {
+                if (this.subtitles[index].lang === '') {
+                    $(`input#subtitle-lang-${index}`).focus()
+                    $(`input#subtitle-lang-${index}`)
+                        .addClass('shake animated')
+                        .one('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', () => {
+                            $(`input#subtitle-lang-${index}`).removeClass('shake animated');
+                        });
+                } else {
+                    $(`input#subtitle-${index}`).trigger("click");
+                }
+            },
+
+            removeSubtitle(index) {
+                if (index === 0) {
+                    if (this.subtitles.length > 1) {
+                        this.subtitles.splice(index, 1)
+                    } else {
+                        this.subtitles[index].lang = ""
+                        this.subtitles[index].file = {}
+                        this.subtitles[index].uploading = false
+                        this.subtitles[index].uploaded = false
+                    }
+                } else {
+                    this.subtitles.splice(index, 1)
+                }
+            },
+
+            addSubtitle() {
+                if (this.subtitles.length < 4) {
+                    this.subtitles.push({
+                        lang: "",
+                        file: {},
+                        uploading: false,
+                        uploaded: false,
+                    });
+                }
+            },
+
+        },
+        mounted() {
+            this.theater_description = this.theater.description;
+
+            switch (this.theater.privacy) {
+                case proto.PRIVACY.PRIVATE:
+                    this.privacy = {
+                        id: proto.PRIVACY.PRIVATE,
+                        value: "Private",
+                        icon: "icofont-user",
+                        description: "Only you have access to your theater!"
+                    };
+                    this.privacy_config.placeholder = "Private";
+                    break
+                case proto.PRIVACY.FRIENDS:
+                    this.privacy = {
+                        id: proto.PRIVACY.FRIENDS,
+                        value: "Friends",
+                        icon: "icofont-users",
+                        description: "Only your friends have access to your theater!"
+                    };
+                    this.privacy_config.placeholder = "Friends";
+                    break
+                case proto.PRIVACY.PUBLIC:
+                    this.privacy = {
+                        id: proto.PRIVACY.PUBLIC,
+                        value: "Public",
+                        icon: "icofont-globe",
+                        description: "Everybody has access to your theater!"
+                    };
+                    this.privacy_config.placeholder = "Public";
+                    break
+            }
+
+            switch (this.theater.video_player_access) {
+                case proto.VIDEO_PLAYER_ACCESS.ACCESS_BY_USER:
+                    this.player_access_control = {
+                        id: proto.VIDEO_PLAYER_ACCESS.ACCESS_BY_USER,
+                        value: "Private",
+                        icon: "icofont-user",
+                        description: "Only you can control theater's video player!"
+                    };
+                    this.player_access_config.placeholder = "Private";
+                    break
+                case proto.VIDEO_PLAYER_ACCESS.ACCESS_BY_FRIENDS:
+                    this.player_access_control = {
+                        id: proto.VIDEO_PLAYER_ACCESS.ACCESS_BY_FRIENDS,
+                        value: "Friends",
+                        icon: "icofont-users",
+                        description: "Only your friends have access to theater's video player!"
+                    };
+                    this.player_access_config.placeholder = "Friends";
+                    break
+                case proto.VIDEO_PLAYER_ACCESS.ACCESS_BY_EVERYONE:
+                    this.player_access_control = {
+                        id: proto.VIDEO_PLAYER_ACCESS.ACCESS_BY_EVERYONE,
+                        value: "Public",
+                        icon: "icofont-globe",
+                        description: "Everybody can control theater's video player!"
+                    };
+                    this.player_access_config.placeholder = "Public";
+                    break
+            }
+
+            this.$bus.$on('new-media-source', mediaSource => {
+                this.theater.media_source = mediaSource;
+            });
+
+        },
+    }
+
+</script>

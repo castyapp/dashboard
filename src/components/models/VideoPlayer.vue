@@ -2,33 +2,33 @@
 
     <div class="vide-player">
 
+        <div class="theater-summary-info pl-3 pr-3" v-if="theater.media_source.title !== undefined">
+            <strong class="pull-left">Watching {{ theater.media_source.title }}</strong>
+        </div>
+
         <div v-if="!autoPlayEnabled" class="autoplay-warning">
             Consider enable auto-play on your browser!
         </div>
 
         <div v-else>
             <video id="theater" class="full-width" crossorigin></video>
-            <div class="members-loading" v-if="syncing">
-                Syncing...
-                <RingLoader class="members-loading-spinner"
-                            :size="25"
-                            :color="'#FFFFFF'"
-                            :loading="true" />
-            </div>
         </div>
-
-        <small class="movie-creator" v-if="theater.movie.length !== undefined">
-            <i class="icofont-clock-time"></i>
-            <span>
-                {{ secondsToHms(theater.movie.length) }}
-            </span>
-        </small>
 
     </div>
 
 </template>
 
 <style scoped>
+
+    video#theater {
+        background: #000000;
+    }
+
+    .theater-summary-info {
+        background: #316cff;
+        padding: 4px;
+        display: flow-root;
+    }
 
     .members-loading-spinner {
         float: right;
@@ -60,255 +60,315 @@
 
 <script>
 
-    import "plyr/dist/plyr.css";
+    import 'plyr/dist/plyr.css'
 
-    import Plyr from 'plyr';
-    import {bus} from '../../main';
-    import {RingLoader} from 'vue-spinners-css';
-    import {proto} from 'casty-proto/pbjs/ws.bundle';
-    import {emit} from 'casty-proto/protocol/protocol';
+    import Plyr from 'plyr'
+    import log from '../../store/logging'
+    import {RingLoader} from 'vue-spinners-css'
+    import {proto} from 'casty-proto/pbjs/ws.bundle'
+    import {emit} from 'casty-proto/protocol/protocol'
 
     export default {
         name: 'video-player',
-        props: ['theater'],
+        props: ['theater', 'subtitles'],
         data() {
             return {
+                buffered: false,
+                buffering: false,
+                ws: null,
                 autoPlayEnabled: true,
                 player: null,
-                syncing: false,
+                syncing: true,
                 synced: false,
+                user: {},
+                sentSyncMeAt: null,
             }
         },
         components: {
             RingLoader,
         },
         methods: {
-            log(message, color) {
-                console.log(
-                    `%c[VIDEO PLAYER]` + `%c ${message}`, 
-                    "font-size: 13px; color:#FFFFFF;", 
-                    `font-size: 13px; color:${color};`
-                );
+            timeNow() {
+                return Math.round(new Date().getTime()) / 1000
             },
-            secondsToHms(d) {
-                d = Number(d);
-                let h = Math.floor(d / 3600);
-                let m = Math.floor(d % 3600 / 60);
-                let s = Math.floor(d % 3600 % 60);
-                let hours = h.toString().length > 1 ? h.toString() : `0${h.toString()}`;
-                let minutes = m.toString().length > 1 ? m.toString() : `0${m.toString()}`;
-                let seconds = s.toString().length > 1 ? s.toString() : `0${s.toString()}`;
-                if (h === 0){
-                    return `${minutes}:${seconds}`;
+            sync() {
+                this.sentSyncMeAt = this.timeNow()
+                log("VIDEO PLAYER", "Sending sync request...", "yellow");
+                emit(this.ws, proto.EMSG.SYNC_ME, proto.TheaterVideoPlayer, {});
+            },
+            onPlaying() {
+                log("VIDEO PLAYER", `Playing at ${this.player.currentTime}!`, 'green');
+                if (!this.player.fromSocket) {
+                    emit(this.ws, proto.EMSG.THEATER_PLAY, proto.TheaterVideoPlayer, {
+                        theaterId:     this.theater_id,
+                        userId:        this.user.id,
+                        currentTime:   this.player.currentTime,
+                        state:         proto.TheaterVideoPlayer.State.PLAYING,
+                    });
+                } else {
+                    console.log("Request to play while on socket mode!");
+                    this.player.fromSocket = false;
                 }
-                return `${hours}:${minutes}:${seconds}`;
             },
-            // async sync(socketConnection) {
-            //     if(this.synced){
-            //         return new Promise(resolve => {
-            //             this.player.play();
-            //             resolve(true);
-            //         });
-            //     }
-            //     this.syncing = true;
-            //     this.player.pause();
-            //     emit(socketConnection, proto.EMSG.SYNC_ME, proto.TheaterVideoPlayer, {});
-            //     this.log("Syncing other clients...", 'green');
-            // },
-            async mountVideoPlayer() {
+            onPaused() {
+                log("VIDEO PLAYER", `Paused at ${this.player.currentTime}!`, 'green');
+                if (!this.player.fromSocket) {
+                    emit(this.ws, proto.EMSG.THEATER_PAUSE, proto.TheaterVideoPlayer, {
+                        theaterId:     this.theater_id,
+                        userId:        this.user.id,
+                        currentTime:   this.player.currentTime,
+                        state:         proto.TheaterVideoPlayer.State.PAUSED,
+                    });
+                } else {
+                    console.log("Request to play while on socket mode!");
+                    this.player.fromSocket = false;
+                }
+            },
+            gatewayOnPlay(packet) {
+                let decoded = proto.TheaterVideoPlayer.decode(packet.data);
+                if (decoded.userId !== undefined) {
+                    if (decoded.userId !== this.user.id || !this.$store.getters.loggedIn) {
+                        this.player.fromSocket = true;
+                        this.player.currentTime = decoded.currentTime;
+                        this.player.play();
+                        console.log("Request to play at: ", decoded.currentTime);
+                    }
+                }
+            },
+            gatewayOnPause(packet) {
+                let decoded = proto.TheaterVideoPlayer.decode(packet.data);
+                if (decoded.userId !== undefined) {
+                    if (decoded.userId !== this.user.id || !this.$store.getters.loggedIn) {
+                        this.player.fromSocket = true;
+                        this.player.currentTime = decoded.currentTime;
+                        this.player.pause();
+                        console.log("Request to pause at: ", decoded.currentTime);
+                    }
+                }
+            },
+            onSynced(packet) {
 
-                let socketConnection = this.$parent.socket.ws;
+                let decoded = proto.TheaterVideoPlayer.decode(packet.data);
 
-                this.player = new Plyr('#theater', {
-                    poster: `${this.cdnUrl}/posters/${this.theater.movie.poster}.png`,
-                    autoplay: false,
-                    controls: [
-                        'play-large', 
-                        'play', 
-                        'progress', 
-                        'current-time', 
-                        'mute', 
-                        'volume', 
-                        'captions', 
-                        'settings', 
-                        'pip', 
-                        'airplay', 
-                        'fullscreen'
-                    ],
-                    settings: [
-                        'captions', 
-                        'quality', 
-                    ],
-                    captions: { 
-                        active: true, 
-                        language: 'auto', 
-                        update: true,
-                    },
-                });
+                this.player.synced = true;
+                this.player.fromSocket = true;
+
+                let currentTime = decoded.currentTime;
+                if (decoded.state === proto.TheaterVideoPlayer.State.PLAYING) {
+                    log("VIDEO PLAYER", "Theater is in playing state, Appending waiting to buffer time to current_time!", "yellow");
+                    const wastedWhileConnecting = this.timeNow() - this.connectedAt
+                    currentTime = (decoded.currentTime + wastedWhileConnecting);
+                }
+
+                this.player.currentTime = currentTime;
+
+                switch (decoded.state) {
+                    case proto.TheaterVideoPlayer.State.PLAYING:
+                        log("VIDEO PLAYER", `Should play at ${currentTime}!`, 'green');
+                        this.player.fromSocket = false;
+                        this.player.play()
+                        break
+                    case proto.TheaterVideoPlayer.State.PAUSED:
+                        log("VIDEO PLAYER", `Should pause at ${currentTime}!`, 'green');
+                        this.player.fromSocket = false;
+                        this.player.pause()
+                        break
+                }
+
+                log("VIDEO PLAYER", `Client Synced!`, 'green');
+
+            },
+            disableVideoPlayer() {
+                console.log("Disabling video player");
+                this.player.muted = true
+            },
+            enableVideoPlayer() {
+                console.log("Enabling video player");
+                this.player.muted = false
+            },
+            mountVideoPlayer() {
+
+                let videoPlayerOptions = {}
+                let canAccessVideoPlayer = false
+
+                switch (this.theater.video_player_access) {
+                    case proto.VIDEO_PLAYER_ACCESS.ACCESS_BY_EVERYONE:
+                        canAccessVideoPlayer = true
+                        break
+                    case proto.VIDEO_PLAYER_ACCESS.ACCESS_BY_FRIENDS:
+                        canAccessVideoPlayer = this.$store.getters.loggedIn
+                        break
+                    case proto.VIDEO_PLAYER_ACCESS.ACCESS_BY_USER:
+                        if (this.$store.getters.loggedIn){
+                            canAccessVideoPlayer = this.user.id === this.theater.user.id
+                        }
+                        break
+                }
+
+                if (canAccessVideoPlayer) {
+                    videoPlayerOptions = {
+                        debug: false,
+                        autoplay: false,
+                        controls: [
+                            'play-large',
+                            'play',
+                            'progress',
+                            'current-time',
+                            'mute',
+                            'volume',
+                            'captions',
+                            'settings',
+                            'pip',
+                            'airplay',
+                            'fullscreen'
+                        ],
+                        settings: [
+                            'captions',
+                            'quality',
+                        ],
+                        captions: {
+                            active: true,
+                            language: 'auto',
+                            update: true,
+                        },
+                    }
+                } else {
+                    videoPlayerOptions = {
+                        debug: false,
+                        autoplay: false,
+                        controls: [
+                            'play-large',
+                            'play',
+                            'current-time',
+                            'mute',
+                            'volume',
+                            'captions',
+                            'settings',
+                            'airplay',
+                            'fullscreen'
+                        ],
+                        settings: [
+                            'captions',
+                            'quality',
+                        ],
+                        captions: {
+                            active: true,
+                            language: 'auto',
+                            update: true,
+                        },
+                    }
+                }
+
+                this.player = new Plyr('#theater', videoPlayerOptions);
 
                 this.player.fromSocket = false;
 
-                bus.$on(proto.EMSG[proto.EMSG.THEATER_PLAY], packet => {
-                    let decoded = proto.TheaterVideoPlayer.decode(packet.data);
-                    if (decoded.userId !== undefined) {
-                        if (decoded.userId !== this.user.id) {
-                            this.player.fromSocket = true;
-                            this.player.currentTime = decoded.currentTime;
-                            this.player.play();
-                            console.log("Request to play at: ", decoded.currentTime);
-                        }
-                    }
-                });
-
-                bus.$on(proto.EMSG[proto.EMSG.THEATER_PAUSE], packet => {
-                    let decoded = proto.TheaterVideoPlayer.decode(packet.data);
-                    if (decoded.userId !== undefined) {
-                        if (decoded.userId !== this.user.id) {
-                            this.player.fromSocket = true;
-                            this.player.currentTime = decoded.currentTime;
-                            this.player.pause();
-                            console.log("Request to pause at: ", decoded.currentTime);
-                        }
-                    }
-                });
-
-                this.player.on('loadstart', () => {
-                    this.player.loaded = false;
-                });
-
-                this.player.on('ended', () => {
-                    this.log('video ended!', 'red');
-                    // send video ended event to gateway
-                });
-
-                if (this.theater.movie.type !== 1){
-                    // check video buffer if video type is not youtube
-                    const refreshId = setInterval(() => {
-                        if (this.player.buffered > 0) {
-                            this.$emit('buffered', true);
-                            clearInterval(refreshId);
-                        }
-                    }, 1000)
-                }
-
-                this.player.on('waiting', () => {
-                    this.log('Waiting to load...', 'yellow');
-                    const refreshId = setInterval(() => {
-                        if (this.player.buffered > 0) {
-                            this.$emit('buffered', true);
-                            clearInterval(refreshId);
-                        }
-                    }, 1000)
-                });
-
-                // this.$on('buffered', async () => {
-                //     this.log("Buffered!", 'green');
-                //     this.sync(socketConnection);
-                // });
-
-                // const Unstarted = -1,
-                //     Ended = 0,
-                //     Playing = 1,
-                //     Paused = 2,
-                //     Buffering = 3,
-                //     VideoCued = 4;
-
-                /* YOUTUBE ONLY */
-                // this.player.on('statechange', state => {
-                //     switch (state.detail.code) {
-                //         case Buffering: this.log("Buffering...", 'green'); break;
-                //         case Playing: this.log("Playing...", 'green'); break;
-                //         case Paused: this.log("Paused!", 'green'); break;
-                //         case VideoCued: this.log("VideoCued!", 'yellow'); break;
-                //         case Ended: this.log("Video ended!", 'red'); break;
-                //     }
-                // });
-
-                this.player.on('loadeddata', () => {
-                    this.player.loaded = true;
+                this.player.on('ready', () => {
+                    log("VIDEO PLAYER", "VideoPlayer Ready!", "green");
+                    this.sync();
                 })
 
-                this.player.on('playing', async () => {
-                    this.log(`Playing at ${this.player.currentTime}!`, 'green');
-                    if (!this.player.fromSocket) {
-                        emit(socketConnection, proto.EMSG.THEATER_PLAY, proto.TheaterVideoPlayer, {
-                            theaterId:     this.theater_id,
-                            userId:        this.user.id,
-                            currentTime:   this.player.currentTime,
-                            source:        this.player.source,
-                        });
-                    } else {
-                        this.player.fromSocket = false;
-                    }
+                this.$on('buffering', () => {
+                    this.buffering = true;
+                    log("VIDEO PLAYER", "VideoPlayer Buffering...", "yellow");
                 });
 
-                this.player.on('pause', () => {
-                    this.log(`Paused at ${this.player.currentTime}!`, 'green');
-                    if (!this.player.fromSocket) {
-                        emit(socketConnection, proto.EMSG.THEATER_PAUSE, proto.TheaterVideoPlayer, {
-                            theaterId:     this.theater_id,
-                            userId:        this.user.id,
-                            currentTime:   this.player.currentTime,
-                            source:        this.player.source,
-                        });
-                    } else {
-                        this.player.fromSocket = false;
-                    }
+                this.$on('buffered', () => {
+                    log("VIDEO PLAYER", "VideoPlayer buffered!", "yellow");
+                    this.buffering = false;
                 });
 
-                // get theater subtitles
+                this.player.on('statechange', event => {
+                    switch (event.detail.code) {
+                        case 3: if (!this.buffering) this.$emit('buffering'); break
+                        case 1: if(this.buffering) this.$emit("buffered"); break
+                    }
+                })
+
+                this.$parent.$on(proto.EMSG[proto.EMSG.SYNCED], this.onSynced);
+                this.$parent.$on(proto.EMSG[proto.EMSG.THEATER_PLAY], this.gatewayOnPlay);
+                this.$parent.$on(proto.EMSG[proto.EMSG.THEATER_PAUSE], this.gatewayOnPause);
+
+                this.player.on('ended', () => {
+                    log("VIDEO PLAYER", 'video ended!', 'red');
+                });
+
+                if (this.loggedIn) {
+                    this.player.on('playing', this.onPlaying);
+                    this.player.on('pause', this.onPaused);
+                }
+
+                this.setMediaSource(this.theater.media_source);
+            },
+            setMediaSource(mediaSource) {
+
                 let tracks = [];
-                await this.$store.dispatch("getTheaterSubtitles", this.theater.id).then(subtitles => {
-                    subtitles.forEach(subtitle => {
-                        tracks.push({
-                            kind: 'captions',
-                            label: subtitle.lang,
-                            srclang: subtitle.lang,
-                            src: `${this.cdnUrl}/subtitles/${subtitle.file}.vtt`,
-                        });
+                this.subtitles.forEach(subtitle => {
+                    tracks.push({
+                        kind: 'captions',
+                        label: subtitle.lang,
+                        srclang: subtitle.lang,
+                        src: `${this.cdnUrl}/subtitles/${subtitle.file}.vtt`,
                     });
                 });
 
-                // check if theater's movie type is youtube
-                if (this.theater.movie.type === 1){
-                    this.player.source = {
-                        type: 'video',
-                        sources: [
-                            {
-                                src: this.theater.movie.uri,
-                                provider: 'youtube',
-                            },
-                        ],
-                        tracks: tracks
-                    };
-                } else {
-                    this.player.source = {
-                        type: 'video',
-                        sources: [
-                            {
-                                src: this.theater.movie.uri,
-                                type: 'video/mp4',
-                                size: 720,
-                            },
-                        ],
-                        tracks: tracks
-                    };
+                if (mediaSource.uri != null){
+
+                    switch (mediaSource.type) {
+                        case proto.MediaSource.Type.YOUTUBE:
+                            this.player.source = {
+                                type: 'video',
+                                sources: [
+                                    {
+                                        src: mediaSource.uri,
+                                        provider: 'youtube',
+                                    },
+                                ],
+                            };
+                            break
+                        case proto.MediaSource.Type.DOWNLOAD_URI:
+                            this.player.source = {
+                                type: 'video',
+                                sources: [
+                                    {
+                                        src: mediaSource.uri,
+                                        type: 'video/mp4',
+                                        size: 720,
+                                    },
+                                ],
+                                tracks: tracks
+                            };
+                            break
+                    }
+
                 }
+
             }
         },
         mounted() {
-            this.mountVideoPlayer();
-            bus.$on(proto.EMSG[proto.EMSG.SYNCED], () => {
-                this.log(`Clients are synced, ready to play!`, 'green');
-                this.syncing = false;
-                this.synced = true;
+
+            this.$bus.$on('new-media-source', mediaSource => {
+                this.theater.media_source = mediaSource;
+                this.setMediaSource(mediaSource);
             });
+
+            this.$parent.$on('theater-connected', socket => {
+                this.ws = socket.ws;
+                this.mountVideoPlayer();
+                this.connectedAt = this.timeNow()
+            })
+
         },
         deactivated() {
-            this.player.destroy();
+            if (this.player !== null) {
+                this.player.destroy();
+            }
+            this.destroy();
         },
         destroyed() {
-            this.player.destroy();
+            if (this.player !== null) {
+                this.player.destroy();
+            }
         }
     }
 

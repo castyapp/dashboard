@@ -4,13 +4,11 @@
 
         <div class="col-container pull-left">
 
-            <div class="title-border-bottom pb-2">
-                <div class="side-component-title">
-                    <strong class="users_title">
-                        <i class="icofont-ui-chat text-primary mr-2"></i>
-                        Chat
-                    </strong>
-                </div>
+            <div class="chat-title-border-bottom pb-2">
+                <strong class="side-component-title">
+                    <i class="icofont-ui-chat mr-2"></i>
+                    <span class="ml-1">Chat</span>
+                </strong>
             </div>
 
             <div class="chat-container">
@@ -53,11 +51,12 @@
 
         </div>
 
-        <div class="chat-input">
+        <div class="chat-input" v-if="loggedIn">
             <input class="chat-box-text"
-                   placeholder="Send a message"
+                   placeholder="Write a message"
                    multiple="multiple"
                    @keyup.enter.exact="sendMessage" />
+            <button class="btn btn-primary btn-send-chat-msg">Send</button>
         </div>
 
     </div>
@@ -66,12 +65,18 @@
 
 <style>
 
+    .btn-send-chat-msg {
+        padding: 3px 8px !important;
+        float: right;
+        margin-top: 15px;
+    }
+
     .col-container {
         display: flex;
         flex-direction: column;
         height: 100%;
         width: 100%;
-        padding: 10px 10px;
+        padding: 10px;
     }
 
     .u-msg > .u-name {
@@ -150,9 +155,8 @@
         top: 0;
         right: 0;
         width: 300px;
-        background: #181818;
+        background: #151515;
         height: 100%;
-        padding: 10px 0 10px 0;
     }
 
     .message.welcome-msg {
@@ -167,11 +171,10 @@
 
 <script>
 
-    import $ from 'jquery';
-    import {bus} from '../../main';
-
-    import {proto} from 'casty-proto/pbjs/ws.bundle';
-    import {Packet} from 'casty-proto/protocol/packet';
+    import $ from 'jquery'
+    import log from '../../store/logging'
+    import {proto} from 'casty-proto/pbjs/ws.bundle'
+    import {Packet} from 'casty-proto/protocol/packet'
     
     export default {
         props: ['theater', 'ready'],
@@ -183,13 +186,6 @@
             }
         },
         methods: {
-            log(message, color) {
-                console.log(
-                    `%c[THEATER GATEWAY]` + `%c ${message}`, 
-                    "font-size: 13px; color:#FFFFFF;", 
-                    `font-size: 13px; color:${color};`
-                );
-            },
             sendMessage() {
                 let messageInput = $(".chat-box-text");
                 let msg = messageInput.val();
@@ -210,7 +206,7 @@
                 }
             },
             changeMemberState(user, state) {
-                bus.$emit('new-theater-member', {user, state})
+                this.$parent.$emit('new-theater-member', {user, state})
             },
             newChatMessage(chatMsg) {
                 this.chats.push({
@@ -224,11 +220,11 @@
 
             this.chats.push({ type: 'WELCOME_MESSAGE' });
 
-            bus.$on("theater-connected", (socket) => {
+            this.$parent.$on("theater-connected", (socket) => {
 
                 this.theaterWebsocket = socket;
 
-                this.log(`Connected to theater[${this.theater.id}] gateway!`, 'green');
+                log("THEATER GATEWAY", `Connected to theater[${this.theater.id}] gateway!`, 'green');
 
                 this.theaterWebsocket.ws.onmessage = (message) => {
 
@@ -237,7 +233,7 @@
                     switch (packet.emsg) {
                         case proto.EMSG.THEATER_MEMBERS:
                             let membersDecoded = proto.TheaterMembers.decode(packet.data);
-                            bus.$emit("new-theater-members", membersDecoded.members);
+                            this.$parent.$emit("new-theater-members", membersDecoded.members);
                             break;
                         case proto.EMSG.MEMBER_STATE_CHANGED:
                             let decoded = proto.PersonalStateMsgEvent.decode(packet.data);
@@ -248,16 +244,13 @@
                             this.newChatMessage(chatMsg);
                             break;
                         default:
-                            bus.$emit(proto.EMSG[packet.emsg], packet);
+                            this.$parent.$emit(proto.EMSG[packet.emsg], packet);
                             break
                     }
 
                 };
 
             });
-        },
-        destroyed() {
-            this.theaterWebsocket.disconnect();
         }
     }
 

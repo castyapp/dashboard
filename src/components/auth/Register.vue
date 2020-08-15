@@ -35,9 +35,9 @@
                    required="required"
                    autocomplete="username" />
 
-            <small v-if="errors.username" class="text-danger fa-pull-left text-left">
+            <small v-if="errors.username" v-for="err in errors.username" class="text-danger fa-pull-left text-left">
                 <span class="clearfix">
-                    {{ errors.username }}
+                    {{ err }}
                 </span>
             </small>
         </div>
@@ -54,9 +54,9 @@
                    required="required"
                    autocomplete="email" />
 
-            <small v-if="errors.email" class="text-danger fa-pull-left text-left">
+            <small v-if="errors.email" v-for="err in errors.email" class="text-danger fa-pull-left text-left">
                 <span class="clearfix">
-                    {{ errors.email }}
+                    {{ err }}
                 </span>
             </small>
         </div>
@@ -72,9 +72,9 @@
                    required="required"
                    autocomplete="password" />
 
-            <small v-if="errors.password" class="text-danger fa-pull-left text-left">
+            <small v-if="errors.password" v-for="err in errors.password" class="text-danger fa-pull-left text-left">
                 <span class="clearfix">
-                    {{ errors.password }}
+                    {{ err }}
                 </span>
             </small>
         </div>
@@ -90,9 +90,9 @@
                    required="required"
                    autocomplete="password" />
 
-            <small v-if="errors.password_confirmation" class="text-danger fa-pull-left text-left">
+            <small v-if="errors.password_confirmation" v-for="err in errors.password_confirmation" class="text-danger fa-pull-left text-left">
                 <span class="clearfix">
-                    {{ errors.password_confirmation }}
+                    {{ err }}
                 </span>
             </small>
         </div>
@@ -173,7 +173,7 @@
                     username: this.username,
                     password: this.password,
                     password_confirmation: this.password_confirmation,
-                    gToken: recaptchaToken,
+                    recaptchaToken: recaptchaToken,
                 }).then(() => {
 
                     this.errors = {};
@@ -197,8 +197,8 @@
 
                     this.loading = false;
 
-                    if (error.code === 3){
-                        this.errors = this.getGrpcErrors(error);
+                    if (error.response.status === 420) {
+                        this.errors = error.response.data.result
                         this.$parent.serverError = "Please check the form error(s)!";
                         jQuery('#serverError')
                             .addClass('shake animated')

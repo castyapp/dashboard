@@ -2,35 +2,58 @@
 
     <div class="sidemenu">
 
-        <div class="logo" @click="redirect('dashboard')">
+        <div class="logo">
             <img src="../../assets/icons/brand-2.svg" alt="Brand" />
         </div>
 
-        <ul class="menu">
+        <div class="scrollable-menu">
+            <ul class="menu" v-if="loggedIn">
+
+                <li>
+                    <router-link :to="{ name: 'dashboard' }" v-title="'Friends'" title-placement="right" v-title.delay="'title'">
+                        <i class="icofont-users"></i>
+                    </router-link>
+                </li>
+
+                <li>
+                    <router-link :to="{ name: 'settings' }" v-title="'Settings'" title-placement="right">
+                        <i class="icofont-ui-settings"></i>
+                    </router-link>
+                </li>
+
+                <li class="bottom-line-sidemenu"></li>
+
+                <li>
+                    <router-link :to="{ path: `/${this.user.username}` }" v-title="'Your Theater'" title-placement="right">
+                        <i class="icofont-movie"></i>
+                    </router-link>
+                </li>
+
+                <li v-for="theater in theaters" v-bind:key="theater.id">
+                    <router-link :to="{ name: 'theater', params: { user: theater.user.username } }"
+                        class="theater-sidemenu"
+                        v-title="theater.user.username + ': ' + theater.description"
+                        title-placement="right">
+                            <img :src="cdnUrl + '/avatars/' + theater.user.avatar + '.png'"
+                                :alt="theater.user.fullname" />
+                    </router-link>
+                </li>
+
+            </ul>
+        </div>
+
+        <ul class="menu" v-if="!loggedIn">
             <li>
-                <router-link :to="{ name: 'library' }" v-title="'Library'" title-placement="right">
-                    <i class="icofont-library"></i>
-                </router-link>
-            </li>
-           <li>
-               <router-link :to="{ name: 'shared' }" v-title="'Shared with you'" title-placement="right">
-                   <i class="icofont-share-boxed"></i>
-                   <!-- <span class="unread-badge-menu">1</span> -->
-               </router-link>
-           </li>
-            <li>
-                <router-link :to="{ name: 'settings' }" v-title="'Settings'" title-placement="right">
-                    <i class="icofont-gears"></i>
-                </router-link>
-            </li>
-            <li>
-                <router-link :to="{ name: 'create_theater' }" v-title="'Create a new theater'" title-placement="right">
-                    <i class="icofont-plus"></i>
+                <router-link :to="{ name: 'login' }" v-title="'Login'" title-placement="right">
+                    <i class="icofont-user"></i>
                 </router-link>
             </li>
         </ul>
 
-        <div class="footer">
+        <div class="footer" v-if="loggedIn">
+
+            <NotificationCenter ref="notifs" :notifications="notifications" />
+
             <a class="user-avatar-button" @click.prevent.stop="actionsBtn($event)">
                 <div class="online">
                     <img :src="cdnUrl + '/avatars/' + user.avatar + '.png'"
@@ -39,32 +62,113 @@
                     <i class="sidemenu-state state-dot"></i>
                 </div>
             </a>
+
         </div>
 
     </div>
-
+    
 </template>
 
 <script>
 
-    import {bus} from "../../main";
+    import {proto} from 'casty-proto/pbjs/ws.bundle'
+    import NotificationCenter from './NotificationCenter'
 
     export default {
+        components: {
+            NotificationCenter,
+        },
+        data() {
+            return {
+                theaters: [],
+                notifications: {
+                    data: [],
+                    unread_count: 0,
+                },
+            }
+        },
         methods: {
             actionsBtn($event) {
                 this.$parent.$refs.menu.open($event, 'usermenu-actions', {})
             },
             redirect(name) {
                 this.$router.push({ name });
-            }
+            },
+            addTheater(theater) {
+                if (theater.user.id === this.user.id){
+                    return
+                }
+                const existed = false;
+                for (let i = 0; i < this.theaters.length; i++) {
+                    if (theater.id === this.theaters[i].id) {
+                        existed = truebreak
+                        break
+                    } else {
+                        continue
+                    }
+                }
+                if (!existed) {
+                    this.theaters.push(theater);
+                }
+            },
+            removeTheater(theater) {
+                if (theater.user.id === this.user.id){
+                    return
+                }
+                for (let i = 0; i < this.theaters.length; i++) {
+                    if (theater.id === this.theaters[i].id) {
+                        this.theaters.splice(i, 1)
+                        break
+                    }
+                }
+            },
+            async getNotifications() {
+                this.notifications = {
+                    data: [],
+                    unread_count: 0,
+                };
+                await this.$store.dispatch("getNotifications").then(response => {
+                    this.notifications.unread_count = response.data.result.unread_count;
+                    let notifications = response.data.result.notifications;
+                    notifications.forEach((notif, index) => {
+                        notifications[index].data = JSON.parse(notif.data);
+                    });
+                    this.notifications.data = notifications;
+                }).catch(console.log);
+            },
+            readNotification(id) {
+                this.notifications.data.forEach((notification, index) => {
+                    if (notification.id === id){
+                        this.notifications.data[index].read = true;
+                        this.notifications.unread_count --;
+                    }
+                })
+            },
         },
-        mounted() {
-            bus.$on("updated-user", user => {
-                this.user = user;
-            });
-            bus.$on('updated-avatar', avatar => {
-                this.user.avatar = avatar;
-            });
+        async mounted() {
+            if (this.loggedIn) {
+
+                this.$bus.$on(proto.EMSG[proto.EMSG.NEW_NOTIFICATION], () => {
+                    this.getNotifications();
+                });
+
+                this.$store.dispatch("followedTheaters").then(response => {
+                    this.theaters = response.data.result;
+                })
+                
+                this.$bus.$on('new-theater-unfollowed', this.removeTheater)
+                this.$bus.$on('new-theater-followed', this.addTheater)
+                
+                this.$bus.$on("updated-user", user => {
+                    this.user = user;
+                });
+
+                this.$bus.$on('updated-avatar', avatar => {
+                    this.user.avatar = avatar;
+                });
+
+                await this.getNotifications();
+            }
         }
     }
 
@@ -72,8 +176,15 @@
 
 <style>
 
-    .logo > img {
+    .bottom-line-sidemenu {
+        border-bottom: 2px solid #252626;
+        margin: 10px 0;
+    }
 
+    .theater-sidemenu > img {
+        width: 100%;
+        border-radius: 50%;
+        border: 2px solid #202020;
     }
 
     li.custom-btn-menu > a {
@@ -95,11 +206,11 @@
     }
 
     .footer {
-        bottom: 0;
-        position: absolute;
         width: 100%;
+        background: #151515;
+        position: absolute;
         left: 0;
-        background: #171717;
+        bottom: 0;
     }
 
     img.avatar {
@@ -119,10 +230,7 @@
     }
 
     ul.menu > li {
-        height: 40px;
-        width: 40px;
         cursor: pointer;
-        margin: 15px 0;
     }
 
     ul.menu > li > a {
@@ -132,15 +240,33 @@
         cursor: pointer;
         display: inline-flex;
         padding: 10px;
-        margin: 10px 3px;
+        margin: 10px 4px;
         background: #343435;
         border-radius: 50%;
         opacity: 0.6;
+        padding: 0;
+        width: 40px;
+        height: 40px;
+        text-align: center;
+        display: grid;
+        align-content: center;
     }
 
     ul.menu > li:hover > a {
         opacity: 1;
     }
+    
+    /* ul.menu li > .router-link-exact-active.router-link-active:after {
+        content: ' ';
+        width: 0;
+        height: 0;
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+        border-right: 7px solid #333333;
+        position: absolute;
+        right: 0;
+        margin-top: 16px;
+    } */
 
     ul.menu > li > a.router-link-exact-active {
         color: #FFFFFF;
@@ -160,7 +286,7 @@
         transition: width .25s ease-in-out 0s;
         left: 0;
         position: fixed;
-        background: #181818;
+        background: #151515;
         text-align: center;
         -webkit-app-region: drag;
         top: 0;
@@ -205,6 +331,11 @@
 
     .user-menu-hover > li > a:hover, .user-menu-hover > li > button:hover {
         background: #333333;
+    }
+
+    img.theater-sidemenu-avatar {
+        width: 20px;
+        border-radius: 50%;
     }
 
 </style>

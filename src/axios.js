@@ -1,7 +1,4 @@
-import {bus} from './main'
-import axios from 'axios';
-import {store} from './store/store';
-import {websocket} from "./store/ws";
+import axios from 'axios'
 
 let isAlreadyFetchingAccessToken = false;
 let subscribers = [];

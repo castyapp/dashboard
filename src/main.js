@@ -41,7 +41,8 @@ import "./assets/css/icofont.css";
 
 import 'vue-loaders/dist/vue-loaders.css';
 import VueLoaders from 'vue-loaders';
-import {websocket} from "./store/ws";
+import userSocket from "./store/user.ws";
+
 Vue.use(VueLoaders);
 
 router.beforeEach(async (to, from, next) => {
@@ -63,51 +64,59 @@ router.beforeEach(async (to, from, next) => {
 });
 
 router.beforeEach(async (to, from, next) => {
-    if (to.matched.some(record => record.meta.requiresAuth)) {
-        if (store.getters.loggedIn) {
-            if (store.state.user == null){
-                await store.dispatch("getUser").then(user => {
-                    store.state.user = user;
-                }).catch(err => {
+    if (store.getters.loggedIn) {
+        if (store.state.user == null){
+            await store.dispatch("getUser").then(user => {
+                store.state.user = user;
+            }).catch(err => {
 
-                    console.log(err);
+                console.log(err);
 
-                    // instead of this store call you would put your code to get new token
-                    store.dispatch("refreshToken").then(response => {
-                        console.log("Refreshed: ", response);
-                    }).catch(async err => {
-                        console.log("Not Refreshed", err);
-                        await store.dispatch('logout').then(() => {
-                            localStorage.removeItem("user");
-                            websocket.user.disconnect();
-                            bus.$router.push({ name: 'login', params: {
-                                err: {
-                                    group: 'auth',
-                                    type: 'error',
-                                    text: "Login failed, Try to login again!",
-                                    title: "Failed",
-                                    duration: 2000,
-                                }
-                            }});
-                        });
+                // instead of this store call you would put your code to get new token
+                store.dispatch("refreshToken").then(response => {
+                    console.log("Refreshed: ", response);
+                }).catch(async err => {
+                    console.log("Not Refreshed", err);
+                    await store.dispatch('logout').then(() => {
+                        localStorage.removeItem("user");
+                        userSocket.disconnect();
+                        router.push({ name: 'login', params: {
+                            err: {
+                                group: 'auth',
+                                type: 'error',
+                                text: "Login failed, Try to login again!",
+                                title: "Failed",
+                                duration: 2000,
+                            }
+                        }});
                     });
-
                 });
-            }
+
+            });
         }
     }
     next()
 });
 
+const MediaSource_Type_UNKNOWN     = 0,
+    MediaSource_Type_YOUTUBE       = 1,
+    MediaSource_Type_TORRENT       = 2,
+    MediaSource_Type_SOUND_CLOUD   = 3,
+    MediaSource_Type_DOWNLOAD_URI  = 4,
+    MediaSource_Type_LOCAL_PATH    = 5;
+
 Vue.mixin({
     data() {
         return {
+            get loggedIn() {
+                return store.getters.loggedIn
+            },
             get cdnUrl() {
                 return `${apiConfig.cdnUrl}/uploads`;
             },
             get user() {
                 return store.state.user;
-            }
+            },
         }
     },
     methods: {
@@ -141,11 +150,29 @@ Vue.mixin({
                     break;
             }
             console.log("%c" + message, "color:" + color);
-        }
+        },
+        getMediaSourceTypeName(mediaSource) {
+            switch (mediaSource.type) {
+                case MediaSource_Type_YOUTUBE: return "Youtube";
+                case MediaSource_Type_DOWNLOAD_URI: return "Download Uri";
+                default: return "Unknown";
+            }
+        },
+        getMediaSourceTypeIcon(mediaSource) {
+            switch (mediaSource.type) {
+                case MediaSource_Type_YOUTUBE: return "icofont-youtube-play";
+                case MediaSource_Type_DOWNLOAD_URI: return "icofont-external-link";
+                default: return "Unknown";
+            }
+        },
     },
 });
 
-let newVueApp = new Vue({
+// Global event bus
+const eventBus = new Vue()
+Vue.prototype.$bus = eventBus;
+
+new Vue({
     el: '#app',
     router: router,
     store: store,
@@ -153,5 +180,4 @@ let newVueApp = new Vue({
     template: '<Master />'
 });
 
-window.eventBus = newVueApp;
-export const bus = newVueApp;
+export const bus = eventBus;

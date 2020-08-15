@@ -3,7 +3,7 @@
     <div class="nc-container" v-click-outside="close">
 
         <button type="button" class="friends-menu-btn" @click="toggle">
-            <i class="icofont-bell-alt"></i>
+            <i class="icofont-notification"></i>
             <span class="unread_count_notifications" v-if="notifications.unread_count > 0">
                 {{ notifications.unread_count }}
             </span>
@@ -47,12 +47,12 @@
         z-index: 1;
         position: absolute;
         background: #141212;
-        width: 350px;
-        right: 50px;
-        margin-top: 7px;
+        width: 370px;
+        left: 70px;
         padding: 5px;
         border-radius: 3px;
         max-height: 400px;
+        bottom: 60px;
     }
 
     .notification-center > .nc-title {
@@ -100,6 +100,13 @@
         display: inline-block;
     }
 
+    button.friends-menu-btn {
+        color: #a1a1a1;
+        background: transparent;
+        border: none;
+        font-size: 20px;
+    }
+
 </style>
 
 <script>
@@ -123,12 +130,14 @@
         },
         methods: {
             readAllNotifications() {
-                this.$store.dispatch("readAllNotifications").then(() => {
-                    this.notifications.unread_count = 0;
-                    this.notifications.data.forEach( (_, index) => {
-                        this.notifications.data[index].read = true;
+                if (this.notifications.unread_count > 0) {
+                    this.$store.dispatch("readAllNotifications").then(() => {
+                        this.notifications.unread_count = 0;
+                        this.notifications.data.forEach( (_, index) => {
+                            this.notifications.data[index].read = true;
+                        });
                     });
-                });
+                }
             },
             readNotification(id) {
                 this.$parent.readNotification(id);

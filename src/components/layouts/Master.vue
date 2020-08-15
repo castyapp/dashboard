@@ -10,15 +10,6 @@
 </template>
 
 <script>
-
     import "animate.css/animate.min.css";
-
-    export default {
-        computed: {
-            loggedIn() {
-                return this.$store.getters.loggedIn
-            }
-        }
-    }
-
+    export default {}
 </script>

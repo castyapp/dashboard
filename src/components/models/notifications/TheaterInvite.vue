@@ -2,13 +2,13 @@
 
     <div class="theater-invite">
 
-        <img :src="cdnUrl + '/avatars/' + notification.fromUser.avatar + '.png'" class="avatar" :alt="notification.fromUser.fullname" />
+        <img :src="cdnUrl + '/avatars/' + notification.from_user.avatar + '.png'" class="avatar" :alt="notification.from_user.fullname" />
 
         <div class="notification-details">
             <div class="notification-title">
                 <span>New theater invite from:</span>
                 <div class="nc-new-friend-name">
-                    {{ notification.fromUser.fullname }}
+                    {{ notification.from_user.fullname }}
                 </div>
             </div>
             <div class="nc-th">

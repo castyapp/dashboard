@@ -1,41 +1,68 @@
 <template>
 
-    <div class="friends_list" :class="status">
+    <div class="friends_list" :class="state">
 
-        <div class="title-border-bottom pb-2">
-            <strong class="side-component-title">
-                <div class="friends_title">
-
-                    <i class="icofont-users-social mr-2"></i>
-                    <span>Friends</span>
-
-                    <NotificationCenter :notifications="notifications" />
-
-                    <button type="button" class="friends-menu-btn pull-right" @click="toggleSearchBox">
-                        <i class="icofont-search-1 search_icon"></i>
-                    </button>
-
-                </div>
-            </strong>
+        <div class="friends-actions">
+            <ul>
+                <li :class="{ 'active': selected === 'friends' }">
+                    <button @click="openTab('friends')">Friends</button>
+                </li>
+                <li :class="{ 'active': selected === 'search' }">
+                    <button @click="openTab('search')">Add Friend</button>
+                </li>
+                <li :class="{ 'active': selected === 'pending' }">
+                    <button @click="openTab('pending')">Pending</button>
+                </li>
+            </ul>
         </div>
 
-        <div class="search_friends clearfix" style="display: none">
+        <div class="search_friends clearfix" v-if="selected === 'search'">
             <div class="search_container">
                 <input type="text"
-                       v-model="search_keyword"
-                       title="search"
-                       class="pull-left search_box"
-                       placeholder="Type the username of a friend" />
+                    v-model="search_keyword"
+                    title="search"
+                    class="pull-left search_box"
+                    placeholder="Search for a friend" />
             </div>
         </div>
 
-        <ul class="mt-2 search_result" style="display: none">
+        <ul class="mt-2 friends_list_ul pending-list" v-if="selected === 'pending'">
+
+            <div class="v-loading">
+                <EllipsisLoader :loading="!loadedPendingFriendRequests" class="v-loading" :color="'#316bff'" />
+            </div>
+
+            <li v-if="loadedPendingFriendRequests" v-show="pendingFriendRequests.length === 0">
+                You have no pending requests here!
+            </li>
+
+            <li class="offline" :key="request.friend.id" v-for="(request, index) in pendingFriendRequests">
+                <a class="friend">
+                    <div class="avatar">
+                        <img :src="cdnUrl + '/avatars/' + request.friend.avatar + '.png'"
+                            alt="Avatar" />
+                    </div>
+                    <div class="innerDetails">
+                        <div class="username pull-left">
+                            <strong>{{ request.friend.fullname }}</strong>
+                        </div>
+                        <VueLoadingButton class="friend_request_accept_btn pull-right"
+                              @click.native="acceptFriendRequest($event, request, index)">
+                            Accept
+                        </VueLoadingButton>
+                    </div>
+                </a>
+            </li>
+
+        </ul>
+
+        <ul class="mt-2 friends_list_ul" v-if="selected === 'search'">
 
             <li class="offline" :key="user.id" v-for="user in search_result">
                 <a class="friend">
                     <div class="avatar">
                         <img :src="cdnUrl + '/avatars/' + user.avatar + '.png'"
-                             alt="Avatar" />
+                            alt="Avatar" />
                     </div>
                     <div class="innerDetails">
                         <div class="username pull-left">
@@ -50,14 +77,14 @@
 
         </ul>
 
-        <div v-if="loading" class="content-loading">
-            <VueContentLoading :width="230" :height="55" primary="#333" secondary="#181818" :key="i" v-for="i in 10">
-                <circle cx="20" cy="20" r="20"></circle>
-                <rect x="55" y="9" rx="9" ry="9" width="170" height="20"></rect>
-            </VueContentLoading>
-        </div>
+        <ul class="mt-2 friends_list_ul" v-if="selected === 'friends'">
 
-        <ul class="mt-2 friends_list_ul">
+            <div v-if="loading" class="content-loading">
+                <VueContentLoading :width="230" :height="55" primary="#333" secondary="#181818" :key="i" v-for="i in 10">
+                    <circle cx="20" cy="20" r="20"></circle>
+                    <rect x="55" y="9" rx="9" ry="9" width="170" height="20"></rect>
+                </VueContentLoading>
+            </div>
 
             <li v-if="!loading" v-show="friends.length === 0">
                 You have no friends here right now :(
@@ -81,10 +108,8 @@
                         <div class="username">
                             <strong>{{ friend.fullname }}</strong>
                         </div>
-                        <div class="activity" v-if="friend.activity !== undefined && friend.state === 1">
-                            Watching
-                            <strong>{{ friend.activity.activity.substring(0,23) + "..." }}</strong>
-                        </div>
+                        <div :data-friend-activity-id="friend.id" 
+                            class="activity"></div>
                     </div>
 
                     <span :data-friend-badge-id="friend.id"
@@ -154,6 +179,17 @@
         border-radius: 4px;
         color: #ffffff;
         background: transparent;
+    }
+
+    .friend_request_accept_btn {
+        border: 0;
+        display: flex;
+        border-radius: 4px;
+        color: #ffffff;
+        background: #28a745;
+        margin: 9px !important;
+        font-size: 14px !important;
+        padding: 1px 7px !important;
     }
 
     .search_friends > .search_container > input {
@@ -248,26 +284,15 @@
     .friends_list {
         position: fixed;
         top: 0;
-        right: 0;
-        width: 250px;
+        width: 255px;
         background: #181818;
         height: 100%;
-        padding: 13px;
+        padding: 8px 10px;
+        left: 65px;
     }
 
     .friends_list.close {
         display: none;
-    }
-
-    button.friends-menu-btn {
-        color: #969696;
-        border-radius: 50%;
-        background: #313131;
-        border: none;
-        width: 32px;
-        height: 30px;
-        font-size: 15px;
-        margin-left: 10px;
     }
 
     span.unread_count_notifications {
@@ -285,26 +310,69 @@
         margin-left: -7px;
     }
 
+    .friends-actions {
+        margin: 10px 0 15px;
+        display: flex;
+    }
+
+    .friends-actions > ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        text-decoration: none;
+    }
+
+    .friends-actions > ul > li {
+        float: left;
+    }
+
+    .friends-actions > ul > li > button {
+        color: #ffffff;
+        padding: 2px 8px;
+        margin: 0 3px;
+        border-radius: 4px;
+        font-size: 14px;
+        border: none;
+        background: transparent;
+    }
+
+    .friends-actions > ul > li > button:hover,
+    .friends-actions > ul > li.active > button {
+        text-decoration: none;
+        background: #316cff;
+        color: #ffffff;
+    }
+
+    .pending-list > li > a > .innerDetails > .username {
+        margin: 10px 0;
+    }
+
 </style>
 
 <script>
 
-    import $ from 'jquery';
-    import {bus} from '../../main';
-    import {websocket} from '../../store/ws';
-    import {proto} from 'casty-proto/pbjs/ws.bundle';
-    import {VueContentLoading} from 'vue-content-loading';
-    import NotificationCenter from './NotificationCenter';
-
+    import $ from 'jquery'
+    import userSocket from '../../store/user.ws'
+    import FriendsActions from './FriendsActions'
+    import {proto} from 'casty-proto/pbjs/ws.bundle'
+    import {EllipsisLoader} from 'vue-spinners-css'
+    import VueLoadingButton from 'vue-loading-button'
+    import {VueContentLoading} from 'vue-content-loading'
+    
     export default {
-        props: ['status'],
+        name: "FriendsList",
         components: {
             VueContentLoading,
-            NotificationCenter,
+            FriendsActions,
+            EllipsisLoader,
+            VueLoadingButton
         },
         data() {
             return {
+                state: "open",
                 friends: [],
+                loadedPendingFriendRequests: false,
+                pendingFriendRequests: [],
                 search_result: [],
                 search_keyword: null,
                 loading: true,
@@ -312,9 +380,46 @@
                     data: [],
                     unread_count: 0,
                 },
+                selected: 'friends',
             }
         },
         methods: {
+            openTab(tabName) {
+                if (tabName === 'pending') {
+                    if (!this.loadedPendingFriendRequests) {
+                        this.$store.dispatch('getPendingFriendRequestsList').then(requests => {
+                            this.pendingFriendRequests = requests
+                            this.loadedPendingFriendRequests = true
+                        });
+                    }
+                }
+                this.selected = tabName
+            },
+            acceptFriendRequest(event, request, index) {
+                this.loading = true;
+                this.$store.dispatch("acceptFriendRequest", request.request_id).then(() => {
+                    this.$bus.$emit("new-friend", this.pendingFriendRequests[index].friend);
+                    this.pendingFriendRequests.splice(index, 1)
+                    this.$notify({
+                        group: 'dashboard',
+                        type: 'success',
+                        text: "Friend request accepted successfully!",
+                        title: "Success",
+                        duration: 2000,
+                    });
+                    this.loading = false;
+                }).catch(err => {
+                    console.log(err);
+                    this.$notify({
+                        group: 'dashboard',
+                        type: 'error',
+                        text: "Something went wrong, please try again later!",
+                        title: "Failed",
+                        duration: 2000,
+                    });
+                    this.loading = false;
+                });
+            },
             sendFriendRequest(user) {
                 this.$store.dispatch("sendFriendRequest", user.id).then(() => {
 
@@ -356,9 +461,9 @@
             },
             getStateName(state) {
                 switch (state) {
-                    case 1: return "online";
-                    case 2: return "busy";
-                    case 3: return "idle";
+                    case proto.PERSONAL_STATE.ONLINE: return "online";
+                    case proto.PERSONAL_STATE.BUSY: return "busy";
+                    case proto.PERSONAL_STATE.IDLE: return "idle";
                     default:
                         return "offline"
                 }
@@ -373,28 +478,6 @@
             clearFriendsList() {
                 this.$parent.friends = [];
             },
-            toggleSearchBox() {
-                let searchFriendsBox = $(".search_friends");
-                let friendsList = $(".friends_list_ul");
-                let searchIcon = $("i.search_icon");
-                let searchResultBox = $(".search_result");
-                let searchInput = $(".search_box").get(0);
-
-                if (searchFriendsBox.hasClass("opened")) {
-                    searchIcon.removeClass("icofont-close");
-                    searchIcon.addClass("icofont-search-1");
-                    searchFriendsBox.removeClass("opened");
-                    friendsList.show();
-                    searchResultBox.hide();
-                } else {
-                    searchFriendsBox.addClass("opened");
-                    friendsList.hide();
-                    searchIcon.removeClass("icofont-search-1");
-                    searchIcon.addClass("icofont-close");
-                    searchInput.focus();
-                    searchResultBox.show();
-                }
-            },
             removeAllClassesEx(element, class_name) {
                 let classes = ["online", "offline", "idle", "busy"];
                 classes.forEach(classN => {
@@ -403,22 +486,29 @@
                     }
                 });
             },
-            changeUserState(user, state) {
-                let friendElement = this.findFriendById(user.id);
-                let stateClass = this.getStateName(state);
-                this.removeAllClassesEx(friendElement, stateClass);
-                friendElement.addClass(stateClass);
-            },
             findFriendById(id) {
                 return $(`[data-id="${id}"]`);
+            },
+            findFriend(id) {
+                let friendIndex = null;
+                this.friends.forEach((friend, index) => {
+                    if (friendIndex === null) {
+                        if (friend.id === id) {
+                            friendIndex = index
+                            return
+                        }
+                    }
+                });
+                return friendIndex
             },
             findFriendBadgeById(id) {
                 return $(`[data-friend-badge-id="${id}"]`);
             },
+            findFriendActivityById(id) {
+                return $(`[data-friend-activity-id="${id}"]`);
+            },
             startConversation(user) {
-                this.$router.push({
-                    path: `/messages/${user.id}`
-                })
+                this.$router.push({ path: `/messages/${user.id}` })
             },
             readNotification(id) {
                 this.notifications.data.forEach((notification, index) => {
@@ -434,13 +524,28 @@
                     unread_count: 0,
                 };
                 await this.$store.dispatch("getNotifications").then(response => {
-                    this.notifications.unread_count = response.unread_count;
-                    let notifications = response.data;
+                    this.notifications.unread_count = response.data.result.unread_count;
+                    let notifications = response.data.result.notifications;
                     notifications.forEach((notif, index) => {
                         notifications[index].data = JSON.parse(notif.data);
                     });
                     this.notifications.data = notifications;
                 }).catch(console.log);
+            },
+            updateFriendState(event) {
+                let friendElement = this.findFriendById(event.user.id);
+                let stateClass = this.getStateName(event.state);
+                this.removeAllClassesEx(friendElement, stateClass);
+                friendElement.addClass(stateClass);
+                this.updateFriendActivity(event)
+            },
+            updateFriendActivity(event) {
+                let activityElement = this.findFriendActivityById(event.user.id);
+                if (!event.hasOwnProperty('activity')) {
+                    activityElement.html(``)
+                } else {
+                    activityElement.html(`Watching ${event.activity.activity.substring(0,18)} ...`)
+                }    
             }
         },
         watch: {
@@ -454,15 +559,20 @@
             }
         },
         async mounted() {
-            websocket.user.connect();
 
-            bus.$on(proto.EMSG[proto.EMSG.FRIEND_REQUEST_ACCEPTED], data => {
-                let decoded = proto.FriendRequestAcceptedMsgEvent.decode(data);
-                decoded.friend.activity = undefined;
-                bus.$emit("new-friend", decoded.friend);
+            this.$bus.$on('updated_friends_list_state', newState => {
+                this.state = newState;
             });
 
-            bus.$on("new-friend", friend => {
+            userSocket.connect();
+
+            this.$bus.$on(proto.EMSG[proto.EMSG.FRIEND_REQUEST_ACCEPTED], data => {
+                let decoded = proto.FriendRequestAcceptedMsgEvent.decode(data);
+                decoded.friend.activity = undefined;
+                this.$bus.$emit("new-friend", decoded.friend);
+            });
+
+            this.$bus.$on("new-friend", friend => {
                 this.$parent.friends.push(friend);
             });
 
@@ -473,7 +583,7 @@
 
             this.friends = this.$parent.friends;
 
-            bus.$on("open-message-page", friend => {
+            this.$bus.$on("open-message-page", friend => {
                 let friendElement = this.findFriendBadgeById(friend.id);
                 let currentCount = parseInt(friendElement.text());
                 if (currentCount !== 0) {
@@ -482,10 +592,10 @@
                 }
             });
 
-            bus.$on(proto.EMSG[proto.EMSG.CHAT_MESSAGES], data => {
+            this.$bus.$on(proto.EMSG[proto.EMSG.CHAT_MESSAGES], data => {
 
                 let decoded = proto.ChatMsgEvent.decode(data);
-                bus.$emit(proto.EMSG[proto.EMSG.NEW_CHAT_MESSAGE], decoded);
+                this.$bus.$emit(proto.EMSG[proto.EMSG.NEW_CHAT_MESSAGE], decoded);
                 let friend = JSON.parse(decoded.from);
 
                 if (this.$route.name !== "messages") {
@@ -499,15 +609,22 @@
 
             });
 
-            bus.$on(proto.EMSG[proto.EMSG.NEW_NOTIFICATION], () => {
+            this.$bus.$on(proto.EMSG[proto.EMSG.NEW_NOTIFICATION], () => {
                 this.getNotifications();
             });
 
-            bus.$on(proto.EMSG[proto.EMSG.PERSONAL_STATE_CHANGED], data => {
+            this.$bus.$on(proto.EMSG[proto.EMSG.PERSONAL_ACTIVITY_CHANGED], data => {
+                if (data !== null){
+                    let decoded = proto.PersonalActivityMsgEvent.decode(data);
+                    this.updateFriendActivity(decoded)
+                }
+            });
+
+            this.$bus.$on(proto.EMSG[proto.EMSG.PERSONAL_STATE_CHANGED], data => {
                 if (data !== null){
                     let decoded = proto.PersonalStateMsgEvent.decode(data);
-                    bus.$emit('friend-state-changed', decoded);
-                    this.changeUserState(decoded.user, decoded.state);
+                    this.$bus.$emit('friend-state-changed', decoded);
+                    this.updateFriendState(decoded);
                 }
             });
 

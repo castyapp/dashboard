@@ -13,6 +13,7 @@
 
     .notification > div > div > .avatar {
         width: 30px;
+        height: 30px;
         border: none;
         float: left;
         margin: 5px;
@@ -24,9 +25,10 @@
     }
 
     .notification-title {
-        line-height: 1.3;
-        padding: 2px 5px;
-        display: inline-block;
+        width: 219px;
+        font-weight: 600;
+        padding: 0 8px;
+        text-align: left;
     }
 
     .nc-new-friend-name {
@@ -39,14 +41,15 @@
         float: right;
         background: #4CAF50;
         color: #ffffff;
-        font-size: 14px;
+        font-size: 14px !important;
         border: none;
         font-weight: bold;
         text-align: center;
-        margin-left: 6px;
-        margin-top: 10px;
-        padding: 0 4px;
         border-radius: 3px;
+        width: 85px;
+        padding: 6px 2px !important;
+        height: 30px;
+        margin-top: 6px !important;
     }
 
     button.nc-btn-accept-fr {
@@ -109,6 +112,10 @@
         margin-top: 5px;
         font-size: 14px;
         font-weight: 100;
+    }
+
+    .notification-details {
+        display: flex;
     }
 
 </style>

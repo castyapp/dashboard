@@ -2,14 +2,14 @@
 
     <div class="friend-invite">
 
-        <img :src="cdnUrl + '/avatars/' + notification.fromUser.avatar + '.png'" class="avatar" :alt="notification.fromUser.fullname" />
+        <img :src="cdnUrl + '/avatars/' + notification.from_user.avatar + '.png'" class="avatar" :alt="notification.from_user.fullname" />
 
         <div class="notification-details">
 
             <div class="notification-title">
                 <span>New friend request:</span>
                 <div class="nc-new-friend-name">
-                    {{ notification.fromUser.fullname }}
+                    {{ notification.from_user.fullname }}
                 </div>
             </div>
 
@@ -42,10 +42,9 @@
 <style>
 
     .nc-btn-accept-fr {
-        font-size: 14px !important;
-        font-weight: 100 !important;
-        padding: 2px 5px !important;
-        margin: 7px !important;
+        background: #4CAF50;
+        margin-right: 5px;
+        padding: 0 15px !important;
     }
 
     button.nc-button.nc-btn-accept-fr.vue-loading-button.loading {
@@ -68,7 +67,6 @@
 
 <script>
 
-    import {bus} from "../../../main";
     import VueLoadingButton from 'vue-loading-button'
 
     export default {
@@ -86,7 +84,7 @@
                 if (!this.notification.accepted) {
                     this.loading = true;
                     this.$store.dispatch("acceptFriendRequest", requestID).then(() => {
-                        bus.$emit("new-friend", this.notification.fromUser);
+                        this.$bus.$emit("new-friend", this.notification.from_user);
                         this.$notify({
                             group: 'dashboard',
                             type: 'success',
@@ -100,7 +98,8 @@
 
                         this.$parent.$parent.readNotification(this.notification.id);
 
-                    }).catch(() => {
+                    }).catch(err => {
+                        console.log(err);
                         this.$notify({
                             group: 'dashboard',
                             type: 'error',

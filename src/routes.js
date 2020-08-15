@@ -8,14 +8,11 @@ import Register from './components/auth/Register'
 // Dashboard components
 import Dashboard from './components/dashboard/Dashboard'
 import Settings from './components/dashboard/Settings'
-import Library from './components/dashboard/Library'
-import SharedWithYou from './components/dashboard/SharedWithYou'
+import Friends from './components/dashboard/Friends'
+import Theater from './components/dashboard/Theater'
+import UserTheater from './components/dashboard/UserTheater'
 
 import Message from './components/dashboard/Messages/Message'
-
-// Theaters components
-import CreateTheater from './components/dashboard/Theaters/Create'
-import Theater from './components/dashboard/Theaters/Theater'
 
 // OAUTH
 import OAUTH from './components/auth/oauth/base'
@@ -47,34 +44,8 @@ const routes = [
             {
                 path: '',
                 name: 'dashboard',
-                redirect: "library",
-            },
-            {
-                path: 'library',
-                name: 'library',
                 components: {
-                    dashboard: Library,
-                },
-            },
-            {
-                path: 'shared',
-                name: 'shared',
-                components: {
-                    dashboard: SharedWithYou,
-                },
-            },
-            {
-                path: 'theaters/create',
-                name: 'create_theater',
-                components: {
-                    dashboard: CreateTheater
-                },
-            },
-            {
-                path: "theater/:theater_id",
-                name: "theater",
-                components: {
-                    theater: Theater,
+                    dashboard: Friends,
                 },
             },
             {
@@ -89,6 +60,13 @@ const routes = [
                 name: 'settings',
                 components: {
                     dashboard: Settings,
+                },
+            },
+            {
+                path: 'me',
+                name: 'me',
+                components: {
+                    dashboard: UserTheater,
                 },
             },
         ],
@@ -179,6 +157,22 @@ const routes = [
                 meta: {
                     requiresAuth: true,
                 }
+            },
+        ]
+    },
+    {
+        path: '',
+        components: {
+            main: Dashboard,
+        },
+        children: [
+            {
+                path: ':user',
+                name: 'theater',
+                components: {
+                    theater: Theater,
+                    dashboard: null,
+                },
             },
         ]
     },

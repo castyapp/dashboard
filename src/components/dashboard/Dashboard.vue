@@ -8,35 +8,41 @@
 
         <Sidemenu />
 
+        <FriendsList v-if="loggedIn" />
+
         <div class="main-container">
-            <router-view name="theater" />
+            <router-view name="theater" :key="$route.fullPath" ref="routerView" />
             <keep-alive>
                 <router-view name="dashboard" :key="$route.fullPath" ref="routerView" />
             </keep-alive>
         </div>
 
-        <FriendsList :status="fl_status" />
-
-        <ContextMenu ref="menu">
+        <ContextMenu ref="menu" v-if="loggedIn">
 
             <template slot-scope="{ type, contextData }">
 
                 <div class="friend-menu" v-show="type === 'friend-menu'">
+
+                    <ContextMenuItem @click.native="goToTheater(contextData)">
+                        <i class="icofont-movie mr-1"></i>
+                        Go to Theater
+                    </ContextMenuItem>
 
                     <ContextMenuItem @click.native="startConversation(contextData)">
                         <i class="icofont-chat mr-1"></i>
                         Send Message
                     </ContextMenuItem>
 
-                    <!--<ContextMenuItem @click.native="$refs.menu.close">-->
-                    <!--    <i class="icofont-ui-mute mr-1"></i>-->
-                    <!--    Mute Notifications-->
-                    <!--</ContextMenuItem>-->
+                    <ContextMenuItem @click.native="$refs.menu.close">
+                        <i class="icofont-ui-mute mr-1"></i>
+                        Mute Notifications
+                    </ContextMenuItem>
 
-                    <!--<ContextMenuItem @click.native="$refs.menu.close">-->
-                    <!--    <i class="icofont-trash mr-1"></i>-->
-                    <!--    Remove Friend-->
-                    <!--</ContextMenuItem>-->
+                    <ContextMenuItem @click.native="$refs.menu.close">
+                        <i class="icofont-trash mr-1"></i>
+                        Remove Friend
+                    </ContextMenuItem>
+
                 </div>
 
                 <div class="friend-menu" v-show="type === 'theater-actions'">
@@ -63,7 +69,11 @@
 
                 </div>
 
-                <div class="friend-menu" v-show="type === 'usermenu-actions'">
+                <div class="usermenu-actions-menu" v-show="type === 'usermenu-actions'">
+
+                    <div class="logged-in-as">
+                        Logged in as: {{ user.fullname }}
+                    </div>
 
                     <ContextMenuItem @click.native="redirect('settings')">
                         <i class="icofont-gears mr-1"></i>
@@ -232,8 +242,6 @@
 
     import VueLoadingButton from 'vue-loading-button'
 
-    import {bus} from "../../main";
-
     export default {
         name: "Dashboard",
         components: {
@@ -246,7 +254,6 @@
         },
         data() {
             return {
-                fl_status: "open",
                 selectedFriends: [],
                 friends: [],
                 selectForInvite: null,
@@ -281,9 +288,9 @@
                 this.$refs.menu.close();
                 $("#logoutModal").modal();
             },
-            goToTheater(theater_id) {
+            goToTheater(user) {
                 this.$refs.menu.close();
-                this.$router.push({ path: `theater/${theater_id}` });
+                this.$router.push({ path: `/${user.username}` });
             },
             removeTheater() {
 
@@ -380,15 +387,16 @@
 
             }
         },
-        created() {
-            this.$on('fl:status', (status) => {
-                this.fl_status = status;
-            });
-        },
         mounted() {
             $("#inviteFriendToTheaterModal").on('hidden.bs.modal', () => {
                 this.selectForInvite = null;
                 this.selectedFriends = [];
+            });
+            this.$bus.$on('start-progress-bar', () => {
+                this.$refs.topProgress.start();
+            });
+            this.$bus.$on('stop-progress-bar', () => {
+                this.$refs.topProgress.done();
             });
         }
     }

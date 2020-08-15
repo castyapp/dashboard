@@ -4,14 +4,14 @@
 
 <script>
 
-    import {websocket} from "../../store/ws";
+    import userSocket from "../../store/user.ws";
 
     export default {
         name: "logout",
         mounted() {
             this.$store.dispatch('logout').then(() => {
                 localStorage.removeItem("user");
-                websocket.user.disconnect();
+                userSocket.disconnect();
                 this.$router.push({ name: 'login' }).then(() => {
                     this.$notify({
                         group: 'auth',

@@ -105,7 +105,6 @@
                     this.errors = {};
                     this.loading = false;
                     this.$parent.serverError = "";
-                    // this.$parent.successMessage = 'Login successfully! Please wait ...';
 
                     this.$notify({
                         group: 'auth',
@@ -124,7 +123,7 @@
 
                     this.loading = false;
 
-                    this.$parent.serverError = err.message;
+                    this.$parent.serverError = "Unauthorized";
 
                     this.password = '';
                     this.$parent.successMessage = '';

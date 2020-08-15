@@ -2,7 +2,7 @@
 
     <div class="messages-section p-2" v-if="friend !== null">
 
-        <div class="title-border-bottom pb-2" :class="getFriendStateElementClass()">
+        <div class="title-border-bottom pb-2" :class="stateElementClass">
             <strong>
                 <i class="icofont-user"></i>
                 {{ friend.fullname }}
@@ -37,7 +37,7 @@
                                     <span>{{ message.sender.fullname }}</span>
                                     <div class="details pull-right" v-if="!isLastOneThisUser(index)">
                                         <small class="ml-2">
-                                            {{ message.createdAt.seconds | moment('timezone', 'Asia/Tehran', 'dddd, MMM Do, h:mm a') }}
+                                            {{ message.created_at.seconds | moment('timezone', 'Asia/Tehran', 'dddd, MMM Do, h:mm a') }}
                                         </small>
                                     </div>
                                 </div>
@@ -59,7 +59,7 @@
 
                 <div class="clearfix"></div>
 
-                <div class="chat-input-message">
+                <div class="chat-input-message" v-if="!loading">
                     <div class="chatbox-container">
                         <textarea class="send-input-messager"
                            placeholder="Send a message"
@@ -79,7 +79,7 @@
 
     .emote-picker-messages-box {
         position: absolute;
-        bottom: 0px;
+        bottom: 0;
         margin-bottom: 170px;
         right: 375px;
     }
@@ -120,7 +120,7 @@
         height: 100%;
         width: 100%;
         position: fixed;
-        padding-right: 330px !important;
+        padding-right: 300px !important;
     }
 
     .messages {
@@ -130,15 +130,15 @@
         padding-right: 20px !important;
     }
 
-    .message {
-        line-height: 0.9;
-        margin-top: 10px;
-        padding: 5px 5px 0 5px;
+    .messages {
+        height: 100%;
+        width: 100%;
+        padding: 0 35px 170px 0 !important;
     }
 
-    .message.sm-user.message {
+    /* .message.sm-user.message {
         padding: 0 5px !important;
-    }
+    } */
 
     .message:first-child {
         margin-top: 0 !important;
@@ -161,6 +161,7 @@
     .message {
         border-top: 1px solid #333 !important;
         padding-top: 15px !important;
+        margin-top: 15px;
     }
 
     .message-user-name {
@@ -247,20 +248,19 @@
 <script>
 
     import $ from "jquery";
-    import {bus} from "../../../main";
-    import moment from 'moment-timezone';
-    import EmojiPicker from 'vue-emoji-picker';
-    import {websocket} from "../../../store/ws";
-    import {EllipsisLoader} from 'vue-spinners-css';
-
-    import {proto} from 'casty-proto/pbjs/ws.bundle';
-    import TheaterMessage from "../../models/TheaterMessage";
+    import moment from 'moment-timezone'
+    import EmojiPicker from 'vue-emoji-picker'
+    import userSocket from '../../../store/user.ws'
+    import {EllipsisLoader} from 'vue-spinners-css'
+    import {proto} from 'casty-proto/pbjs/ws.bundle'
+    import TheaterMessage from '../../models/TheaterMessage'
 
     export default {
         name: 'Message',
         data() {
             return {
                 friend: null,
+                stateElementClass: 'offline',
                 messages: [],
                 loading: true,
             }
@@ -271,12 +271,6 @@
             EmojiPicker,
         },
         methods: {
-            getFriendStateElementClass() {
-                return {
-                    'online': this.friend.state === 1,
-                    'offline': this.friend.state === 0 || this.friend.state === undefined,
-                };
-            },
             hasMetaData(message) {
                 let matches = /<(.*?)>/s.exec(message.data);
                 if (matches !== null){
@@ -293,12 +287,12 @@
                 let messageInput = $(".send-input-messager");
                 let content = messageInput.val();
                 messageInput.val("");
-                websocket.user.sendMessage(content, this.friend.username);
+                userSocket.sendMessage(content, this.friend.username);
                 let message = {
                     content,
                     sender: this.user,
                     reciever: this.friend,
-                    createdAt: {
+                    created_at: {
                         seconds: Math.floor(Date.now() /1000),
                     },
                 };
@@ -324,8 +318,8 @@
                 if (index !== 0){
 
                     let lastIndex = index - 1;
-                    let diff = moment(this.messages[index].createdAt.seconds)
-                        .diff(this.messages[lastIndex].createdAt.seconds);
+                    let diff = moment(this.messages[index].created_at.seconds)
+                        .diff(this.messages[lastIndex].created_at.seconds);
 
                     return diff <= 300000;
                 }
@@ -333,13 +327,22 @@
             }
         },
         activated() {
-            bus.$emit("open-message-page", this.friend)
+            if (this.friend !== null) {
+                this.$bus.$emit("open-message-page", this.friend)
+            }
+            this.$bus.$emit('updated_friends_list_state', 'open');
         },
         async mounted() {
 
-            bus.$on('friend-state-changed', pState => {
+            this.$bus.$emit('updated_friends_list_state', 'open');
+
+            this.$bus.$on('friend-state-changed', pState => {
                 if (pState.user.id === this.friend.id){
                     this.friend.state = pState.state;
+                    switch (pState.state) {
+                        case 1: this.stateElementClass = "online"; break
+                        default: this.stateElementClass = "offline"; break
+                    }
                 }
             });
 
@@ -356,8 +359,6 @@
                 });
             }
 
-            bus.$emit("open-message-page", this.friend)
-
             let v = this;
             this.$store.dispatch("getMessages", friend_username).then(messages => {
                 this.messages = messages;
@@ -365,7 +366,7 @@
                 v.$parent.$emit("ready");
             });
 
-            bus.$on(proto.EMSG[proto.EMSG.NEW_CHAT_MESSAGE], decoded => {
+            this.$bus.$on(proto.EMSG[proto.EMSG.NEW_CHAT_MESSAGE], decoded => {
                 let sender;
                 let senderString = decoded.from.trim();
                 if (senderString !== '' || senderString !== undefined){
@@ -375,7 +376,7 @@
                     let message = {
                         content: new TextDecoder("utf-8").decode(decoded.message),
                         sender: sender,
-                        createdAt: decoded.createdAt,
+                        created_at: decoded.createdAt,
                     };
                     if (this.messages == null){
                         this.messages = [];

@@ -1,52 +1,12 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import axios from "axios";
+import axios from 'axios'
 import config from './api'
 
-Vue.use(Vuex);
+Vue.use(Vuex)
 
-// Authentication service
-const {
-    AuthServiceClient,
-    AuthRequest,
-    RefreshTokenRequest,
-    OAUTHRequest,
-} = require("casty-proto/pbjs/grpc.auth_grpc_web_pb");
-
-// User service
-const {
-    User,
-    FriendRequest,
-    CreateUserRequest,
-    SearchUserRequest,
-    UpdateUserRequest,
-    UserServiceClient,
-    AuthenticateRequest,
-} = require("casty-proto/pbjs/grpc.user_grpc_web_pb");
-
-// Theater service
-const {
-    TheaterServiceClient,
-    GetAllUserTheatersRequest,
-    Theater,
-    Movie,
-    TheaterAuthRequest,
-    InviteFriendsTheaterRequest,
-    CreateTheaterRequest,
-} = require("casty-proto/pbjs/grpc.theater_grpc_web_pb");
-
-// Message service
-const {
-    MessagesServiceClient,
-    GetMessagesRequest,
-} = require("casty-proto/pbjs/grpc.message_grpc_web_pb");
-
-const grpc_api_uri = `${config.schema}://${config.baseURL}`;
-
-const authService = new AuthServiceClient(grpc_api_uri, null, null);
-const userService = new UserServiceClient(grpc_api_uri, null, null);
-const theaterService = new TheaterServiceClient(grpc_api_uri, null, null);
-const messageService = new MessagesServiceClient(grpc_api_uri, null, null);
+let baseURL = `${config.schema}://${config.baseURL}/${config.version}`;
+axios.defaults.baseURL = baseURL;
 
 export const store = new Vuex.Store({
     state: {
@@ -55,7 +15,7 @@ export const store = new Vuex.Store({
         user: null,
     },
     getters: {
-        loggedIn: (state, getters) => {
+        loggedIn: (_, getters) => {
             return getters.token !== null
         },
         token: state => {
@@ -91,238 +51,164 @@ export const store = new Vuex.Store({
         },
         getFriendsList(context) {
             return new Promise((resolve, reject) => {
-                const request = new AuthenticateRequest();
-                let utf8Encode = new TextEncoder();
-                let token = utf8Encode.encode(context.state.token)
-                request.setToken(token);
-                const call = userService.getFriends(request, {}, (err, response) => {
-                    if (!err) {
-                        let friends = []
-                        response.getResultList().forEach(friend => {
-                            friends.push(friend.toObject())
-                        })
-                        resolve(friends);
-                    }
-                });
-                call.on('error', err => {
-                    reject(err);
-                });
+                axios.get('/user/@friends', {
+                    headers: {
+                        'Authorization': `Bearer ${context.state.token}`,
+                    },
+                }).then(response => {
+                    resolve(response.data.result)
+                }).catch(reject)
+            })
+        },
+        getPendingFriendRequestsList(context) {
+            return new Promise((resolve, reject) => {
+                axios.get('/user/@friends/pending', {
+                    headers: {
+                        'Authorization': `Bearer ${context.state.token}`,
+                    },
+                }).then(response => {
+                    resolve(response.data.result)
+                }).catch(reject)
             })
         },
         getUser(context) {
             return new Promise((resolve, reject) => {
-                const request = new AuthenticateRequest();
-                let utf8Encode = new TextEncoder();
-                let token = utf8Encode.encode(context.state.token)
-                request.setToken(token);
-                const call = userService.getUser(request, {}, (err, response) => {
-                    if (!err) {
-                        resolve(response.getResult().toObject());
-                    }
-                });
-                call.on('error', err => {
-                    reject(err);
-                });
+                axios.get('/user/@me', {
+                    'headers': {
+                        "Authorization": `Bearer ${context.state.token}`
+                    },
+                }).then(response => {
+                    resolve(response.data.result);
+                }).catch(reject)
+            })
+        },
+        parseMediaSourceUri(context, uri) {
+            return new Promise((resolve, reject) => {
+
+                const params = new URLSearchParams();
+                params.append('source', uri);
+
+                axios.post('/user/@media/parse', params, {
+                    'headers': {
+                        'Authorization': `Bearer ${context.state.token}`,
+                    },
+                }).then(resolve).catch(reject)
+            })
+        },
+        selectNewMediaSource(context, media_source_id) {
+            return new Promise((resolve, reject) => {
+
+                const params = new URLSearchParams();
+                params.append('source_id', media_source_id);
+
+                axios.post('/user/@media/select', params, {
+                    'headers': {
+                        'Authorization': `Bearer ${context.state.token}`,
+                    },
+                }).then(resolve).catch(reject)
+
+            })
+        },
+        saveNewMediaSource(context, {title, uri}) {
+            return new Promise((resolve, reject) => {
+
+                const params = new URLSearchParams();
+                params.append('title', title);
+                params.append('source', uri);
+
+                axios.post('/user/@media', params, {
+                    'headers': {
+                        'Authorization': `Bearer ${context.state.token}`,
+                    },
+                }).then(resolve).catch(reject)
+
+            })
+        },
+        loadMediaSources(context) {
+            return new Promise((resolve, reject) => {
+                axios.get('/user/@media', {
+                    'headers': {
+                        'Authorization': `Bearer ${context.state.token}`,
+                    },
+                }).then(resolve).catch(reject)
             })
         },
         searchUser(context, keyword) {
-
             return new Promise((resolve, reject) => {
-
-                const authRequest = new AuthenticateRequest();
-                let utf8Encode = new TextEncoder();
-                let token = utf8Encode.encode(context.state.token)
-                authRequest.setToken(token);
-
-                const request = new SearchUserRequest();
-                request.setKeyword(keyword);
-                request.setAuthRequest(authRequest);
-
-                userService.search(request, {}, (err, response) => {
-                    if (!err) {
-                        let users = []
-                        response.getResultList().forEach(user => {
-                            users.push(user.toObject())
-                        })
-                        resolve(users);
-                    }
-                }).on('error', err => {
-                    reject(err);
-                });
+                axios.get(`/user/@search?keyword=${keyword}`, {
+                    headers: {
+                        'Authorization': `Bearer ${context.state.token}`,
+                    },
+                }).then(response => {
+                    resolve(response.data.result);
+                }).catch(reject);
             })
         },
         getFriend(context, friend_id) {
             return new Promise((resolve, reject) => {
-
-                const authRequest = new AuthenticateRequest();
-                let utf8Encode = new TextEncoder();
-                let token = utf8Encode.encode(context.state.token)
-                authRequest.setToken(token);
-
-                const request = new FriendRequest();
-                request.setFriendId(friend_id);
-                request.setAuthRequest(authRequest);
-
-                const call = userService.getFriend(request, {}, (err, response) => {
-                    if (!err) {
-                        resolve(response.getResult().toObject());
-                    }
-                });
-                call.on('error', err => {
-                    reject(err);
-                });
+                axios.get(`/user/@friend/${friend_id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${context.state.token}`,
+                    },
+                }).then(response => {
+                    resolve(response.data.result);
+                }).catch(reject);
             })
         },
         getMessages(context, receiverId) {
             return new Promise((resolve, reject) => {
-
-                const authRequest = new AuthenticateRequest();
-                let utf8Encode = new TextEncoder();
-                let token = utf8Encode.encode(context.state.token)
-                authRequest.setToken(token);
-
-                const request = new GetMessagesRequest();
-                request.setReceiverId(receiverId);
-                request.setAuthRequest(authRequest);
-
-                const call = messageService.getUserMessages(request, {}, (err, response) => {
-                    if (!err) {
-                        let messages = []
-                        response.getResultList().forEach(message => {
-                            messages.push(message.toObject())
-                        })
-                        resolve(messages);
-                    }
-                });
-                call.on('error', err => {
-                    reject(err);
-                });
+                axios.get(`/user/@messages/${receiverId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${context.state.token}`,
+                    },
+                }).then(response => {
+                    resolve(response.data.result);
+                }).catch(reject);
             })
         },
-        getTheater(context, theater_id) {
-            return new Promise((resolve, reject) => {
-                const request = new Theater();
-                request.setId(theater_id);
-                const call = theaterService.getTheater(request, {}, (err, response) => {
-                    if (!err) {
-                        resolve(response.getResult().toObject());
-                    }
-                });
-                call.on('error', err => {
-                    reject(err);
-                });
-            })
-        },
-        getTheaters(context) {
+        getTheater(context, user) {
             return new Promise((resolve, reject) => {
 
-                const authRequest = new AuthenticateRequest();
-                let utf8Encode = new TextEncoder();
-                let token = utf8Encode.encode(context.state.token)
-                authRequest.setToken(token);
+                let reqUri = '/user/@theater'
+                if (user !== undefined){
+                    reqUri = `/user/@theater/${user}`
+                }
 
-                const request = new GetAllUserTheatersRequest();
-                request.setAuthRequest(authRequest);
+                let headers = {};
+                if (this.getters.loggedIn){
+                    headers = {
+                        'Authorization': `Bearer ${context.state.token}`
+                    };
+                }
 
-                const call = theaterService.getUserTheaters(request, {}, (err, response) => {
-                    if (!err) {
-                        let theaters = []
-                        response.getResultList().forEach(theater => {
-                            theaters.push(theater.toObject())
-                        })
-                        resolve(theaters);
-                    }
-                });
-                call.on('error', err => {
-                    reject(err);
-                });
+                axios.get(reqUri, {headers}).then(response => {
+                    resolve(response.data.result);
+                }).catch(reject);
             })
         },
-        getSharedTheaters(context) {
+        getSubtitles(context, media_source_id) {
             return new Promise((resolve, reject) => {
 
-                const authRequest = new AuthenticateRequest();
-                let utf8Encode = new TextEncoder();
-                let token = utf8Encode.encode(context.state.token)
-                authRequest.setToken(token);
+                let reqUri = `/user/@theater/${media_source_id}/subtitles`
+                let headers = {};
+                if (this.getters.loggedIn){
+                    reqUri = `/user/@theaters/${media_source_id}/subtitles`
+                    headers = {
+                        'Authorization': `Bearer ${context.state.token}`
+                    };
+                }
 
-                const request = new GetAllUserTheatersRequest();
-                request.setAuthRequest(authRequest);
-
-                const call = theaterService.getUserSharedTheaters(request, {}, (err, response) => {
-                    if (!err) {
-                        let theaters = []
-                        response.getResultList().forEach(theater => {
-                            theaters.push(theater.toObject())
-                        })
-                        resolve(theaters);
-                    }
-                });
-                call.on('error', err => {
-                    reject(err);
-                });
+                axios.get(reqUri, {headers}).then(response => {
+                    resolve(response.data.result)
+                }).catch(reject);
             })
         },
-        updateProfile(context, form) {
-            return new Promise((resolve, reject) => {
-
-                const authRequest = new AuthenticateRequest();
-                let utf8Encode = new TextEncoder();
-                let token = utf8Encode.encode(context.state.token)
-                authRequest.setToken(token);
-
-                const user = new User();
-                user.setFullname(form.fullname);
-
-                const request = new UpdateUserRequest();
-                request.setAuthRequest(authRequest);
-                request.setResult(user);
-
-                const call = userService.updateUser(request, {}, (err, response) => {
-                    if (!err) {
-                        resolve(response.getResult().toObject());
-                    }
-                });
-                call.on('error', err => {
-                    reject(err);
-                });
-            })
-        },
-        getTheaterSubtitles(context, theater_id) {
-            return new Promise((resolve, reject) => {
-
-                const theater = new Theater();
-                theater.setId(theater_id);
-
-                const authRequest = new AuthenticateRequest();
-                let utf8Encode = new TextEncoder();
-                let token = utf8Encode.encode(context.state.token)
-                authRequest.setToken(token);
-
-                const request = new TheaterAuthRequest();
-                request.setAuthRequest(authRequest);
-                request.setTheater(theater);
-
-                const call = theaterService.getSubtitles(request, {}, (err, response) => {
-                    if (!err) {
-                        let subtitles = [];
-                        response.getResultList().forEach(subtitle => {
-                            subtitles.push(subtitle.toObject())
-                        })
-                        resolve(subtitles);
-                    }
-                });
-                call.on('error', err => {
-                    reject(err);
-                });
-            })
-        },
-        addSubtitleToTheater(context, {subtitle, theater_id}) {
+        uploadSubtitle(context, {subtitle, media_source_id}) {
             return new Promise((resolve, reject) => {
                 let params = new FormData();
                 params.append('lang', subtitle.lang);
                 params.append('subtitle', subtitle.file, subtitle.file.name);
-                axios.post(`${config.cdnUrl}/json.TheaterService/${theater_id}/cc`, params, {
+                axios.post(`/user/@theaters/${media_source_id}/subtitles`, params, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                         'Authorization': `Bearer ${context.state.token}`,
@@ -330,280 +216,221 @@ export const store = new Vuex.Store({
                 }).then(resolve).catch(reject);
             })
         },
-        createTheater(context, data) {
-
-            const authRequest = new AuthenticateRequest();
-            let utf8Encode = new TextEncoder();
-            let token = utf8Encode.encode(context.state.token)
-            authRequest.setToken(token);
-
-            const request = new CreateTheaterRequest();
-            request.setAuthRequest(authRequest);
-
-            const theater = new Theater();
-            theater.setTitle(data.title);
-            theater.setPrivacy(data.privacy);
-            theater.setVideoPlayerAccess(data.video_player_access);
-
-            const movie = new Movie();
-            movie.setType(data.type);
-            movie.setUri(data.movie_uri);
-
-            theater.setMovie(movie);
-            request.setTheater(theater);
-
+        followedTheaters(context) {
             return new Promise((resolve, reject) => {
-                const call = theaterService.createTheater(request, {}, (err, response) => {
-                    if (!err) {
-                        const decoder = new TextDecoder("utf-8");
-                        const insertedID = decoder.decode(response.getResult());
-                        resolve(insertedID);
+                axios.get(`/user/@theaters`, {
+                    headers: {
+                        'Authorization': `Bearer ${context.state.token}`
                     }
-                });
-                call.on('error', err => {
-                    reject(err);
-                });
-            });
+                }).then(resolve).catch(reject);
+            })
         },
-        updateAvatar(context, avatar) {
+        followTheater(context, theater_id) {
             return new Promise((resolve, reject) => {
+                axios.get(`/user/@theaters/${theater_id}/follow`, {
+                    headers: {
+                        'Authorization': `Bearer ${context.state.token}`
+                    }
+                }).then(resolve).catch(reject);
+            })
+        },
+        unfollowTheater(context, theater_id) {
+            return new Promise((resolve, reject) => {
+                axios.get(`/user/@theaters/${theater_id}/unfollow`, {
+                    headers: {
+                        'Authorization': `Bearer ${context.state.token}`
+                    }
+                }).then(resolve).catch(reject);
+            })
+        },
+        updateProfile(context, form) {
+
+            return new Promise((resolve, reject) => {
+
                 let params = new FormData();
-                params.append('avatar', avatar, avatar.name);
-                axios.post(`${config.cdnUrl}/json.UserService/avatar`, params, {
+                params.append('fullname', form.fullname);
+
+                let headers = {
+                    'Content-Type': 'multipart/form-data',
+                    'Authorization': `Bearer ${context.state.token}`,
+                }
+
+                if (form.avatar !== null) {
+                    params.append('avatar', form.avatar, form.avatar.name);
+                }
+
+                axios.put(`/user/@me`, params, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                         'Authorization': `Bearer ${context.state.token}`,
                     }
-                }).then(resolve).catch(reject);
+                }).then(response => {
+                    resolve(response.data.result)
+                }).catch(reject);
             })
+
         },
-        uploadTheaterPoster(context, { theater_id, poster }) {
+        updatePassword(context, form) {
+
             return new Promise((resolve, reject) => {
+
                 let params = new FormData();
-                params.append('poster', poster, poster.name);
-                axios.post(`${config.cdnUrl}/json.TheaterService/${theater_id}/poster`, params, {
+                params.append('current_password', form.current_password);
+                params.append('new_password', form.new_password);
+                params.append('verify_new_password', form.verify_new_password);
+
+                axios.put(`/user/@password`, params, {
                     headers: {
-                        'Content-Type': 'multipart/form-data',
                         'Authorization': `Bearer ${context.state.token}`,
                     }
                 }).then(resolve).catch(reject);
             })
+
         },
-        removeTheater(context, theater_id) {
+        updateTheater(context, data) {
+
             return new Promise((resolve, reject) => {
 
-                const authRequest = new AuthenticateRequest();
-                let utf8Encode = new TextEncoder();
-                let token = utf8Encode.encode(context.state.token)
-                authRequest.setToken(token);
+                let params = new FormData();
+                if (data.changes.description) {
+                    params.append('description', data.form.description);
+                }
+                if (data.changes.privacy) {
+                    params.append('privacy', data.form.privacy);
+                }
+                if (data.changes.video_player_access) {
+                    params.append('video_player_access', data.form.video_player_access);
+                }
 
-                const theater = new Theater();
-                theater.setId(theater_id);
-
-                const request = new TheaterAuthRequest();
-                request.setAuthRequest(authRequest);
-                request.setTheater(theater);
-
-                const call = theaterService.removeTheater(request, {}, (err, response) => {
-                    if (!err) {
-                        resolve(response.getMessage());
+                axios.put(`/user/@theater`, params, {
+                    headers: {
+                        'Authorization': `Bearer ${context.state.token}`,
                     }
-                });
-                call.on('error', err => {
-                    reject(err);
-                });
+                }).then(resolve).catch(reject);
             })
+
         },
+        // uploadTheaterPoster(context, { theater_id, poster }) {
+        //     return new Promise((resolve, reject) => {
+        //         let params = new FormData();
+        //         params.append('poster', poster, poster.name);
+        //         axios.post(`${config.cdnUrl}/json.TheaterService/${theater_id}/poster`, params, {
+        //             headers: {
+        //                 'Content-Type': 'multipart/form-data',
+        //                 'Authorization': `Bearer ${context.state.token}`,
+        //             }
+        //         }).then(resolve).catch(reject);
+        //     })
+        // },
         sendFriendRequest(context, friend_id) {
             return new Promise((resolve, reject) => {
-
-                const authRequest = new AuthenticateRequest();
-                let utf8Encode = new TextEncoder();
-                let token = utf8Encode.encode(context.state.token)
-                authRequest.setToken(token);
-
-                const request = new FriendRequest();
-                request.setAuthRequest(authRequest);
-                request.setFriendId(friend_id);
-
-                const call = userService.sendFriendRequest(request, {}, (err, response) => {
-                    if (!err) {
-                        resolve(response.getMessage());
+                axios.get(`/user/@friend/${friend_id}/request`, {
+                    headers: {
+                        'Authorization': `Bearer ${context.state.token}`,
                     }
-                });
-                call.on('error', err => {
-                    reject(err);
-                });
+                }).then(resolve).catch(reject);
             })
         },
         acceptFriendRequest(context, request_id) {
             return new Promise((resolve, reject) => {
-
-                const authRequest = new AuthenticateRequest();
-                let utf8Encode = new TextEncoder();
-                let token = utf8Encode.encode(context.state.token)
-                authRequest.setToken(token);
-
-                const request = new FriendRequest();
-                request.setAuthRequest(authRequest);
-                request.setRequestId(request_id);
-
-                const call = userService.acceptFriendRequest(request, {}, (err, response) => {
-                    if (!err) {
-                        resolve(response.getMessage());
+                const params = new FormData();
+                params.append('request_id', request_id)
+                axios.post(`/user/@friend/accept`, params, {
+                    headers: {
+                        'Authorization': `Bearer ${context.state.token}`,
+                        'Content-Type': 'application/x-www-form-urlencoded'
                     }
-                });
-                call.on('error', err => {
-                    reject(err);
-                });
+                }).then(resolve).catch(reject);
             })
         },
         register(context, data) {
-            const user = new User();
-            user.setEmail(data.email);
-            user.setFullname(data.fullname);
-            user.setUsername(data.username);
-            user.setPassword(data.password);
-
-            const request = new CreateUserRequest();
-            request.setUser(user);
-
-            const metadata = { 'g-recaptcha-response': data.gToken };
-
             return new Promise((resolve, reject) => {
-                const call = userService.createUser(request, metadata, (err, response) => {
-                    if (!err) {
-                        const decoder = new TextDecoder("utf-8");
-                        const token = decoder.decode(response.getToken());
-                        const refreshed_token = decoder.decode(response.getRefreshedToken());
-                        context.commit('retrieveToken', {token, refreshed_token});
-                        resolve(response)
+
+                let params = new FormData();
+                params.append('email', data.email);
+                params.append('fullname', data.fullname);
+                params.append('username', data.username);
+                params.append('password', data.password);
+                params.append('password_confirmation', data.password_confirmation);
+                params.append('g-recaptcha-response', data.recaptchaToken)
+
+                axios.post(`/user/@create`, params, {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
                     }
-                });
-                call.on('error', reject);
+                }).then(response => {
+                    const {token, refreshed_token} = response.data.result;
+                    context.commit('retrieveToken', {token, refreshed_token});
+                    resolve(response);
+                }).catch(reject);
             })
         },
         refreshToken(context) {
-            const request = new RefreshTokenRequest();
-            request.setRefreshedToken(context.state.refreshed_token);
             return new Promise((resolve, reject) => {
-                const call = authService.refreshToken(request, {}, (err, response) => {
-                    if (!err) {
-                        const decoder = new TextDecoder("utf-8");
-                        const token = decoder.decode(response.getToken());
-                        const refreshed_token = decoder.decode(response.getRefreshedToken());
-                        context.commit('retrieveToken', {token, refreshed_token});
-                        resolve(response)
+                axios.put(`/@auth/@create`, {}, {
+                    headers: {
+                        'Authorization': `Bearer ${context.state.refreshed_token}`,
                     }
-                });
-                call.on('error', reject);
+                }).then(resolve).catch(reject);
             })
         },
         login(context, credentials) {
-            const request = new AuthRequest();
-            request.setUser(credentials.user);
-            request.setPass(credentials.pass);
+
             return new Promise((resolve, reject) => {
-                const call = authService.authenticate(request, {
-                    'g-recaptcha-response': credentials.gToken,
-                }, (err, response) => {
-                    if (!err) {
-                        const decoder = new TextDecoder("utf-8");
-                        const token = decoder.decode(response.getToken());
-                        const refreshed_token = decoder.decode(response.getRefreshedToken());
-                        context.commit('retrieveToken', {token, refreshed_token});
-                        resolve(response);
+
+                const params = new URLSearchParams();
+
+                params.append('user', credentials.user);
+                params.append('pass', credentials.pass);
+                params.append('g-recaptcha-response', credentials.gToken);
+
+                axios.post('/auth/@create', params, {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
                     }
-                });
-                call.on('error', reject);
-            });
+                }).then(response => {
+                    const {token, refreshed_token} = response.data.result;
+                    context.commit('retrieveToken', {token, refreshed_token});
+                    resolve(response);
+                }).catch(reject);
+
+            })
+
         },
         getNotifications(context) {
             return new Promise((resolve, reject) => {
-                const request = new AuthenticateRequest();
-                let utf8Encode = new TextEncoder();
-                let token = utf8Encode.encode(context.state.token)
-                request.setToken(token);
-                const call = userService.getNotifications(request, {}, (err, response) => {
-                    if (!err) {
-                        let notifications = []
-                        response.getResultList().forEach(notification => {
-                            notifications.push(notification.toObject())
-                        })
-                        resolve({
-                            unread_count: response.getUnreadCount(),
-                            data: notifications,
-                        });
+                axios.get(`/user/@notifications`, {
+                    headers: {
+                        'Authorization': `Bearer ${context.state.token}`,
                     }
-                });
-                call.on('error', err => {
-                    reject(err);
-                });
+                }).then(resolve).catch(reject);
             })
         },
         readAllNotifications(context) {
             return new Promise((resolve, reject) => {
-
-                const request = new AuthenticateRequest();
-                let utf8Encode = new TextEncoder();
-                let token = utf8Encode.encode(context.state.token)
-                request.setToken(token);
-
-                const call = userService.readAllNotifications(request, {}, (err, response) => {
-                    if (!err) {
-                        resolve(response.getMessage());
+                axios.put(`/user/@notifications`, {}, {
+                    headers: {
+                        'Authorization': `Bearer ${context.state.token}`,
                     }
-                });
-                call.on('error', err => {
-                    reject(err);
-                });
-            })
-        },
-        inviteFriendToTheater(context, {friend_ids, theater_id}) {
-            return new Promise((resolve, reject) => {
-
-                const authRequest = new AuthenticateRequest();
-                let utf8Encode = new TextEncoder();
-                let token = utf8Encode.encode(context.state.token)
-                authRequest.setToken(token);
-
-                const request = new InviteFriendsTheaterRequest();
-                request.setAuthRequest(authRequest);
-                request.setTheaterId(theater_id);
-                request.setFriendIdsList(friend_ids);
-
-                const call = theaterService.invite(request, {}, (err, response) => {
-                    if (!err) {
-                        resolve(response.getMessage());
-                    }
-                });
-                call.on('error', err => {
-                    reject(err);
-                });
+                }).then(resolve).catch(reject);
             })
         },
         OAUTHCallback(context, {service, code}) {
-
-            let serviceId = 0;
-            switch (service) {
-                case "google": serviceId = 1; break;
-                case "discord": serviceId = 2; break;
-            }
-
             return new Promise((resolve, reject) => {
-                const request = new OAUTHRequest();
-                request.setCode(code);
-                request.setService(serviceId);
-                const call = authService.callbackOAUTH(request, {}, (err, response) => {
-                    if (!err) {
-                        const decoder = new TextDecoder("utf-8");
-                        const token = decoder.decode(response.getToken());
-                        const refreshed_token = decoder.decode(response.getRefreshedToken());
-                        context.commit('retrieveToken', {token, refreshed_token});
-                        resolve(response)
+
+                const params = new URLSearchParams();
+                params.append('code', code);
+
+                axios.put(`/oauth/${service}/@callback`, params, {
+                    headers: {
+                        'Authorization': `Bearer ${context.state.token}`,
                     }
-                });
-                call.on('error', reject);
+                }).then(response => {
+                    const {token, refreshed_token} = response.data.result;
+                    context.commit('retrieveToken', {token, refreshed_token});
+                    resolve(response);
+                }).catch(reject);
+
             })
         }
     },
