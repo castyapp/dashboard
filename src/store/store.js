@@ -421,7 +421,7 @@ export const store = new Vuex.Store({
                 const params = new URLSearchParams();
                 params.append('code', code);
 
-                axios.put(`/oauth/${service}/@callback`, params, {
+                axios.post(`/oauth/${service}/@callback`, params, {
                     headers: {
                         'Authorization': `Bearer ${context.state.token}`,
                     }
