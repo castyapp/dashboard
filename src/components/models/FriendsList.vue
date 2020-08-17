@@ -16,7 +16,7 @@
             </ul>
         </div>
 
-        <div class="search_friends clearfix" v-if="selected === 'search'">
+        <div class="search_friends clearfix" v-show="selected === 'search'">
             <div class="search_container">
                 <input type="text"
                     v-model="search_keyword"
@@ -26,7 +26,7 @@
             </div>
         </div>
 
-        <ul class="mt-2 friends_list_ul pending-list" v-if="selected === 'pending'">
+        <ul class="mt-2 friends_list_ul pending-list" v-show="selected === 'pending'">
 
             <div class="v-loading">
                 <EllipsisLoader :loading="!loadedPendingFriendRequests" class="v-loading" :color="'#316bff'" />
@@ -56,7 +56,7 @@
 
         </ul>
 
-        <ul class="mt-2 friends_list_ul" v-if="selected === 'search'">
+        <ul class="mt-2 friends_list_ul" v-show="selected === 'search'">
 
             <li class="offline" :key="user.id" v-for="user in search_result">
                 <a class="friend">
@@ -77,7 +77,7 @@
 
         </ul>
 
-        <ul class="mt-2 friends_list_ul" v-if="selected === 'friends'">
+        <ul class="mt-2 friends_list_ul" v-show="selected === 'friends'">
 
             <div v-if="loading" class="content-loading">
                 <VueContentLoading :width="230" :height="55" primary="#333" secondary="#181818" :key="i" v-for="i in 10">
@@ -86,38 +86,12 @@
                 </VueContentLoading>
             </div>
 
-            <li v-if="!loading" v-show="friends.length === 0">
+            <div v-if="!loading" v-show="friends.length === 0">
                 You have no friends here right now :(
-            </li>
+            </div>
 
-            <li :data-id="friend.id" 
-            :key="friend.id"
-            :class="getStateName(friend.state)" v-for="friend in friends"
-            @contextmenu.prevent="$parent.$refs.menu.open($event, 'friend-menu', friend)">
-
-                <router-link class="friend"
-                             :to="{ name: 'messages', params: { friend_id: friend.username, friend }}">
-
-                    <div class="avatar">
-                        <img :src="cdnUrl + '/avatars/' + friend.avatar + '.png'"
-                             alt="Avatar" />
-                        <i class="state-dot"></i>
-                    </div>
-
-                    <div class="innerDetails">
-                        <div class="username">
-                            <strong>{{ friend.fullname }}</strong>
-                        </div>
-                        <div :data-friend-activity-id="friend.id" 
-                            class="activity"></div>
-                    </div>
-
-                    <span :data-friend-badge-id="friend.id"
-                          class="unread-badge-friendlist d-none">0</span>
-
-                </router-link>
-
-            </li>
+            <!-- Online Friends -->
+            <FriendRow ref="friends" :key="friend.id" v-for="friend in orderedFriends" :friend="friend" />
 
         </ul>
 
@@ -351,7 +325,7 @@
 
 <script>
 
-    import $ from 'jquery'
+    import FriendRow from './FriendRow'
     import userSocket from '../../store/user.ws'
     import FriendsActions from './FriendsActions'
     import {proto} from 'casty-proto/pbjs/ws.bundle'
@@ -365,7 +339,8 @@
             VueContentLoading,
             FriendsActions,
             EllipsisLoader,
-            VueLoadingButton
+            VueLoadingButton,
+            FriendRow
         },
         data() {
             return {
@@ -381,6 +356,16 @@
                     unread_count: 0,
                 },
                 selected: 'friends',
+            }
+        },
+        computed: {
+            orderedFriends() {
+                return this.friends.slice(0).sort(friend => {
+                    if (friend.state === proto.PERSONAL_STATE.OFFLINE) {
+                        return 1
+                    }
+                    return -1
+                })
             }
         },
         methods: {
@@ -459,53 +444,15 @@
 
                 });
             },
-            getStateName(state) {
-                switch (state) {
-                    case proto.PERSONAL_STATE.ONLINE: return "online";
-                    case proto.PERSONAL_STATE.BUSY: return "busy";
-                    case proto.PERSONAL_STATE.IDLE: return "idle";
-                    default:
-                        return "offline"
-                }
-            },
             setFriends(friends) {
                 this.loading = false;
                 if (friends !== null){
-                    this.$parent.friends = friends;
-                    this.$parent.setFriends(friends);
+                    this.friends = [];
+                    friends.forEach(friend => {
+                        friend.state = proto.PERSONAL_STATE.OFFLINE
+                        this.friends.push(friend)
+                    })
                 }
-            },
-            clearFriendsList() {
-                this.$parent.friends = [];
-            },
-            removeAllClassesEx(element, class_name) {
-                let classes = ["online", "offline", "idle", "busy"];
-                classes.forEach(classN => {
-                    if (classN !== class_name){
-                        element.removeClass(classN);
-                    }
-                });
-            },
-            findFriendById(id) {
-                return $(`[data-id="${id}"]`);
-            },
-            findFriend(id) {
-                let friendIndex = null;
-                this.friends.forEach((friend, index) => {
-                    if (friendIndex === null) {
-                        if (friend.id === id) {
-                            friendIndex = index
-                            return
-                        }
-                    }
-                });
-                return friendIndex
-            },
-            findFriendBadgeById(id) {
-                return $(`[data-friend-badge-id="${id}"]`);
-            },
-            findFriendActivityById(id) {
-                return $(`[data-friend-activity-id="${id}"]`);
             },
             startConversation(user) {
                 this.$router.push({ path: `/messages/${user.id}` })
@@ -533,19 +480,32 @@
                 }).catch(console.log);
             },
             updateFriendState(event) {
-                let friendElement = this.findFriendById(event.user.id);
-                let stateClass = this.getStateName(event.state);
-                this.removeAllClassesEx(friendElement, stateClass);
-                friendElement.addClass(stateClass);
-                this.updateFriendActivity(event)
+                // update friend state in list
+                const friendIndex = this.friends.findIndex(friend => friend.id === event.user.id);
+                this.friends[friendIndex].state = event.state
+
+                // update friend state in FriendRow component
+                const currentIndex = this.$refs.friends.findIndex(friend => friend.$vnode.key === event.user.id);
+                const component = this.$refs.friends[currentIndex]
+                component.updateState(event.state)
             },
             updateFriendActivity(event) {
-                let activityElement = this.findFriendActivityById(event.user.id);
-                if (!event.hasOwnProperty('activity')) {
-                    activityElement.html(``)
-                } else {
-                    activityElement.html(`Watching ${event.activity.activity.substring(0,18)} ...`)
-                }    
+                // update friend activity in FriendRow component
+                const currentIndex = this.$refs.friends.findIndex(friend => friend.$vnode.key === event.user.id);
+                const component = this.$refs.friends[currentIndex]
+                component.updateActivity(event) 
+            },
+            updateFriend(user) {
+                // update friend
+                const friendIndex = this.friends.findIndex(friend => friend.id === user.id);
+                const oldFriend = this.friends[friendIndex]
+                user.state = oldFriend.state
+                this.friends[friendIndex] = user
+                
+                // update friend in FriendRow component
+                const currentIndex = this.$refs.friends.findIndex(friend => friend.$vnode.key === user.id);
+                const component = this.$refs.friends[currentIndex]
+                component.updateFriend(user) 
             }
         },
         watch: {
@@ -566,6 +526,12 @@
 
             userSocket.connect();
 
+            this.$bus.$on(proto.EMSG[proto.EMSG.USER_UPDATED], data => {
+                let decoded = proto.User.decode(data);
+                this.updateFriend(decoded);
+                this.$bus.$emit("user-updated", decoded);
+            });
+
             this.$bus.$on(proto.EMSG[proto.EMSG.FRIEND_REQUEST_ACCEPTED], data => {
                 let decoded = proto.FriendRequestAcceptedMsgEvent.decode(data);
                 decoded.friend.activity = undefined;
@@ -577,18 +543,14 @@
             });
 
             await this.$store.dispatch("getFriendsList").then(friends => {
-                this.clearFriendsList();
                 this.setFriends(friends);
             });
 
-            this.friends = this.$parent.friends;
-
             this.$bus.$on("open-message-page", friend => {
-                let friendElement = this.findFriendBadgeById(friend.id);
-                let currentCount = parseInt(friendElement.text());
-                if (currentCount !== 0) {
-                    friendElement.addClass("d-none");
-                    friendElement.text(0);
+                const currentIndex = this.$refs.friends.findIndex(f => f.$vnode.key === friend.id);
+                const component = this.$refs.friends[currentIndex]
+                if (component.badgeCount !== 0) {
+                    component.removeBadgeCount()
                 }
             });
 
@@ -600,10 +562,9 @@
 
                 if (this.$route.name !== "messages") {
                     if (this.$route.params.friend_id !== friend.username) {
-                        let friendElement = this.findFriendBadgeById(friend.id);
-                        let currentCount = parseInt(friendElement.text());
-                        friendElement.removeClass("d-none");
-                        friendElement.text(currentCount + 1);
+                        const currentIndex = this.$refs.friends.findIndex(f => f.$vnode.key === friend.id);
+                        const component = this.$refs.friends[currentIndex]
+                        component.addBadgeCount()
                     }
                 }
 
@@ -631,7 +592,9 @@
             await this.getNotifications();
         },
         destroyed() {
-            websocket.user.disconnect();
+            if (websocket !== undefined) {
+                websocket.user.disconnect();
+            }
         }
     }
 

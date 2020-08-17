@@ -47,7 +47,7 @@
                                                class="form-control" />
                                     </div>
                                 </div>
-                                <div class="preview-duration">
+                                <div class="preview-duration" v-if="newMediaSource.data.length !== 0">
                                     <span class="badge badge-warning">
                                         <i class="icofont-clock-time"></i>
                                         {{ getHumanDuration(newMediaSource.data.length * 1000) }}
@@ -70,16 +70,16 @@
                         </div>
 
                         <div class="media-sources" v-else>
-
                             <MediaSource class="selected-media-source"
                                          :mediaSource="theater.media_source"
                                          :selected="true" />
+                        </div>
 
+                        <div class="media-sources" v-if="!show_all_media_sources">
                             <MediaSource :key="mediaSource.id"
                                          v-for="mediaSource in mediaSources"
                                          :selectedMediaSourceId="theater.media_source.id"
                                          :mediaSource="mediaSource" />
-
                         </div>
 
                     </div>
@@ -143,7 +143,7 @@
                                 <i :class="getMediaSourceTypeIcon(theater.media_source)"></i>
                                 {{ theater.media_source.title }}
                             </span>
-                            <div class="preview-duration">
+                            <div class="preview-duration" v-if="theater.media_source.length !== undefined && theater.media_source.length !== 0">
                                 <span class="badge badge-warning">
                                     <i class="icofont-clock-time"></i>
                                     {{ getHumanDuration(theater.media_source.length * 1000) }}
@@ -536,6 +536,8 @@
         },
         data() {
             return {
+
+                show_all_media_sources: false,
 
                 hasChanges: false,
                 saveLoading: false,

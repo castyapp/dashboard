@@ -2,7 +2,7 @@
 
     <div class="messages-section p-2" v-if="friend !== null">
 
-        <div class="title-border-bottom pb-2" :class="stateElementClass">
+        <div class="title-border-bottom pb-2">
             <strong>
                 <i class="icofont-user"></i>
                 {{ friend.fullname }}
@@ -98,7 +98,7 @@
 
     .send-input-messager {
         width: 100%;
-        margin: 10px 0;
+        margin: 0;
         padding: 10px !important;
         background: #181818;
         border: 0;
@@ -141,15 +141,12 @@
     } */
 
     .message:first-child {
-        margin-top: 0 !important;
+        margin-top: 10px !important;
     }
 
     .message.sm-user {
-        margin-top: 0 !important;
+        margin: 0 !important;
         padding: 0 !important;
-    }
-
-    .message.sm-user {
         border-top: none !important;
     }
 
@@ -159,14 +156,14 @@
     }
 
     .message {
-        border-top: 1px solid #333 !important;
+        /* border-top: 1px solid #333 !important; */
         padding-top: 15px !important;
-        margin-top: 15px;
+        margin-top: 10px;
     }
 
     .message-user-name {
-        margin-bottom: 10px;
-        margin-top: 10px;
+        /* margin-bottom: 10px; */
+        /* margin-top: 10px; */
         color: #b3b3b3;
         /*border-bottom: 1px solid #333334;*/
         /*padding-bottom: 10px;*/
@@ -189,7 +186,7 @@
     .chats {
         height: 100%;
         overflow: auto;
-        padding: 10px;
+        padding: 0 0 20px 10px;
     }
 
     .messages-container {
@@ -260,7 +257,6 @@
         data() {
             return {
                 friend: null,
-                stateElementClass: 'offline',
                 messages: [],
                 loading: true,
             }
@@ -336,16 +332,6 @@
 
             this.$bus.$emit('updated_friends_list_state', 'open');
 
-            this.$bus.$on('friend-state-changed', pState => {
-                if (pState.user.id === this.friend.id){
-                    this.friend.state = pState.state;
-                    switch (pState.state) {
-                        case 1: this.stateElementClass = "online"; break
-                        default: this.stateElementClass = "offline"; break
-                    }
-                }
-            });
-
             this.messages = [];
             let friend_username = this.$route.params.friend_id;
 
@@ -384,6 +370,13 @@
                     this.messages.push(message);
                 }
             });
+
+            this.$bus.$on('user-updated', updatedUser => {
+                if (this.friend.id === updatedUser.id) {
+                    this.friend = updatedUser
+                }
+            });
+
         },
         destroyed() {
             this.friend = null;

@@ -62,6 +62,7 @@
 
     import 'plyr/dist/plyr.css'
 
+    import Hls from 'hls.js'
     import Plyr from 'plyr'
     import log from '../../store/logging'
     import {RingLoader} from 'vue-spinners-css'
@@ -92,9 +93,11 @@
                 return Math.round(new Date().getTime()) / 1000
             },
             sync() {
-                this.sentSyncMeAt = this.timeNow()
-                log("VIDEO PLAYER", "Sending sync request...", "yellow");
-                emit(this.ws, proto.EMSG.SYNC_ME, proto.TheaterVideoPlayer, {});
+                if (this.theater.media_source.type === proto.MediaSource.Type.YOUTUBE) {
+                    this.sentSyncMeAt = this.timeNow()
+                    log("VIDEO PLAYER", "Sending sync request...", "yellow");
+                    emit(this.ws, proto.EMSG.SYNC_ME, proto.TheaterVideoPlayer, {});
+                }
             },
             onPlaying() {
                 log("VIDEO PLAYER", `Playing at ${this.player.currentTime}!`, 'green');
@@ -147,6 +150,8 @@
                 }
             },
             onSynced(packet) {
+
+                console.log("onSynced called");
 
                 let decoded = proto.TheaterVideoPlayer.decode(packet.data);
 
@@ -259,6 +264,19 @@
                     }
                 }
 
+                if (this.theater.media_source.type === proto.MediaSource.Type.M3U8) {
+                    // videoPlayerOptions.controls = [
+                    //     'play-large',
+                    //     'play',
+                    //     'mute',
+                    //     'volume',
+                    //     'captions',
+                    //     'settings',
+                    //     'airplay',
+                    //     'fullscreen'
+                    // ]
+                }
+                
                 this.player = new Plyr('#theater', videoPlayerOptions);
 
                 this.player.fromSocket = false;
@@ -285,17 +303,21 @@
                     }
                 })
 
-                this.$parent.$on(proto.EMSG[proto.EMSG.SYNCED], this.onSynced);
-                this.$parent.$on(proto.EMSG[proto.EMSG.THEATER_PLAY], this.gatewayOnPlay);
-                this.$parent.$on(proto.EMSG[proto.EMSG.THEATER_PAUSE], this.gatewayOnPause);
+                if (this.theater.media_source.type !== proto.MediaSource.Type.M3U8) {
+                    this.$parent.$on(proto.EMSG[proto.EMSG.SYNCED], this.onSynced);
+                    this.$parent.$on(proto.EMSG[proto.EMSG.THEATER_PLAY], this.gatewayOnPlay);
+                    this.$parent.$on(proto.EMSG[proto.EMSG.THEATER_PAUSE], this.gatewayOnPause);
+                }
 
                 this.player.on('ended', () => {
                     log("VIDEO PLAYER", 'video ended!', 'red');
                 });
 
                 if (this.loggedIn) {
-                    this.player.on('playing', this.onPlaying);
-                    this.player.on('pause', this.onPaused);
+                    if (this.theater.media_source.type !== proto.MediaSource.Type.M3U8) {
+                        this.player.on('playing', this.onPlaying);
+                        this.player.on('pause', this.onPaused);
+                    }
                 }
 
                 this.setMediaSource(this.theater.media_source);
@@ -338,6 +360,20 @@
                                 ],
                                 tracks: tracks
                             };
+                            break
+                        case proto.MediaSource.Type.M3U8:
+                            if (!Hls.isSupported()) {
+                                this.player.media.src = mediaSource.uri;
+                            } else {
+                                const hls = new Hls();
+                                hls.loadSource(mediaSource.uri);
+                                hls.attachMedia(this.player.media);
+                                window.hls = hls;
+                                this.player.on('languagechange', () => {
+                                    setTimeout(() => hls.subtitleTrack = this.player.currentTrack, 50);
+                                });
+                                this.player.play()
+                            }
                             break
                     }
 

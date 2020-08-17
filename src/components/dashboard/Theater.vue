@@ -14,7 +14,7 @@
 
                     <img :src="this.cdnUrl + '/avatars/' + this.theater.user.avatar + '.png'"
                          :alt="this.theater.user.fullname"
-                         class="theater-avatar" :class="getStateName(this.theater.user.state)" />
+                         class="theater-avatar" />
 
                     <div class="theater-top-details">
                         <strong class="ml-1">
@@ -314,9 +314,8 @@
                     this.theater = theater;
                     this.theater_description = this.theater.description
                     resolve(theater)
-                }).catch(err => {
+                }).catch(() => {
                     this.theaterLoading = false;
-                    console.log(err)
                 });
             }
         },
@@ -372,6 +371,12 @@
                 }).catch(console.log)
             });
 
+            this.$bus.$on('user-updated', updatedUser => {
+                if (this.theater.user.id === updatedUser.id) {
+                    this.theater.user = updatedUser
+                }
+            });
+
         },
         activated() {
             if (this.loggedIn) {
@@ -380,7 +385,9 @@
         },
         destroyed() {
             this.members = [];
-            this.socket.disconnect();
+            if (this.socket !== null) {
+                this.socket.disconnect();
+            }
             if (this.loggedIn) {
                 this.$bus.$emit('updated_friends_list_state', 'open');
             }

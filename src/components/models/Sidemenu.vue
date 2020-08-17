@@ -29,15 +29,7 @@
                     </router-link>
                 </li>
 
-                <li v-for="theater in theaters" v-bind:key="theater.id">
-                    <router-link :to="{ name: 'theater', params: { user: theater.user.username } }"
-                        class="theater-sidemenu"
-                        v-title="theater.user.username + ': ' + theater.description"
-                        title-placement="right">
-                            <img :src="cdnUrl + '/avatars/' + theater.user.avatar + '.png'"
-                                :alt="theater.user.fullname" />
-                    </router-link>
-                </li>
+                <TheaterRow :key="'th-' + theater.user.id" v-for="theater in theaters" :theater="theater" ref="theaters" />
 
             </ul>
         </div>
@@ -71,12 +63,14 @@
 
 <script>
 
+    import TheaterRow from './TheaterRow'
     import {proto} from 'casty-proto/pbjs/ws.bundle'
     import NotificationCenter from './NotificationCenter'
 
     export default {
         components: {
             NotificationCenter,
+            TheaterRow
         },
         data() {
             return {
@@ -167,6 +161,12 @@
                     this.user.avatar = avatar;
                 });
 
+                this.$bus.$on('user-updated', user => {
+                    const currentIndex = this.$refs.theaters.findIndex(th => th.$vnode.key === `th-${user.id}`);
+                    const component = this.$refs.theaters[currentIndex]
+                    component.updateUser(user)
+                })
+
                 await this.getNotifications();
             }
         }
@@ -182,9 +182,10 @@
     }
 
     .theater-sidemenu > img {
-        width: 100%;
+        width: 40px;
         border-radius: 50%;
         border: 2px solid #202020;
+        height: 40px;
     }
 
     li.custom-btn-menu > a {

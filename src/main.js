@@ -8,10 +8,11 @@ import { store } from './store/store'
 import VueChatScroll from 'vue-chat-scroll'
 import Notifications from 'vue-notification'
 import vueTopProgress from 'vue-top-progress'
+import {proto} from 'casty-proto/pbjs/ws.bundle'
 import Master from './components/layouts/Master'
-import * as VueSpinnersCss from "vue-spinners-css"
+import * as VueSpinnersCss from 'vue-spinners-css'
 import GSignInButton from 'vue-google-signin-button'
-const {Status} = require("@stackpath/node-grpc-error-details");
+const {Status} = require('@stackpath/node-grpc-error-details')
 
 Vue.config.productionTip = false;
 
@@ -68,15 +69,8 @@ router.beforeEach(async (to, from, next) => {
         if (store.state.user == null){
             await store.dispatch("getUser").then(user => {
                 store.state.user = user;
-            }).catch(err => {
-
-                console.log(err);
-
-                // instead of this store call you would put your code to get new token
-                store.dispatch("refreshToken").then(response => {
-                    console.log("Refreshed: ", response);
-                }).catch(async err => {
-                    console.log("Not Refreshed", err);
+            }).catch(() => {
+                store.dispatch("refreshToken").catch(async () => {
                     await store.dispatch('logout').then(() => {
                         localStorage.removeItem("user");
                         userSocket.disconnect();
@@ -98,18 +92,11 @@ router.beforeEach(async (to, from, next) => {
     next()
 });
 
-const MediaSource_Type_UNKNOWN     = 0,
-    MediaSource_Type_YOUTUBE       = 1,
-    MediaSource_Type_TORRENT       = 2,
-    MediaSource_Type_SOUND_CLOUD   = 3,
-    MediaSource_Type_DOWNLOAD_URI  = 4,
-    MediaSource_Type_LOCAL_PATH    = 5;
-
 Vue.mixin({
     data() {
         return {
             get loggedIn() {
-                return store.getters.loggedIn
+                return store.getters.loggedIn && this.user !== null
             },
             get cdnUrl() {
                 return `${apiConfig.cdnUrl}/uploads`;
@@ -153,15 +140,17 @@ Vue.mixin({
         },
         getMediaSourceTypeName(mediaSource) {
             switch (mediaSource.type) {
-                case MediaSource_Type_YOUTUBE: return "Youtube";
-                case MediaSource_Type_DOWNLOAD_URI: return "Download Uri";
+                case proto.MediaSource.Type.YOUTUBE: return "Youtube";
+                case proto.MediaSource.Type.DOWNLOAD_URI: return "Download Uri";
+                case proto.MediaSource.Type.M3U8: return "M3U8";
                 default: return "Unknown";
             }
         },
         getMediaSourceTypeIcon(mediaSource) {
             switch (mediaSource.type) {
-                case MediaSource_Type_YOUTUBE: return "icofont-youtube-play";
-                case MediaSource_Type_DOWNLOAD_URI: return "icofont-external-link";
+                case proto.MediaSource.Type.YOUTUBE: return "icofont-youtube-play";
+                case proto.MediaSource.Type.DOWNLOAD_URI: return "icofont-external-link";
+                case proto.MediaSource.Type.M3U8: return "icofont-external-link";
                 default: return "Unknown";
             }
         },
