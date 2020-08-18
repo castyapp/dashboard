@@ -71,15 +71,16 @@
 
                         <div class="media-sources" v-else>
                             <MediaSource class="selected-media-source"
-                                         :mediaSource="theater.media_source"
-                                         :selected="true" />
+                                :mediaSource="theater.media_source"
+                                :selected="true" />
                         </div>
 
-                        <div class="media-sources" v-if="!show_all_media_sources">
-                            <MediaSource :key="mediaSource.id"
-                                         v-for="mediaSource in mediaSources"
-                                         :selectedMediaSourceId="theater.media_source.id"
-                                         :mediaSource="mediaSource" />
+                        <div class="media-sources" v-if="!mediaSourcesLoading">
+                            <MediaSource :key="'media-source-' + ms.id"
+                                v-for="ms in mediaSources"
+                                :selectedMediaSourceId="theater.media_source.id"
+                                :mediaSource="ms" 
+                                :selected="false" />
                         </div>
 
                     </div>
@@ -131,17 +132,21 @@
 
                     <div class="media-source-preview" v-if="theater.media_source.uri !== null">
 
-                        <img v-if="theater.media_source.banner !== undefined" :src="theater.media_source.banner"
-                             :alt="theater.media_source.title" />
+                        <img v-if="theater.media_source.banner !== undefined && theater.media_source.banner !== 'default'" 
+                            :src="cdnUrl + '/posters/' + theater.media_source.banner + '.png'"
+                            :alt="theater.media_source.title" />
 
                         <div v-else class="default-preview-banner">
                             <i class="icofont-ui-movie"></i>
                         </div>
 
                         <div class="preview-info">
-                            <span class="selected-preview-title">
+                            <span class="selected-preview-title" v-if="$parent.hasMediaSource()">
                                 <i :class="getMediaSourceTypeIcon(theater.media_source)"></i>
                                 {{ theater.media_source.title }}
+                            </span>
+                            <span class="selected-preview-title new-media-source-title" v-else>
+                                No media source found!
                             </span>
                             <div class="preview-duration" v-if="theater.media_source.length !== undefined && theater.media_source.length !== 0">
                                 <span class="badge badge-warning">
@@ -155,14 +160,14 @@
                                     @click.native="openMediaSourcesModal"
                                     type="button"
                                     class="btn btn-primary">
-                                Change
+                                Configure
                             </VueLoadingButton>
                         </div>
                     </div>
 
                 </div>
 
-                <div class="form-group" v-if="theater.media_source.type !== 1">
+                <div class="form-group" v-if="theater.media_source.type !== 1 && $parent.hasMediaSource()">
 
                     <label for="movie_subtitles">
                         <i class="icofont-cc mr-1"></i>
@@ -303,6 +308,11 @@
 </template>
 
 <style>
+
+    span.selected-preview-title.new-media-source-title {
+        margin: 12px 5px;
+        font-size: 17px;
+    }
 
     .succeed-upload-subtitle {
         padding: 6px;
@@ -809,9 +819,12 @@
                 };
 
                 this.$store.dispatch("saveNewMediaSource", payload).then(response => {
+
+                    let mediaSource = response.data.result;
                     this.saveNewMediaLoading = false;
 
-                    this.$bus.$emit("new-media-source", response.data.result);
+                    this.mediaSources.push(mediaSource);
+                    this.theater.media_source = mediaSource;
 
                     // empty the parse media source
                     this.newMediaSource.loading = false;
@@ -844,7 +857,7 @@
             loadMediaSources() {
 
                 this.mediaSourcesLoading = true;
-                this.mediaSources = {};
+                this.mediaSources = [];
 
                 this.$store.dispatch("loadMediaSources").then(response => {
                     this.mediaSources = response.data.result;
@@ -979,10 +992,6 @@
                     this.player_access_config.placeholder = "Public";
                     break
             }
-
-            this.$bus.$on('new-media-source', mediaSource => {
-                this.theater.media_source = mediaSource;
-            });
 
         },
     }

@@ -317,6 +317,9 @@
                 }).catch(() => {
                     this.theaterLoading = false;
                 });
+            },
+            hasMediaSource() {
+                return Object.keys(this.theater.media_source).length > 0
             }
         },
         mounted() {
@@ -352,11 +355,17 @@
                     this.$refs.TheaterSettings.setSubtitlesLoading(true)
                 }
 
-                this.$store.dispatch('getSubtitles', this.theater.media_source.id).then(subtitles => {
-                    this.subtitles = subtitles
-                    this.$refs.TheaterSettings.setSubtitles(subtitles)
-                }).catch(console.log)
-                
+                if (this.hasMediaSource()) {
+                    this.$store.dispatch('getSubtitles', this.theater.media_source.id).then(subtitles => {
+                        this.subtitles = subtitles
+                        this.$refs.TheaterSettings.setSubtitles(subtitles)
+                    }).catch(() => {
+                        this.$refs.TheaterSettings.setSubtitles([])
+                    })
+                } else {
+                    this.$refs.TheaterSettings.setSubtitles([])
+                }
+
             })
 
             this.$on('theater-description-changed', desc => {
@@ -368,7 +377,9 @@
                 this.$store.dispatch('getSubtitles', mediaSource.id).then(subtitles => {
                     this.subtitles = subtitles
                     this.$refs.TheaterSettings.setSubtitles(subtitles)
-                }).catch(console.log)
+                }).catch(() => {
+                    this.$refs.TheaterSettings.setSubtitles([])
+                })
             });
 
             this.$bus.$on('user-updated', updatedUser => {

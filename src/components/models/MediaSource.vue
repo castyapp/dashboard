@@ -4,8 +4,9 @@
 
         <div class="media-source-details">
 
-            <img v-if="mediaSource.banner !== undefined" :src="mediaSource.banner"
-                 :alt="mediaSource.title" />
+            <img v-if="mediaSource.banner !== undefined"
+                :src="cdnUrl + '/posters/' + mediaSource.banner + '.png'"
+                :alt="mediaSource.title" />
 
             <div v-else class="small-default-preview-banner">
                 <i class="icofont-ui-movie"></i>
@@ -74,9 +75,9 @@
         methods: {
             select() {
                 this.loading = true;
-                this.$store.dispatch("selectNewMediaSource", this.mediaSource.id).then(() => {
+                this.$store.dispatch("selectNewMediaSource", this.mediaSource.id).then(response => {
                     this.loading = false;
-                    this.$bus.$emit('new-media-source', this.mediaSource);
+                    this.$bus.$emit('new-media-source', response.data.result);
                 }).catch(() => {
                     this.loading = false;
                 });
