@@ -592,9 +592,7 @@
             await this.getNotifications();
         },
         destroyed() {
-            if (websocket !== undefined) {
-                websocket.user.disconnect();
-            }
+            userSocket.disconnect();
         }
     }
 
