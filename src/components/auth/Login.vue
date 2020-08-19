@@ -100,7 +100,7 @@
             },
             login() {
 
-                if (this.recaptcha.valid) {
+                if (!this.recaptcha.valid) {
                     this.$notify({
                         group: 'auth',
                         type: 'error',
