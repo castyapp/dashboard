@@ -15,7 +15,7 @@
                    required="required"
                    autocomplete="user" />
             <small v-if="errors.username" class="text-danger pull-left text-left">
-                <span class="clearfix" v-for="err in errors.username">
+                <span class="clearfix" :key="'username-err-' + i" v-for="(err, i) in errors.username">
                     {{ err }}
                 </span>
             </small>
@@ -33,7 +33,7 @@
                    autocomplete="current-password" />
 
             <small v-if="errors.password" class="text-danger pull-left text-left">
-                <span class="clearfix" v-for="err in errors.password">
+                <span class="clearfix" :key="'password-err-' + i" v-for="(err, i) in errors.password">
                     {{ err }}
                 </span>
             </small>
@@ -41,12 +41,11 @@
 
         <div class="form-group login-bottom-action-buttons">
             <div class="buttons">
-                <VueRecaptcha :sitekey="sitekey"
-                              ref="recaptcha"
-                              @verify="onCaptchaVerified"
-                              @expired="onCaptchaExpired"
-                              size="invisible"
-                              :loadRecaptchaScript="true" />
+
+                <VueHcaptcha :sitekey="$parent.sitekey" 
+                    @verify="onCaptchaVerified" 
+                    @expired="onCaptchaExpired"
+                    @error="onCaptchaExpired" />
 
                 <VueLoadingButton
                         type="submit"
@@ -68,29 +67,51 @@
 
 <script>
 
-    const jQuery = require("jquery");
-    import VueRecaptcha from 'vue-recaptcha';
+    const jQuery = require('jquery')
+    import VueHcaptcha from '@hcaptcha/vue-hcaptcha'
     import VueLoadingButton from 'vue-loading-button'
-    import OAuthButtons from "./oauth/OAuthButtons";
+    import OAuthButtons from './oauth/OAuthButtons'
 
     export default {
         name: 'login',
         components: {
-            VueRecaptcha,
+            VueHcaptcha,
             VueLoadingButton,
             OAuthButtons,
         },
         data() {
             return {
+                recaptcha: {
+                    token: null,
+                    valid: false,
+                },
                 loading: false,
                 errors: {},
                 user: '',
                 pass: '',
-                sitekey: process.env.VUE_APP_API_RECAPTCHA_KEY,
             }
         },
         methods: {
-            onCaptchaVerified(recaptchaToken) {
+            onCaptchaVerified(response) {
+                this.recaptcha = {
+                    valid: true,
+                    token: response,
+                };
+            },
+            login() {
+
+                if (this.recaptcha.valid) {
+                    this.$notify({
+                        group: 'auth',
+                        type: 'error',
+                        text: "Captcha is invalid!",
+                        title: "Failed",
+                        duration: 2000,
+                    });
+                    return
+                }
+
+                this.loading = true;
 
                 jQuery('#serverError').removeClass();
 
@@ -99,7 +120,7 @@
                 this.$store.dispatch('login', {
                     user: this.user,
                     pass: this.pass,
-                    gToken: recaptchaToken,
+                    recaptchaToken: this.recaptcha.token,
                 }).then(() => {
 
                     this.errors = {};
@@ -140,18 +161,23 @@
                         });
 
                     this.$parent.$refs.topProgress.done();
-                    this.$refs.recaptcha.reset();
-
+                    
                 });
 
             },
             onCaptchaExpired() {
                 this.loading = false;
-                this.$refs.recaptcha.reset();
-            },
-            login() {
-                this.loading = true;
-                this.$refs.recaptcha.execute();
+                this.recaptcha = {
+                    token: null,
+                    valid: false,
+                };
+                this.$notify({
+                    group: 'auth',
+                    type: 'error',
+                    text: "Captcha is invalid!",
+                    title: "Failed",
+                    duration: 2000,
+                });
             },
         },
         mounted() {

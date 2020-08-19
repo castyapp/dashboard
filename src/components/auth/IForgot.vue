@@ -15,7 +15,7 @@
                    required="required"
                    autocomplete="username" />
             <small v-if="errors.username" class="text-danger pull-left text-left">
-                <span class="clearfix" v-for="err in errors.username">
+                <span class="clearfix" :key="'username-err-' + i" v-for="(err, i) in errors.username">
                     {{ err }}
                 </span>
             </small>
@@ -23,12 +23,12 @@
 
         <div class="form-group login-bottom-action-buttons">
             <div class="buttons">
-                <VueRecaptcha :sitekey="sitekey"
-                              ref="recaptcha"
-                              @verify="onCaptchaVerified"
-                              @expired="onCaptchaExpired"
-                              size="invisible"
-                              :loadRecaptchaScript="true" />
+
+                <VueHcaptcha :sitekey="$parent.sitekey" 
+                    @verify="onCaptchaVerified" 
+                    @expired="onCaptchaExpired"
+                    @error="onCaptchaExpired" />
+
                 <VueLoadingButton
                         type="submit"
                         :loading="loading"
@@ -36,6 +36,7 @@
                         :disabled="loading">
                     <span>Submit</span>
                 </VueLoadingButton>
+
             </div>
 
         </div>
@@ -46,35 +47,54 @@
 
 <script>
 
-    const jQuery = require("jquery");
-    import VueRecaptcha from 'vue-recaptcha';
+    const jQuery = require('jquery')
+    import VueHcaptcha from '@hcaptcha/vue-hcaptcha'
     import VueLoadingButton from 'vue-loading-button'
 
     export default {
         name: 'login',
         components: {
-            VueRecaptcha,
             VueLoadingButton,
+            VueHcaptcha,
         },
         data() {
             return {
+                recaptcha: {
+                    token: null,
+                    valid: false,
+                },
                 loading: false,
                 errors: {},
                 user: '',
                 pass: '',
-                sitekey: process.env.VUE_APP_API_RECAPTCHA_KEY,
             }
         },
         methods: {
-            onCaptchaVerified(recaptchaToken) {
-                // this.loading = true;
+
+            onCaptchaVerified(response) {
+                this.recaptcha = {
+                    valid: true,
+                    token: response,
+                };
             },
+
             onCaptchaExpired() {
-                this.$refs.recaptcha.reset();
+                this.loading = false;
+                this.recaptcha = {
+                    token: null,
+                    valid: false,
+                };
+                this.$notify({
+                    group: 'auth',
+                    type: 'error',
+                    text: "Captcha is invalid!",
+                    title: "Failed",
+                    duration: 2000,
+                });
             },
-            submit() {
-                this.$refs.recaptcha.execute();
-            },
+
+            submit() {},
+
         },
         mounted() {
             let err = this.$route.params.err;

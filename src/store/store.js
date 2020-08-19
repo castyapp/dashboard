@@ -352,11 +352,11 @@ export const store = new Vuex.Store({
                 params.append('username', data.username);
                 params.append('password', data.password);
                 params.append('password_confirmation', data.password_confirmation);
-                params.append('g-recaptcha-response', data.recaptchaToken)
 
                 axios.post(`/user/@create`, params, {
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'h-captcha-response': data.recaptchaToken,
                     }
                 }).then(response => {
                     const {token, refreshed_token} = response.data.result;
@@ -382,11 +382,11 @@ export const store = new Vuex.Store({
 
                 params.append('user', credentials.user);
                 params.append('pass', credentials.pass);
-                params.append('g-recaptcha-response', credentials.gToken);
-
+                
                 axios.post('/auth/@create', params, {
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'h-captcha-response': credentials.recaptchaToken,
                     }
                 }).then(response => {
                     const {token, refreshed_token} = response.data.result;

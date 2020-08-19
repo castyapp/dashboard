@@ -60,6 +60,7 @@
             return {
                 serverError: '',
                 successMessage: this.dataSuccessMessage,
+                sitekey: process.env.VUE_APP_API_RECAPTCHA_SITE_KEY,
             }
         }
     }

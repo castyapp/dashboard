@@ -16,10 +16,10 @@
                    required="required"
                    autocomplete="fullname" />
 
-            <small v-if="errors.fullname" class="text-danger fa-pull-left text-left">
-                    <span class="clearfix">
-                        {{ errors.fullname }}
-                    </span>
+            <small :key="'fullname-err-' + i" v-for="(err, i) in errors.fullname" class="text-danger fa-pull-left text-left">
+                <span class="clearfix">
+                    {{ err }}
+                </span>
             </small>
         </div>
 
@@ -35,7 +35,7 @@
                    required="required"
                    autocomplete="username" />
 
-            <small v-if="errors.username" v-for="err in errors.username" class="text-danger fa-pull-left text-left">
+            <small :key="'username-err-' + i" v-for="(err, i) in errors.username" class="text-danger fa-pull-left text-left">
                 <span class="clearfix">
                     {{ err }}
                 </span>
@@ -54,7 +54,7 @@
                    required="required"
                    autocomplete="email" />
 
-            <small v-if="errors.email" v-for="err in errors.email" class="text-danger fa-pull-left text-left">
+            <small :key="'email-err-' + i" v-for="(err, i) in errors.email" class="text-danger fa-pull-left text-left">
                 <span class="clearfix">
                     {{ err }}
                 </span>
@@ -72,7 +72,7 @@
                    required="required"
                    autocomplete="password" />
 
-            <small v-if="errors.password" v-for="err in errors.password" class="text-danger fa-pull-left text-left">
+            <small :key="'password-err-' + i" v-for="(err, i) in errors.password" class="text-danger fa-pull-left text-left">
                 <span class="clearfix">
                     {{ err }}
                 </span>
@@ -90,7 +90,7 @@
                    required="required"
                    autocomplete="password" />
 
-            <small v-if="errors.password_confirmation" v-for="err in errors.password_confirmation" class="text-danger fa-pull-left text-left">
+            <small :key="'password-conf-err-' + i" v-for="(err, i) in errors.password_confirmation" class="text-danger fa-pull-left text-left">
                 <span class="clearfix">
                     {{ err }}
                 </span>
@@ -98,13 +98,14 @@
         </div>
 
         <div class="form-group login-bottom-action-buttons">
+
             <div class="buttons">
-                <VueRecaptcha :sitekey="sitekey"
-                              ref="recaptcha"
-                              @verify="onCaptchaVerified"
-                              @expired="onCaptchaExpired"
-                              size="invisible"
-                              :loadRecaptchaScript="true" />
+
+                <VueHcaptcha :sitekey="$parent.sitekey" 
+                    @verify="onCaptchaVerified" 
+                    @expired="onCaptchaExpired"
+                    @error="onCaptchaExpired" />
+
                 <VueLoadingButton
                         type="submit"
                         :loading="loading"
@@ -112,7 +113,9 @@
                         :disabled="loading">
                     <span>Register</span>
                 </VueLoadingButton>
+
             </div>
+
             <OAuthButtons />
         </div>
 
@@ -122,9 +125,9 @@
 
 <script>
 
-    const jQuery = require("jquery");
-    import VueRecaptcha from 'vue-recaptcha';
-    import OAuthButtons from "./oauth/OAuthButtons";
+    const jQuery = require('jquery')
+    import OAuthButtons from './oauth/OAuthButtons'
+    import VueHcaptcha from '@hcaptcha/vue-hcaptcha'
     import VueLoadingButton from 'vue-loading-button'
 
     export default {
@@ -135,12 +138,16 @@
             }
         },
         components: {
-            VueRecaptcha,
             OAuthButtons,
             VueLoadingButton,
+            VueHcaptcha,
         },
         data() {
             return {
+                recaptcha: {
+                    token: null,
+                    valid: false,
+                },
                 loading: false,
                 googleSignInParams: {
                     client_id: process.env.VUE_APP_API_GOOGLE_CLIENT_ID,
@@ -151,7 +158,6 @@
                 email: '',
                 password: '',
                 password_confirmation: '',
-                sitekey: process.env.VUE_APP_API_RECAPTCHA_KEY,
             }
         },
         mounted() {
@@ -161,7 +167,27 @@
             }
         },
         methods: {
-            onCaptchaVerified(recaptchaToken) {
+
+            onCaptchaVerified(response) {
+                this.recaptcha = {
+                    valid: true,
+                    token: response,
+                };
+            },
+
+            register() {
+
+                if (this.recaptcha.valid) {
+                    this.$notify({
+                        group: 'auth',
+                        type: 'error',
+                        text: "Captcha is invalid!",
+                        title: "Failed",
+                        duration: 2000,
+                    });
+                    return
+                }
+
                 jQuery('#serverError').removeClass();
 
                 this.loading = true;
@@ -173,7 +199,7 @@
                     username: this.username,
                     password: this.password,
                     password_confirmation: this.password_confirmation,
-                    recaptchaToken: recaptchaToken,
+                    recaptchaToken: this.recaptcha.token,
                 }).then(() => {
 
                     this.errors = {};
@@ -219,10 +245,18 @@
                 })
             },
             onCaptchaExpired() {
-                this.$refs.recaptcha.reset();
-            },
-            register() {
-                this.$refs.recaptcha.execute();
+                this.loading = false;
+                this.recaptcha = {
+                    token: null,
+                    valid: false,
+                };
+                this.$notify({
+                    group: 'auth',
+                    type: 'error',
+                    text: "Captcha is invalid!",
+                    title: "Failed",
+                    duration: 2000,
+                });
             },
             GoogleOAUTHPage() {
                 this.$router.push({ name: "google_oauth_connect" });
