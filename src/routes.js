@@ -25,6 +25,10 @@ import GoogleCallback from './components/auth/oauth/google/Callback'
 import DiscordOAUTH from './components/auth/oauth/discord/Connect'
 import DiscordCallback from './components/auth/oauth/discord/Callback'
 
+// Spotify oauth
+import SpotifyOAUTH from './components/auth/oauth/spotify/Connect'
+import SpotifyCallback from './components/auth/oauth/spotify/Callback'
+
 import Splash from './components/Splash';
 
 const routes = [
@@ -107,6 +111,20 @@ const routes = [
                 name: 'discord_oauth_callback',
                 components: {
                     oauth: DiscordCallback
+                }
+            },
+            {
+                path: 'spotify/connect',
+                name: 'spotify_oauth_connect',
+                components: {
+                    oauth: SpotifyOAUTH
+                },
+            },
+            {
+                path: 'spotify/callback',
+                name: 'spotify_oauth_callback',
+                components: {
+                    oauth: SpotifyCallback
                 }
             }
         ],

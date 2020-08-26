@@ -99,12 +99,24 @@
                 <label for="username">Username</label>
 
                 <input type="text"
-                       class="form-control form-control-disabled"
-                       id="username"
-                       placeholder="Enter your username here"
-                       v-model="user.username"
-                       autocomplete="off"
-                       disabled="disabled" />
+                    class="form-control form-control-disabled"
+                    id="username"
+                    placeholder="Enter your username here"
+                    v-model="user.username"
+                    autocomplete="off"
+                    disabled="disabled" />
+
+            </div>
+
+            <div class="form-group">
+
+                <strong class="clearfix">Connections</strong>
+                <span>Connect your accounts</span>
+
+                <div class="connections mt-3">
+                    <Connection :connection="{ service: 'spotify', color: 'success', icon: 'spotify' }" />
+                    <Connection :connection="{ service: 'google', color: 'danger', icon: 'google-plus' }" />
+                </div>
 
             </div>
 
@@ -149,11 +161,24 @@
         margin-right: 20px;
     }
 
+    .connection {
+        background: #333;
+        clear: both;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+
+    .connection:last-child {
+        margin-bottom: 0px;
+    }
+
 </style>
 
 <script>
 
-    const $ = require("jquery");
+    import $ from 'jquery'
+    import Connection from './Connection'
 
     export default {
         name: "SettingsProfile",
@@ -167,6 +192,9 @@
                     avatar: null,
                 },
             }
+        },
+        components: {
+            Connection,
         },
         watch: {
             form: {

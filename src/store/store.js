@@ -421,11 +421,14 @@ export const store = new Vuex.Store({
                 const params = new URLSearchParams();
                 params.append('code', code);
 
-                axios.post(`/oauth/${service}/@callback`, params, {
-                    headers: {
-                        'Authorization': `Bearer ${context.state.token}`,
-                    }
-                }).then(response => {
+                let headers = {};
+                if (this.getters.loggedIn){
+                    headers = {
+                        'Authorization': `Bearer ${context.state.token}`
+                    };
+                }
+
+                axios.post(`/oauth/${service}/@callback`, params, {headers}).then(response => {
                     const {token, refreshed_token} = response.data.result;
                     context.commit('retrieveToken', {token, refreshed_token});
                     resolve(response);

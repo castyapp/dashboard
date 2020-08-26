@@ -4,7 +4,7 @@
 
         <div class="media-source-details">
 
-            <img v-if="mediaSource.banner !== undefined"
+            <img v-if="mediaSource.banner !== undefined && mediaSource.banner !== 'default'"
                 :src="cdnUrl + '/posters/' + mediaSource.banner + '.png'"
                 :alt="mediaSource.title" />
 
@@ -23,17 +23,25 @@
             </div>
         </div>
 
-        <div class="selected-btn pull-right m-2 text-white" v-if="selected">
+        <div class="selected-btn pull-right text-white" v-if="selected">
             <i class="icofont-check"></i>
             Selected
         </div>
 
+        <button
+            v-if="!selected"
+            @click="select"
+            type="button"
+            class="pull-right media-trash-btn">
+            <i class="icofont-trash"></i>
+        </button>
+
         <VueLoadingButton
-                v-else
-                @click.native="select"
-                :loading="loading"
-                type="button"
-                class="btn btn-outline-primary m-2">
+            v-if="!selected"
+            @click.native="select"
+            :loading="loading"
+            type="button"
+            class="btn btn-outline-primary m-2">
             Select
         </VueLoadingButton>
 
@@ -54,6 +62,13 @@
         font-size: 25px;
         color: #131212;
         margin-right: 10px;
+    }
+
+    button.media-trash-btn {
+        background: transparent;
+        border: none;
+        color: #dc3545;
+        margin: 5px;
     }
 
 </style>

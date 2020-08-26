@@ -799,3 +799,7 @@ img.theater-avatar.online {
 .height-full {
     height: 100vh;
 }
+
+.circle {
+    border-radius: 50%;
+}

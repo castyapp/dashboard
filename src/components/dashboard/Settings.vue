@@ -24,8 +24,8 @@
 
 <script>
 
-    import Profile from "./Settings/Profile";
-    import ChangePassword from "./Settings/ChangePassword";
+    import Profile from './Settings/Profile'
+    import ChangePassword from './Settings/ChangePassword'
 
     export default {
         components: {
