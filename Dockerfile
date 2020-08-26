@@ -3,7 +3,7 @@ FROM ubuntu
 RUN apt-get update &&\
     apt-get -y upgrade
 
-RUN apt-get install -y curl nano
+RUN apt-get install -y curl nano git
 
 RUN curl https://getcaddy.com | bash -s personal http.cors,http.grpc
 
