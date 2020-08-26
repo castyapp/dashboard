@@ -1,11 +1,11 @@
-FROM debian
+FROM ubuntu
 
 RUN apt-get update &&\
     apt-get -y upgrade
 
-RUN apt-get install -y curl nano git
+RUN apt-get install -y curl nano
 
-RUN curl https://getcaddy.com | bash -s personal http.cors,http.grpc
+RUN curl https://getcaddy.com | bash -s personal http.cors
 
 # Check caddy version
 RUN caddy -version
