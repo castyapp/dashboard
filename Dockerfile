@@ -1,11 +1,8 @@
-FROM ubuntu
+FROM iamalirezaj/caddy
 
-RUN apt-get update &&\
-    apt-get -y upgrade
+RUN yum -y update
 
-RUN apt-get install -y curl nano
-
-RUN curl https://getcaddy.com | bash -s personal http.cors
+RUN yum install -y curl nano
 
 # Check caddy version
 RUN caddy -version
@@ -17,10 +14,10 @@ RUN mkdir /casty.caddy
 WORKDIR /casty.caddy
 
 # Add nodesource
-RUN curl -sL https://deb.nodesource.com/setup_12.x | bash -
+RUN curl -sL https://rpm.nodesource.com/setup_12.x | sudo bash -
 
 # Install nodejs
-RUN apt-get install -y nodejs
+RUN yum install -y nodejs
 
 # Check nodejs version
 RUN node --version
