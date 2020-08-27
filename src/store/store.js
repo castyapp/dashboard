@@ -447,7 +447,7 @@ export const store = new Vuex.Store({
                 }
 
                 axios.post(`/oauth/${service}/@callback`, params, {headers}).then(response => {
-                    if (ref === 'dashboard') {
+                    if (ref !== 'dashboard') {
                         const {token, refreshed_token} = response.data.result;
                         context.commit('retrieveToken', {token, refreshed_token});
                     }
