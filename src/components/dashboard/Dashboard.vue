@@ -398,9 +398,9 @@
             this.$bus.$on('stop-progress-bar', () => {
                 this.$refs.topProgress.done();
             });
-            let err = this.$route.params.err;
-            if (err != null){
-                this.$notify(err);
+            let notify = this.$route.params.notify;
+            if (notify != null){
+                this.$notify(notify);
             }
         }
     }

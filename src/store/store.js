@@ -433,7 +433,7 @@ export const store = new Vuex.Store({
                 }).then(resolve).catch(reject);
             })
         },
-        OAUTHCallback(context, {service, code}) {
+        OAUTHCallback(context, {service, code, ref}) {
             return new Promise((resolve, reject) => {
 
                 const params = new URLSearchParams();
@@ -447,8 +447,10 @@ export const store = new Vuex.Store({
                 }
 
                 axios.post(`/oauth/${service}/@callback`, params, {headers}).then(response => {
-                    const {token, refreshed_token} = response.data.result;
-                    context.commit('retrieveToken', {token, refreshed_token});
+                    if (ref === 'dashboard') {
+                        const {token, refreshed_token} = response.data.result;
+                        context.commit('retrieveToken', {token, refreshed_token});
+                    }
                     resolve(response);
                 }).catch(reject);
 

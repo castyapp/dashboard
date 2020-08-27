@@ -160,12 +160,6 @@
                 password_confirmation: '',
             }
         },
-        mounted() {
-            let err = this.$route.params.err;
-            if (err != null){
-                this.$notify(err);
-            }
-        },
         methods: {
 
             onCaptchaVerified(response) {
@@ -263,6 +257,12 @@
             },
             DiscordOAUTHPage() {
                 this.$router.push({ name: "discord_oauth_connect" });
+            }
+        },
+        mounted() {
+            let notify = this.$route.params.notify;
+            if (notify != null){
+                this.$notify(notify);
             }
         }
     }

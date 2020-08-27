@@ -66,6 +66,7 @@
                 this.$store.dispatch("OAUTHCallback", {
                     service: "spotify",
                     code: this.$route.query.code,
+                    ref,
                 }).then(() => {
 
                     this.loading = false;
@@ -106,7 +107,7 @@
                         this.$router.push({
                             name: "settings",
                             params: {
-                                err: {
+                                notify: {
                                     group: 'dashboard',
                                     type: 'error',
                                     text: "Could not connect your Spotify account!",
@@ -119,7 +120,7 @@
                         this.$router.push({
                             name: "login",
                             params: {
-                                err: {
+                                notify: {
                                     group: 'auth',
                                     type: 'error',
                                     text: "Unauthorized!",
