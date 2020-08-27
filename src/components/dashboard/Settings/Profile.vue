@@ -108,18 +108,6 @@
 
             </div>
 
-            <div class="form-group">
-
-                <strong class="clearfix">Connections</strong>
-                <span>Connect your accounts</span>
-
-                <div class="connections mt-3">
-                    <Connection :connection="{ service: 'spotify', color: 'success', icon: 'spotify' }" />
-                    <Connection :connection="{ service: 'google', color: 'danger', icon: 'google-plus' }" />
-                </div>
-
-            </div>
-
             <button class="btn btn-primary mt-2" :disabled="!hasChanges">
                 Update Profile
             </button>
@@ -178,7 +166,6 @@
 <script>
 
     import $ from 'jquery'
-    import Connection from './Connection'
 
     export default {
         name: "SettingsProfile",
@@ -192,9 +179,6 @@
                     avatar: null,
                 },
             }
-        },
-        components: {
-            Connection,
         },
         watch: {
             form: {
@@ -268,7 +252,7 @@
                     this.$bus.$emit('stop-progress-bar');
 
                 });
-            }
+            },
         },
         mounted() {
             this.form.fullname = this.user.fullname;

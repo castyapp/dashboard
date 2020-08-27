@@ -3,7 +3,7 @@
         <ring-loader :loading="true" :color="'#ffffff'" />
         <p>Redirecting to Discord...</p>
 
-        <router-link :to="{name: 'login'}" class="btn btn-primary">
+        <router-link v-if="!hideBackBtn" :to="{name: 'login'}" class="btn btn-primary">
             Back to authentication page
         </router-link>
 
@@ -29,20 +29,29 @@
     let client_id = process.env.VUE_APP_API_DISCORD_CLIENT_ID,
         redirect_uri = process.env.VUE_APP_API_DISCORD_REDIRECT_URI;
 
-    let redirect_url = "https://discordapp.com/api/oauth2/authorize?" +
-        `client_id=${client_id}&` +
-        `redirect_uri=${redirect_uri}&` +
-        "response_type=code&" +
-        "scope=identify%20email";
-
     export default {
         name: "discord-oauth",
         data() {
             return {
+                state: null,
                 timeoutId: 0,
+                hideBackBtn: false,
+            }
+        },
+        created() {
+            this.state = this.$parent.getNewState();
+            if (this.$route.query.ref == "dashboard") {
+                this.hideBackBtn = true;
+                localStorage.setItem(`discord-oauth-${this.state}`, this.$route.query.ref)
             }
         },
         mounted() {
+            let redirect_url = "https://discordapp.com/api/oauth2/authorize?" +
+                `client_id=${client_id}&` +
+                `state=${this.state}&` +
+                `redirect_uri=${redirect_uri}&` +
+                "response_type=code&" +
+                "scope=identify%20email";
             this.timeoutId = setTimeout(() => {
                 location.replace(redirect_url);
             }, 2000)

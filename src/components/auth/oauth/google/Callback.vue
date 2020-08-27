@@ -50,7 +50,7 @@
 <script>
 
     export default {
-        name: "google-oauth-callback",
+        name: "GoogleOauthCallback",
         data() {
             return {
                 timeoutId: 0,
@@ -60,46 +60,75 @@
         },
         methods: {
             verify() {
+
+                const ref = localStorage.getItem(`google-oauth-${this.$route.query.state}`)
+
                 this.$store.dispatch("OAUTHCallback", {
                     service: "google",
                     code: this.$route.query.code,
                 }).then(() => {
 
                     this.loading = false;
-
-                    this.$notify({
-                        group: 'auth',
-                        type: 'success',
-                        text: "Login successfully! Please wait ...",
-                        title: "Success",
-                        duration: 2000,
-                    });
-
                     this.verified = true;
 
-                    setTimeout(() => {
-                        this.$refs.topProgress.done();
-                        this.$router.push({ name: 'dashboard' })
-                    }, 1000);
+                    if (ref === 'dashboard') {
+                        this.$notify({
+                            group: 'auth',
+                            type: 'success',
+                            text: "Your Google account connected successfully!",
+                            title: "Success",
+                            duration: 2000,
+                        });
+                        setTimeout(() => {
+                            this.$refs.topProgress.done();
+                            this.$router.push({ name: 'settings' })
+                        }, 1000);
+                    } else {
+                        this.$notify({
+                            group: 'auth',
+                            type: 'success',
+                            text: "Login successfully! Please wait ...",
+                            title: "Success",
+                            duration: 2000,
+                        });
+                        setTimeout(() => {
+                            this.$refs.topProgress.done();
+                            this.$router.push({ name: 'dashboard' })
+                        }, 1000);
+                    }
 
                 }).catch(() => {
 
                     this.loading = false;
-
-                    this.$router.push({
-                        name: "login",
-                        params: {
-                            err: {
-                                group: 'auth',
-                                type: 'error',
-                                text: "Unauthorized!",
-                                title: "Failed",
-                                duration: 2000,
-                            }
-                        },
-                    });
-
                     this.$refs.topProgress.done();
+
+                    if (ref === 'dashboard') {
+                        this.$router.push({
+                            name: "settings",
+                            params: {
+                                err: {
+                                    group: 'dashboard',
+                                    type: 'error',
+                                    text: "Could not connect your Google account!",
+                                    title: "Failed",
+                                    duration: 2000,
+                                }
+                            },
+                        });
+                    } else {
+                        this.$router.push({
+                            name: "login",
+                            params: {
+                                err: {
+                                    group: 'auth',
+                                    type: 'error',
+                                    text: "Unauthorized!",
+                                    title: "Failed",
+                                    duration: 2000,
+                                }
+                            },
+                        });
+                    }
                 });
             }
         },
@@ -109,6 +138,7 @@
         },
         destroyed() {
             clearTimeout(this.timeoutId)
+            localStorage.removeItem(`google-oauth-${this.$route.query.state}`)
         }
     }
 

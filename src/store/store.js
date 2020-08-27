@@ -415,6 +415,24 @@ export const store = new Vuex.Store({
                 }).then(resolve).catch(reject);
             })
         },
+        userConnections(context) {
+            return new Promise((resolve, reject) => {
+                axios.get(`/user/@connections`, {
+                    headers: {
+                        'Authorization': `Bearer ${context.state.token}`,
+                    }
+                }).then(resolve).catch(reject);
+            })
+        },
+        userConnection(context, service) {
+            return new Promise((resolve, reject) => {
+                axios.get(`/user/@connection/${service}`, {
+                    headers: {
+                        'Authorization': `Bearer ${context.state.token}`,
+                    }
+                }).then(resolve).catch(reject);
+            })
+        },
         OAUTHCallback(context, {service, code}) {
             return new Promise((resolve, reject) => {
 

@@ -5,6 +5,9 @@
             <Profile />
             <ChangePassword />
         </div>
+        <div class="row">
+            <Connections />
+        </div>
     </div>
 
 </template>
@@ -25,12 +28,14 @@
 <script>
 
     import Profile from './Settings/Profile'
+    import Connections from './Settings/Connections'
     import ChangePassword from './Settings/ChangePassword'
 
     export default {
         components: {
             Profile,
             ChangePassword,
+            Connections,
         },
         activated() {
             this.$bus.$emit('updated_friends_list_state', 'open');

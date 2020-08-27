@@ -1,8 +1,5 @@
 :80 {
-    gzip
-    root /casty.caddy/dist/web
-    rewrite {
-        regexp .*
-        to {path} /
-    }
+    encode gzip
+    root * /casty.caddy/dist/web
+    try_files {path} /index.html
 }
