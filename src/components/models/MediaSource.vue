@@ -13,7 +13,7 @@
             </div>
 
             <span class="media-source-title">
-                {{ mediaSource.title }}
+                {{ getStringSub(mediaSource.title, 36) }}
             </span>
             <div class="badge badge-primary external-link">
                 <a :href="mediaSource.uri" target="_blank">
@@ -30,7 +30,7 @@
 
         <button
             v-if="!selected"
-            @click="select"
+            @click="$parent.showRemoveMediaSourceModal(mediaSource)"
             type="button"
             class="pull-right media-trash-btn">
             <i class="icofont-trash"></i>

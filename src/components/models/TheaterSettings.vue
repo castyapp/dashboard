@@ -31,7 +31,7 @@
                            class="form-control"
                            id="theater_name"
                            v-model="theater_description"
-                           placeholder="Enter your theater description here"
+                           placeholder="Enter your theater description here [youtube|spotify]"
                            required="required"
                            autocomplete="off" />
 
@@ -59,7 +59,7 @@
                         <div class="preview-info">
                             <span class="selected-preview-title" v-if="$parent.hasMediaSource()">
                                 <i :class="getMediaSourceTypeIcon(theater.media_source)"></i>
-                                {{ theater.media_source.title }}
+                                {{ this.getStringSub(theater.media_source.title, 40) }}
                             </span>
                             <span class="selected-preview-title new-media-source-title" v-else>
                                 No media source found!
@@ -501,7 +501,6 @@
             },
         },
         methods: {
-            
             setSubtitlesLoading(loading) {
                 this.subtitlesLoading = loading
             },
@@ -695,7 +694,7 @@
                     });
                 }
             },
-
+            
         },
         mounted() {
             this.theater_description = this.theater.description;

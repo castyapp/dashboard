@@ -92,7 +92,6 @@
         width: 100px;
         border-radius: 3px;
         float: left;
-        height: 58px;
     }
 
     .media-source-preview {

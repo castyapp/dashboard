@@ -53,7 +53,7 @@ export const store = new Vuex.Store({
             return new Promise((resolve, reject) => {
                 axios.get('/user/@friends', {
                     headers: {
-                        'Authorization': `Bearer ${context.state.token}`,
+                        authorization: `Bearer ${context.state.token}`,
                     },
                 }).then(response => {
                     resolve(response.data.result)
@@ -64,7 +64,7 @@ export const store = new Vuex.Store({
             return new Promise((resolve, reject) => {
                 axios.get('/user/@friends/pending', {
                     headers: {
-                        'Authorization': `Bearer ${context.state.token}`,
+                        authorization: `Bearer ${context.state.token}`,
                     },
                 }).then(response => {
                     resolve(response.data.result)
@@ -74,8 +74,8 @@ export const store = new Vuex.Store({
         getUser(context) {
             return new Promise((resolve, reject) => {
                 axios.get('/user/@me', {
-                    'headers': {
-                        "Authorization": `Bearer ${context.state.token}`
+                    headers: {
+                        authorization: `Bearer ${context.state.token}`
                     },
                 }).then(response => {
                     resolve(response.data.result);
@@ -89,8 +89,8 @@ export const store = new Vuex.Store({
                 params.append('source', uri);
 
                 axios.post('/user/@media/parse', params, {
-                    'headers': {
-                        'Authorization': `Bearer ${context.state.token}`,
+                    headers: {
+                        authorization: `Bearer ${context.state.token}`,
                     },
                 }).then(resolve).catch(reject)
             })
@@ -102,33 +102,51 @@ export const store = new Vuex.Store({
                 params.append('source_id', media_source_id);
 
                 axios.post('/user/@media/select', params, {
-                    'headers': {
-                        'Authorization': `Bearer ${context.state.token}`,
+                    headers: {
+                        authorization: `Bearer ${context.state.token}`,
                     },
                 }).then(resolve).catch(reject)
 
             })
         },
-        saveNewMediaSource(context, {title, uri}) {
+        removeMediaSource(context, media_source_id) {
+            return new Promise((resolve, reject) => {
+                axios.delete('/user/@media', {
+                    headers: {
+                        authorization: `Bearer ${context.state.token}`,
+                    },
+                    params: {
+                        source_id: media_source_id
+                    },
+                }).then(resolve).catch(reject)
+            })
+        },
+        saveNewMediaSource(context, {title, uri, accessToken}) {
             return new Promise((resolve, reject) => {
 
                 const params = new URLSearchParams();
                 params.append('title', title);
                 params.append('source', uri);
 
-                axios.post('/user/@media', params, {
-                    'headers': {
-                        'Authorization': `Bearer ${context.state.token}`,
-                    },
-                }).then(resolve).catch(reject)
+                let headers = {
+                    authorization: `Bearer ${context.state.token}`,
+                }
+
+                if (accessToken !== undefined && accessToken !== null) {
+                    headers['Service-Authorization'] = accessToken
+                }
+
+                axios.post('/user/@media', params, {headers})
+                    .then(resolve)
+                    .catch(reject)
 
             })
         },
         loadMediaSources(context) {
             return new Promise((resolve, reject) => {
                 axios.get('/user/@media', {
-                    'headers': {
-                        'Authorization': `Bearer ${context.state.token}`,
+                    headers: {
+                        authorization: `Bearer ${context.state.token}`,
                     },
                 }).then(resolve).catch(reject)
             })
@@ -137,7 +155,7 @@ export const store = new Vuex.Store({
             return new Promise((resolve, reject) => {
                 axios.get(`/user/@search?keyword=${keyword}`, {
                     headers: {
-                        'Authorization': `Bearer ${context.state.token}`,
+                        authorization: `Bearer ${context.state.token}`,
                     },
                 }).then(response => {
                     resolve(response.data.result);
@@ -148,7 +166,7 @@ export const store = new Vuex.Store({
             return new Promise((resolve, reject) => {
                 axios.get(`/user/@friend/${friend_id}`, {
                     headers: {
-                        'Authorization': `Bearer ${context.state.token}`,
+                        authorization: `Bearer ${context.state.token}`,
                     },
                 }).then(response => {
                     resolve(response.data.result);
@@ -159,7 +177,7 @@ export const store = new Vuex.Store({
             return new Promise((resolve, reject) => {
                 axios.get(`/user/@messages/${receiverId}`, {
                     headers: {
-                        'Authorization': `Bearer ${context.state.token}`,
+                        authorization: `Bearer ${context.state.token}`,
                     },
                 }).then(response => {
                     resolve(response.data.result);
@@ -177,7 +195,7 @@ export const store = new Vuex.Store({
                 let headers = {};
                 if (this.getters.loggedIn){
                     headers = {
-                        'Authorization': `Bearer ${context.state.token}`
+                        authorization: `Bearer ${context.state.token}`
                     };
                 }
 
@@ -194,7 +212,7 @@ export const store = new Vuex.Store({
                 if (this.getters.loggedIn){
                     reqUri = `/user/@theaters/${media_source_id}/subtitles`
                     headers = {
-                        'Authorization': `Bearer ${context.state.token}`
+                        authorization: `Bearer ${context.state.token}`
                     };
                 }
 
@@ -211,7 +229,7 @@ export const store = new Vuex.Store({
                 axios.post(`/user/@theaters/${media_source_id}/subtitles`, params, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
-                        'Authorization': `Bearer ${context.state.token}`,
+                        authorization: `Bearer ${context.state.token}`,
                     }
                 }).then(resolve).catch(reject);
             })
@@ -220,7 +238,7 @@ export const store = new Vuex.Store({
             return new Promise((resolve, reject) => {
                 axios.get(`/user/@theaters`, {
                     headers: {
-                        'Authorization': `Bearer ${context.state.token}`
+                        authorization: `Bearer ${context.state.token}`
                     }
                 }).then(resolve).catch(reject);
             })
@@ -229,7 +247,7 @@ export const store = new Vuex.Store({
             return new Promise((resolve, reject) => {
                 axios.get(`/user/@theaters/${theater_id}/follow`, {
                     headers: {
-                        'Authorization': `Bearer ${context.state.token}`
+                        authorization: `Bearer ${context.state.token}`
                     }
                 }).then(resolve).catch(reject);
             })
@@ -238,7 +256,7 @@ export const store = new Vuex.Store({
             return new Promise((resolve, reject) => {
                 axios.get(`/user/@theaters/${theater_id}/unfollow`, {
                     headers: {
-                        'Authorization': `Bearer ${context.state.token}`
+                        authorization: `Bearer ${context.state.token}`
                     }
                 }).then(resolve).catch(reject);
             })
@@ -252,7 +270,7 @@ export const store = new Vuex.Store({
 
                 let headers = {
                     'Content-Type': 'multipart/form-data',
-                    'Authorization': `Bearer ${context.state.token}`,
+                    authorization: `Bearer ${context.state.token}`,
                 }
 
                 if (form.avatar !== null) {
@@ -262,7 +280,7 @@ export const store = new Vuex.Store({
                 axios.put(`/user/@me`, params, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
-                        'Authorization': `Bearer ${context.state.token}`,
+                        authorization: `Bearer ${context.state.token}`,
                     }
                 }).then(response => {
                     resolve(response.data.result)
@@ -281,7 +299,7 @@ export const store = new Vuex.Store({
 
                 axios.put(`/user/@password`, params, {
                     headers: {
-                        'Authorization': `Bearer ${context.state.token}`,
+                        authorization: `Bearer ${context.state.token}`,
                     }
                 }).then(resolve).catch(reject);
             })
@@ -304,29 +322,17 @@ export const store = new Vuex.Store({
 
                 axios.put(`/user/@theater`, params, {
                     headers: {
-                        'Authorization': `Bearer ${context.state.token}`,
+                        authorization: `Bearer ${context.state.token}`,
                     }
                 }).then(resolve).catch(reject);
             })
 
         },
-        // uploadTheaterPoster(context, { theater_id, poster }) {
-        //     return new Promise((resolve, reject) => {
-        //         let params = new FormData();
-        //         params.append('poster', poster, poster.name);
-        //         axios.post(`${config.cdnUrl}/json.TheaterService/${theater_id}/poster`, params, {
-        //             headers: {
-        //                 'Content-Type': 'multipart/form-data',
-        //                 'Authorization': `Bearer ${context.state.token}`,
-        //             }
-        //         }).then(resolve).catch(reject);
-        //     })
-        // },
         sendFriendRequest(context, friend_id) {
             return new Promise((resolve, reject) => {
                 axios.get(`/user/@friend/${friend_id}/request`, {
                     headers: {
-                        'Authorization': `Bearer ${context.state.token}`,
+                        authorization: `Bearer ${context.state.token}`,
                     }
                 }).then(resolve).catch(reject);
             })
@@ -337,7 +343,7 @@ export const store = new Vuex.Store({
                 params.append('request_id', request_id)
                 axios.post(`/user/@friend/accept`, params, {
                     headers: {
-                        'Authorization': `Bearer ${context.state.token}`,
+                        authorization: `Bearer ${context.state.token}`,
                         'Content-Type': 'application/x-www-form-urlencoded'
                     }
                 }).then(resolve).catch(reject);
@@ -369,7 +375,7 @@ export const store = new Vuex.Store({
             return new Promise((resolve, reject) => {
                 axios.put(`/@auth/@create`, {}, {
                     headers: {
-                        'Authorization': `Bearer ${context.state.refreshed_token}`,
+                        authorization: `Bearer ${context.state.refreshed_token}`,
                     }
                 }).then(resolve).catch(reject);
             })
@@ -401,7 +407,7 @@ export const store = new Vuex.Store({
             return new Promise((resolve, reject) => {
                 axios.get(`/user/@notifications`, {
                     headers: {
-                        'Authorization': `Bearer ${context.state.token}`,
+                        authorization: `Bearer ${context.state.token}`,
                     }
                 }).then(resolve).catch(reject);
             })
@@ -410,7 +416,7 @@ export const store = new Vuex.Store({
             return new Promise((resolve, reject) => {
                 axios.put(`/user/@notifications`, {}, {
                     headers: {
-                        'Authorization': `Bearer ${context.state.token}`,
+                        authorization: `Bearer ${context.state.token}`,
                     }
                 }).then(resolve).catch(reject);
             })
@@ -419,16 +425,16 @@ export const store = new Vuex.Store({
             return new Promise((resolve, reject) => {
                 axios.get(`/user/@connections`, {
                     headers: {
-                        'Authorization': `Bearer ${context.state.token}`,
+                        authorization: `Bearer ${context.state.token}`,
                     }
                 }).then(resolve).catch(reject);
             })
         },
         userConnection(context, service) {
             return new Promise((resolve, reject) => {
-                axios.get(`/user/@connection/${service}`, {
+                axios.get(`/user/@connections/${service}`, {
                     headers: {
-                        'Authorization': `Bearer ${context.state.token}`,
+                        authorization: `Bearer ${context.state.token}`,
                     }
                 }).then(resolve).catch(reject);
             })
@@ -442,7 +448,7 @@ export const store = new Vuex.Store({
                 let headers = {};
                 if (this.getters.loggedIn){
                     headers = {
-                        'Authorization': `Bearer ${context.state.token}`
+                        authorization: `Bearer ${context.state.token}`
                     };
                 }
 
@@ -454,6 +460,37 @@ export const store = new Vuex.Store({
                     resolve(response);
                 }).catch(reject);
 
+            })
+        },
+        refreshConnectionToken(context, service) {
+            return new Promise((resolve, reject) => {
+                axios.put(`/user/@connections/${service}`, {}, {
+                    headers: {
+                        authorization: `Bearer ${context.state.token}`,
+                    }
+                }).then(resolve).catch(reject);
+            })
+        },
+        getSpotifyTrack(context, {id, service, access_token}) {
+            return new Promise((resolve, reject) => {
+                axios.get(`https://api.spotify.com/v1/${service}/${id}`, {
+                    headers: {
+                        authorization: `Bearer ${access_token}`,
+                    }
+                }).then(resolve).catch(err => {
+                    const { config, response: { status } } = err;
+                    const originalRequest = config;
+                    if (status === 401) {
+                        context.dispatch('refreshConnectionToken', 'spotify').then(response => {
+                            access_token = response.data.result[0].access_token;
+                            console.log(originalRequest);
+                            originalRequest.headers["authorization"] = `Bearer ${access_token}`;
+                            resolve({ response: axios(originalRequest), access_token})
+                        }).catch(reject)
+                    } else {
+                        reject(err)
+                    }
+                });
             })
         }
     },

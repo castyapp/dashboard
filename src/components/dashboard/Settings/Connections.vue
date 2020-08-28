@@ -40,11 +40,6 @@
                         connected: false,
                         data: {},
                     },
-                    discord: {
-                        service: 'discord',  
-                        connected: false,
-                        data: {},
-                    },
                 },
             }
         },
@@ -66,10 +61,10 @@
                                 this.connections.spotify.connected = true;
                                 this.connections.spotify.data = connection;
                                 break
-                            case proto.Connection.Type.DISCORD:
-                                this.connections.discord.connected = true;
-                                this.connections.discord.data = connection;
-                                break
+                            // case proto.Connection.Type.DISCORD:
+                            //     this.connections.discord.connected = true;
+                            //     this.connections.discord.data = connection;
+                            //     break
                         }
                     })
 

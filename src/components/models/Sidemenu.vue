@@ -3,7 +3,7 @@
     <div class="sidemenu">
 
         <div class="logo">
-            <img src="../../assets/icons/brand-2.svg" alt="Brand" />
+            <img src="../../assets/icons/brand.svg" alt="Brand" />
         </div>
 
         <div class="scrollable-menu">

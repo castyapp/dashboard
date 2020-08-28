@@ -3,7 +3,7 @@
     <div class="vide-player">
 
         <div class="theater-summary-info pl-3 pr-3" v-if="theater.media_source.title !== undefined">
-            <strong class="pull-left">Watching {{ theater.media_source.title }}</strong>
+            <strong class="pull-left">Watching {{ this.getStringSub(theater.media_source.title, 50) }}</strong>
         </div>
 
         <div v-if="!autoPlayEnabled" class="autoplay-warning">

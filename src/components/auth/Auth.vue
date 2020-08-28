@@ -9,7 +9,7 @@
             <vue-topprogress ref="topProgress" />
 
             <div class="logo">
-                <img src="../../assets/icons/brand-2.svg"
+                <img src="../../assets/icons/brand.svg"
                      alt="Brand"
                      class="img-logo"/>
                 <span class="brand-name">Casty</span>

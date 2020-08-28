@@ -107,6 +107,12 @@ Vue.mixin({
         }
     },
     methods: {
+        getStringSub(str, length) {
+            if (str.length > length) {
+                return `${str.substring(0, length)} ...`
+            }
+            return str
+        },
         getGrpcErrors(error) {
             const str = atob(error.metadata['grpc-status-details-bin']);
             let utf8Encode = new TextEncoder();
@@ -142,6 +148,7 @@ Vue.mixin({
             switch (mediaSource.type) {
                 case proto.MediaSource.Type.YOUTUBE: return "Youtube";
                 case proto.MediaSource.Type.DOWNLOAD_URI: return "Download Uri";
+                case proto.MediaSource.Type.SPOTIFY: return "Spotify";
                 case proto.MediaSource.Type.M3U8: return "M3U8";
                 default: return "Unknown";
             }
@@ -151,6 +158,7 @@ Vue.mixin({
                 case proto.MediaSource.Type.YOUTUBE: return "icofont-youtube-play";
                 case proto.MediaSource.Type.DOWNLOAD_URI: return "icofont-external-link";
                 case proto.MediaSource.Type.M3U8: return "icofont-external-link";
+                case proto.MediaSource.Type.SPOTIFY: return "icofont-spotify";
                 default: return "Unknown";
             }
         },

@@ -100,16 +100,16 @@
             },
             login() {
 
-                if (!this.recaptcha.valid) {
-                    this.$notify({
-                        group: 'auth',
-                        type: 'error',
-                        text: "Captcha is invalid!",
-                        title: "Failed",
-                        duration: 2000,
-                    });
-                    return
-                }
+                // if (!this.recaptcha.valid) {
+                //     this.$notify({
+                //         group: 'auth',
+                //         type: 'error',
+                //         text: "Captcha is invalid!",
+                //         title: "Failed",
+                //         duration: 2000,
+                //     });
+                //     return
+                // }
 
                 this.loading = true;
 

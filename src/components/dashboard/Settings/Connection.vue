@@ -4,10 +4,12 @@
 
         <div class="connection-title pull-left">
 
-            <i :class="'icofont-' + connection.service"></i> 
+            <i :style="'color: ' + getServiceColor(connection.service) " 
+                :class="'icofont-' + connection.service"></i> 
             
             <span v-if="connection.connected">
-                <strong>Connected:</strong> {{ connection.data.name }}
+                <strong>Connected:</strong> 
+                {{ connection.data.name }}
             </span>
 
             <span v-else>
@@ -18,10 +20,11 @@
 
         <button v-if="connection.connected" 
             class="pull-right disconnect-btn"
+            :style="'background-color: ' + connectBtnColor"
             @mouseover="onMouseOverConnectedBtn($event)"
             @mouseleave="onMouseLeaveConnectedBtn($event)">
-            Connected 
-            <i class="icofont-link-alt"></i>
+            {{ connectBtnText }} 
+            <i :class="connectBtnIcon"></i>
         </button>
 
         <router-link v-else
@@ -97,14 +100,12 @@
     }
 
     i.icofont-discord {
-        background: url('../../../assets/icons/social/discord-brand.png');
-        width: 20px;
-        height: 20px;
+        background: url('../../../assets/icons/social/discord-color.svg');
+        width: 25px;
+        height: 25px;
         background-size: contain;
         background-repeat: no-repeat;
-        margin-left: 3px;
-        margin-top: 4px;
-        margin-right: 13px;
+        margin-left: 2px;
     }
 
 </style>
@@ -116,12 +117,30 @@
     export default {
         name: "Connection",
         props: ['connection'],
+        data() {
+            return {
+                connectBtnText: 'Connected',
+                connectBtnIcon: 'icofont-check',
+                connectBtnColor: '#28a745'
+            }
+        },
         methods: {
             onMouseOverConnectedBtn(event) {
-                event.target.innerHTML = 'Disconnect <i class="icofont-link-broken"></i>'
+                this.connectBtnText = 'Disconnect'
+                this.connectBtnIcon = 'icofont-close'
+                this.connectBtnColor = '#dc3545'
             },
             onMouseLeaveConnectedBtn(event) {
-                event.target.innerHTML = 'Connected <i class="icofont-link-alt"></i>'
+                this.connectBtnText = 'Connected'
+                this.connectBtnIcon = 'icofont-check'
+                this.connectBtnColor = '#28a745'
+            },
+            getServiceColor(service) {
+                switch (service) {
+                    case 'spotify': return '#1DB954'; break;
+                    case 'discord': return '#FFFFFF'; break;
+                    default: return '#FFFFFF';
+                }
             }
         }
     }

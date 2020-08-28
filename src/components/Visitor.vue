@@ -20,15 +20,6 @@
 
 <style>
 
-    .th-bold-title {
-        background: #8a8c8a;
-        padding: 0 5px;
-        border-radius: 5px;
-        font-size: 17px;
-        font-weight: bold;
-        color: #000000;
-    }
-
     .invite-ico {
         font-size: 20px;
         color: #007bff;

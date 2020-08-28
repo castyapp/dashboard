@@ -82,7 +82,7 @@
                     this.activity = '';
                 } else {
                     this.hasActivity = true;
-                    this.activity = `Watching ${event.activity.activity.substring(0,18)} ...`
+                    this.activity = `Watching ${getStringSub(event.activity.activity, 18)}`
                 }   
             },
             addBadgeCount() {
