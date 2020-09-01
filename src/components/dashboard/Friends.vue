@@ -48,6 +48,7 @@
             this.$bus.$emit('updated_friends_list_state', 'open');
         },
         activated() {
+            this.setTitle(`Friends`);
             this.$bus.$emit('updated_friends_list_state', 'open');
         }
     }

@@ -473,19 +473,73 @@ export const store = new Vuex.Store({
         },
         getSpotifyTrack(context, {id, service, access_token}) {
             return new Promise((resolve, reject) => {
-                axios.get(`https://api.spotify.com/v1/${service}/${id}`, {
+                axios.get(`https://api.spotify.com/v1/${service}/${id}?ts=${new Date().getTime()}`, {
                     headers: {
                         authorization: `Bearer ${access_token}`,
                     }
-                }).then(resolve).catch(err => {
+                }).then(response => {
+                    resolve({ response, access_token })
+                }).catch(err => {
                     const { config, response: { status } } = err;
                     const originalRequest = config;
                     if (status === 401) {
-                        context.dispatch('refreshConnectionToken', 'spotify').then(response => {
+                        context.dispatch('refreshConnectionToken', 'spotify').then(async response => {
                             access_token = response.data.result[0].access_token;
-                            console.log(originalRequest);
                             originalRequest.headers["authorization"] = `Bearer ${access_token}`;
-                            resolve({ response: axios(originalRequest), access_token})
+                            let resp = await axios(originalRequest)
+                            resolve({ response: resp, access_token})
+                        }).catch(reject)
+                    } else {
+                        reject(err)
+                    }
+                });
+            })
+        },
+        spotifyPlayRequest(context, {access_token, device_id}) {
+            return new Promise((resolve, reject) => {
+                const params = {data: {device_ids: [device_id], play: true}};
+                axios.put(`https://api.spotify.com/v1/me/player?ts=${new Date().getTime()}`, params, {
+                    headers: {
+                        authorization: `Bearer ${access_token}`,
+                        'Content-Type': 'application/json',
+                    }
+                }).then(response => {
+                    resolve({ response, access_token })
+                }).catch(err => {
+                    const { config, response: { status } } = err;
+                    const originalRequest = config;
+                    if (status === 401) {
+                        context.dispatch('refreshConnectionToken', 'spotify').then(async response => {
+                            access_token = response.data.result[0].access_token;
+                            originalRequest.headers["authorization"] = `Bearer ${access_token}`;
+                            let resp = await axios(originalRequest)
+                            resolve({ response: resp, access_token})
+                        }).catch(reject)
+                    } else {
+                        reject(err)
+                    }
+                });
+            })
+        },
+        playOnSpotify(context, {access_token, device_id, spotify_uris}) {
+            return new Promise((resolve, reject) => {
+                const params = {uris: spotify_uris};
+                axios.put(`https://api.spotify.com/v1/me/player/play?device_id=${device_id}`, params, {
+                    headers: {
+                        authorization: `Bearer ${access_token}`,
+                        'Content-Type': 'application/json',
+                    }
+                }).then(response => {
+                    resolve({ response, access_token })
+                }).catch(err => {
+                    const { config, response: { status } } = err;
+                    const originalRequest = config;
+                    if (status === 401) {
+                        context.dispatch('refreshConnectionToken', 'spotify').then(async response => {
+                            access_token = response.data.result[0].access_token;
+                            originalRequest.headers["authorization"] = `Bearer ${access_token}`;
+                            let resp = await axios(originalRequest)
+                            resolve({ response: resp, access_token})
                         }).catch(reject)
                     } else {
                         reject(err)

@@ -113,7 +113,7 @@
         overflow: hidden;
         background: #131212;
         border-radius: 4px;
-        width: 190px;
+        width: 200px;
         padding: 10px;
     }
     .context-menu:focus {

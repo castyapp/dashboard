@@ -1,9 +1,11 @@
 <template>
 
-    <div class="vide-player">
+    <div class="video-player">
 
-        <div class="theater-summary-info pl-3 pr-3" v-if="theater.media_source.title !== undefined">
-            <strong class="pull-left">Watching {{ this.getStringSub(theater.media_source.title, 50) }}</strong>
+        <div class="theater-summary-info pl-3 pr-3" v-if="theater.media_source.title">
+            <strong class="pull-left">
+                Watching {{ getStringSub(this.theater.media_source.title, 50) }}
+            </strong>
         </div>
 
         <div v-if="!autoPlayEnabled" class="autoplay-warning">
@@ -88,10 +90,16 @@
         components: {
             RingLoader,
         },
+        computed: {
+            mediaSourceTheaterTitle() {
+                const title = this.getStringSub(this.theater.media_source.title, 50);
+                if (this.theater.media_source.type === proto.MediaSource.Type.SPOTIFY) {
+                    return `Listening To ${title} on Spotify`;
+                } 
+                return `Watching ${title}`;
+            }
+        },
         methods: {
-            timeNow() {
-                return Math.round(new Date().getTime()) / 1000
-            },
             sync() {
                 if (this.theater.media_source.type === proto.MediaSource.Type.YOUTUBE) {
                     this.sentSyncMeAt = this.timeNow()
@@ -379,21 +387,14 @@
 
                 }
 
-            }
+            },
         },
         mounted() {
-
-            this.$bus.$on('new-media-source', mediaSource => {
-                this.theater.media_source = mediaSource;
-                this.setMediaSource(mediaSource);
-            });
-
             this.$parent.$on('theater-connected', socket => {
                 this.ws = socket.ws;
                 this.mountVideoPlayer();
                 this.connectedAt = this.timeNow()
             })
-
         },
         deactivated() {
             if (this.player !== null) {

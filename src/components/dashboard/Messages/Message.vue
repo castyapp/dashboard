@@ -342,6 +342,7 @@
             if (this.friend === null){
                 await this.$store.dispatch("getFriend", friend_username).then(friend => {
                     this.friend = friend;
+                    this.setTitle(`Friends | ${friend.fullname}`);
                 });
             }
 

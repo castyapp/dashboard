@@ -38,10 +38,12 @@
             Connections,
         },
         activated() {
+            this.setTitle(`Settings`);
             this.$bus.$emit('updated_friends_list_state', 'open');
         },
         mounted() {
             this.$bus.$emit('updated_friends_list_state', 'open');
+            this.setTitle(`Settings`);
         }
     }
 

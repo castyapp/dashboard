@@ -55,13 +55,17 @@
 
                         <div class="media-sources">
 
-                            <div v-if="newMediaSource.loading">
-                                Loading...
-                            </div>
+                            <button v-if="connectSpotifyAlert" @click="connectSpotifyAccount" class="spotify-account-alert-btn">
+                                <i class="icofont-spotify"></i>
+                                <span>Connect your spotify account to continue</span>
+                            </button>
+
+                            <div v-if="loading"> Loading... </div>
 
                             <div class="media-source-preview mb-3" v-if="newMediaSource.loaded">
 
-                                <img v-if="newMediaSource.data.banner !== undefined" 
+                                <img v-if="newMediaSource.data.banner !== undefined"
+                                    class="preview-select-ms"
                                     :src="newMediaSource.data.banner"
                                     :alt="newMediaSource.data.title" />
 
@@ -80,7 +84,7 @@
                                     <div class="preview-duration" v-if="newMediaSource.data.length !== 0">
                                         <span class="badge badge-warning">
                                             <i class="icofont-clock-time"></i>
-                                            {{ $parent.getHumanDuration(newMediaSource.data.length * 1000) }}
+                                            {{ humanizeDuration(newMediaSource.data.length * 1000) }}
                                         </span>
                                     </div>
                                 </div>
@@ -100,21 +104,15 @@
                                 <i class="icofont-youtube-play"></i>
                                 <i class="icofont-film"></i>
                             </div>
-
-                            <VueLoadingButton
-                                v-if="!loadedMediaSources"
-                                @click.native="loadMediaSources"
-                                :loading="mediaSourcesLoading"
-                                type="button"
-                                class="btn btn-outline-primary mb-4">
-                                MediaSource History
-                            </VueLoadingButton>
                             
-                            <div class="media-sources-list" v-if="!mediaSourcesLoading && showMediaSources">
-
+                            <div class="media-sources-list mb-3">
                                 <MediaSource class="selected-media-source"
                                     :mediaSource="theater.media_source"
                                     :selected="true" />
+                            </div>
+
+                            <div class="media-sources-list media-sources-scrollable" 
+                                v-if="!mediaSourcesLoading && showMediaSources">
 
                                 <MediaSource :key="'media-source-' + ms.id"
                                     v-for="ms in mediaSources"
@@ -144,56 +142,29 @@
 
     .media-sources-list {
         width: 100%;
-        margin-bottom: 15px;
-        max-height: 400px;
+    }
+
+    .media-sources-scrollable {
+        max-height: 300px;
         overflow-y: auto;
-        padding: 10px;
     }
 
     .media-sources-list > .media-source {
         width: 100%;
         background: #131212;
-        padding: 10px;
         border-radius: 5px;
-        margin-bottom: 10px;
+        margin-bottom: 15px;
         display: flow-root;
         align-content: center;
     }
 
-    .media-source > button {
-        float: right;
-        padding: 1px 7px;
-        margin-top: 3px;
+    .media-sources-list > .media-source:last-child {
+        margin-bottom: 5px;
     }
 
     .media-sources-list > span.media-source-title {
         float: left;
         margin-top: 5px;
-    }
-
-    span.media-source-title {
-        text-align: left;
-    }
-
-    .badge.badge-primary.external-link > a {
-        color: #fff;
-    }
-
-    .badge.badge-primary.external-link {
-        margin-left: 5px;
-    }
-
-    .media-source-details > img {
-        width: 60px;
-        height: 35px;
-        border-radius: 4px;
-        margin-right: 10px;
-    }
-
-    .media-source-details {
-        float: left;
-        align-items: center;
-        display: flex;
     }
 
     .media-source-container {
@@ -215,14 +186,6 @@
         margin: 10px 0;
     }
 
-    .media-source.selected-media-source {
-        background: #1a7bff;
-    }
-
-    .selected-btn {
-        margin: 5px !important;
-    }
-
     .editable-preview-title,
     .form-dark > .form-group.editable-preview-title input {
         background: #181818 !important;
@@ -230,13 +193,19 @@
     }
 
     .media-sources-icons {
-        margin: 20px 0;
+        position: absolute;
+        right: 15px;
+        top: 86px;
     }
 
     .media-sources-icons > i {
         font-size: 25px;
         color: #333;
         margin: 0 5px;
+    }
+
+    .media-sources {
+        padding: 10px 0;
     }
 
     .th-bold-title {
@@ -248,6 +217,35 @@
         color: #000000;
         margin-top: 10px !important;
         display: inline-block;
+    }
+
+    img.preview-select-ms {
+        width: 82px !important;
+    }
+
+    input#media_source {
+        padding-right: 110px;
+    }
+
+    .spotify-account-alert-btn {
+        padding: 10px;
+        background: #1DB954;
+        border-radius: 5px;
+        color: #FFFFFF;
+        font-size: 16px;
+        border: none;
+        width: 100%;
+    }
+
+    .spotify-account-alert-btn > i {
+        font-size: 20px;
+        margin-right: 5px;
+    }
+
+    .spotify-account-alert-btn:hover {
+        background: #148a3e;
+        color: #FFFFFF;
+        text-decoration: none;
     }
 
 </style>
@@ -267,7 +265,8 @@
         },
         data() {
             return {
-
+                loading: false,
+                connectSpotifyAlert: false,
                 hasSpotifyConnection: null,
                 spotifyConnection: null,
 
@@ -292,13 +291,25 @@
                 if (this.newMediaSourceUri !== null && this.newMediaSourceUri !== ""){
                     this.parseMediaSourceUri()
                 } else {
-                    this.newMediaSource.loading = false;
+                    this.loading = false;
                     this.newMediaSource.loaded = false;
                     this.newMediaSource.data = {};
+                    this.connectSpotifyAlert = false;
                 }
             },
         },
         methods: {
+
+            connectSpotifyAccount() {
+                $("#mediaSource").modal('hide');
+                this.$router.push({ 
+                    name: 'spotify_oauth_connect', 
+                    query: {
+                        ref: 'dashboard',
+                    }
+                })
+            },
+
             saveNewMedia(mediaSource) {
 
                 this.saveNewMediaLoading = true;
@@ -321,7 +332,7 @@
                     this.theater.media_source = mediaSource;
 
                     // empty the parse media source
-                    this.newMediaSource.loading = false;
+                    this.loading = false;
                     this.newMediaSource.loaded = false;
                     this.newMediaSource.data = {};
                     this.newMediaSourceUri = null;
@@ -329,6 +340,10 @@
                     if (!this.showMediaSources) {
                         this.loadMediaSources()
                     }
+
+                    this.$bus.$emit('new-media-source', mediaSource);
+
+                    $("#mediaSource").modal('hide');
 
                 }).catch(() => {
                     this.saveNewMediaLoading = false;
@@ -340,20 +355,22 @@
                 return new Promise((resolve, reject) => {
                     this.$store.dispatch('userConnection', 'spotify').then(response => {
                         const connection = response.data.result[0]
-                        resolve(connection)
                         this.hasSpotifyConnection = true;
                         this.spotifyConnection = connection;
+                        resolve(connection)
                     }).catch(err => {
-                        reject(err)
                         this.hasSpotifyConnection = false;
                         this.spotifyConnection = null;
+                        reject(err)
                     })
                 });
             },
 
             async parseSpotifyEpisode(episode_id) {
                 if (this.hasSpotifyConnection === null) {
-                    await this.getSpotifyConnection();
+                    await this.getSpotifyConnection().catch(err => {
+                        console.log("Could not find spotify connection");
+                    });
                 }
                 if (this.hasSpotifyConnection) {
                     // parsing here
@@ -368,24 +385,27 @@
                         this.spotifyConnection.access_token = access_token;
                         this.newMediaSource.data = {
                             title:  episode.name,
-                            length: episode.duration_ms / 1000,
+                            length: Math.round(episode.duration_ms / 1000),
                             banner: episode.images[1].url,
                             type:   6,
                             uri:   `https://open.spotify.com/episode/${episode_id}`,
                         };
-                        this.newMediaSource.loading = false;
+                        this.loading = false;
                     }).catch(() => {
-                        this.newMediaSource.loading = false;
+                        this.loading = false;
                     });
                 } else {
                     console.log("You need connect your spotify account");
-                    this.newMediaSource.loading = false;
+                    this.loading = false;
+                    this.connectSpotifyAlert = true;
                 }
             },
 
             async parseSpotifyTrack(track_id) {
                 if (this.hasSpotifyConnection === null) {
-                    await this.getSpotifyConnection();
+                    await this.getSpotifyConnection().catch(err => {
+                        console.log("Could not find spotify connection");
+                    });
                 }
                 if (this.hasSpotifyConnection) {
                     // parsing here
@@ -394,29 +414,31 @@
                         id: track_id, 
                         access_token: this.spotifyConnection.access_token,
                     };
-                    await this.$store.dispatch('getSpotifyTrack', payload).then(response => {
+                    await this.$store.dispatch('getSpotifyTrack', payload).then(({response, access_token}) => {
                         const track = response.data;
                         this.newMediaSource.loaded = true;
+                        this.spotifyConnection.access_token = access_token;
                         this.newMediaSource.data = {
                             title:  track.name,
-                            length: Math.round(track.duration_ms) / 1000,
+                            length: Math.round(track.duration_ms / 1000),
                             banner: track.album.images[1].url,
                             type:   6,
                             uri:   `https://open.spotify.com/track/${track_id}`,
                         };
-                        this.newMediaSource.loading = false;
+                        this.loading = false;
                     }).catch(() => {
-                        this.newMediaSource.loading = false;
+                        this.loading = false;
                     });
                 } else {
-                    console.log("You need connect your spotify account");
-                    this.newMediaSource.loading = false;
+                    this.loading = false;
+                    this.connectSpotifyAlert = true;
                 }
             },
 
             parseMediaSourceUri() {
 
-                this.newMediaSource.loading = true;
+                this.connectSpotifyAlert = false;
+                this.loading = true;
                 this.newMediaSource.loaded = false;
                 this.newMediaSource.data = {};
 
@@ -428,26 +450,33 @@
                         switch (sMatch[1]) {
                             case "episode": this.parseSpotifyEpisode(sMatch[2]); break;
                             case "track": this.parseSpotifyTrack(sMatch[2]); break;
-                            default: this.newMediaSource.loading = false; break;
+                            default: this.loading = false; break;
                         }
                     }
                 } else {
-                    let urlParsed = new URL(this.newMediaSourceUri)
-                    if (urlParsed.hostname === "open.spotify.com") {
-                        const parsed = urlParsed.pathname.split("/")
-                        switch (parsed[1]) {
-                            case "episode": this.parseSpotifyEpisode(parsed[2]); break;
-                            case "track": this.parseSpotifyTrack(parsed[2]); break;
-                            default: this.newMediaSource.loading = false; break;
+                    try {
+                        let url = new URL(this.newMediaSourceUri)
+                        switch (url.hostname) {
+                            case "open.spotify.com":
+                                const parsed = url.pathname.split("/")
+                                switch (parsed[1]) {
+                                    case "episode": this.parseSpotifyEpisode(parsed[2]); break;
+                                    case "track": this.parseSpotifyTrack(parsed[2]); break;
+                                    default: this.loading = false; break;
+                                }
+                                break
+                            default:
+                                this.$store.dispatch("parseMediaSourceUri", url.href).then(response => {
+                                    this.newMediaSource.loaded = true;
+                                    this.newMediaSource.data = response.data.result;
+                                    this.loading = false;
+                                }).catch(() => {
+                                    this.loading = false;
+                                });
+                                break;
                         }
-                    } else {
-                        this.$store.dispatch("parseMediaSourceUri", this.newMediaSourceUri).then(response => {
-                            this.newMediaSource.loaded = true;
-                            this.newMediaSource.data = response.data.result;
-                            this.newMediaSource.loading = false;
-                        }).catch(() => {
-                            this.newMediaSource.loading = false;
-                        });
+                    } catch (error) {
+                        this.loading = false;
                     }
                 }
             },
@@ -455,6 +484,7 @@
             loadMediaSources() {
 
                 this.showMediaSources = true;
+                this.loading = true;
                 this.mediaSourcesLoading = true;
                 this.mediaSources = [];
                 this.loadedMediaSources = false;
@@ -463,14 +493,19 @@
                     this.mediaSources = response.data.result;
                     this.mediaSourcesLoading = false;
                     this.loadedMediaSources = true;
+                    this.loading = false;
                 }).catch(() => {
                     this.mediaSourcesLoading = false;
+                    this.loading = false;
                 });
 
             },
 
             openMediaSourcesModal() {
                 $("#mediaSource").modal();
+                if (!this.loadedMediaSources) {
+                    this.loadMediaSources();   
+                }
             },
 
             removeMediaSource() {

@@ -97,6 +97,7 @@
 
         },
         mounted() {
+            this.setTitle("Forgot Password?");
             let err = this.$route.params.err;
             if (err != null){
                 this.$notify(err);

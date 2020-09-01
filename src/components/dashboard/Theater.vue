@@ -76,7 +76,8 @@
 
             <div class="clearfix"></div>
 
-            <VideoPlayer :theater="theater" :subtitles="subtitles" ref="VideoPlayer" />
+            <SpotifyPlayer v-if="theater.media_source.type === 6" :theater="theater" ref="player" />
+            <VideoPlayer v-else :theater="theater" :subtitles="subtitles" ref="player" />
             <TheaterChat :ready="ready" :theater="theater" />
             <TheaterSettings :theater="theater" v-if="loggedIn && theater.user.id === user.id" ref="TheaterSettings" />
 
@@ -87,12 +88,6 @@
 </template>
 
 <style>
-
-    .media-source-preview > img {
-        width: 100px;
-        border-radius: 3px;
-        float: left;
-    }
 
     .media-source-preview {
         background: #131212;
@@ -232,17 +227,19 @@
 <script>
 
     import $ from "jquery";
-    import {proto} from 'casty-proto/pbjs/ws.bundle'
-    import TheaterWebsocket from '../../store/theater.ws'
     import {EllipsisLoader} from 'vue-spinners-css'
     import VideoPlayer from '../models/VideoPlayer'
     import TheaterChat from '../models/TheaterChat'
+    import {proto} from 'casty-proto/pbjs/ws.bundle'
     import VueLoadingButton from 'vue-loading-button'
+    import SpotifyPlayer from '../models/SpotifyPlayer'
+    import TheaterWebsocket from '../../store/theater.ws'
     import TheaterSettings from '../models/TheaterSettings'
 
     export default {
         components: {
             VideoPlayer,
+            SpotifyPlayer,
             TheaterChat,
             VueLoadingButton,
             TheaterSettings,
@@ -334,6 +331,8 @@
             this.theaterLoading = true;
             this.loadTheater(theater => {
 
+                this.setTitle(`${theater.user.fullname}'s theater`);
+
                 this.socket = new TheaterWebsocket(this).connect(theater.id);
                 this.ready = true;
                 this.theaterLoading = false;
@@ -355,12 +354,14 @@
                 }
 
                 if (this.hasMediaSource()) {
-                    this.$store.dispatch('getSubtitles', this.theater.media_source.id).then(subtitles => {
-                        this.subtitles = subtitles
-                        this.$refs.TheaterSettings.setSubtitles(subtitles)
-                    }).catch(() => {
-                        this.$refs.TheaterSettings.setSubtitles([])
-                    })
+                    if (mediaSource.type === proto.MediaSource.Type.DOWNLOAD_URI) {
+                        this.$store.dispatch('getSubtitles', this.theater.media_source.id).then(subtitles => {
+                            this.subtitles = subtitles
+                            this.$refs.TheaterSettings.setSubtitles(subtitles)
+                        }).catch(() => {
+                            this.$refs.TheaterSettings.setSubtitles([])
+                        })
+                    }
                 } else {
                     this.$refs.TheaterSettings.setSubtitles([])
                 }
@@ -371,14 +372,18 @@
                 this.theater_description = desc
             });
 
-            this.$bus.$on("new-media-source", mediaSource => {
-                this.$refs.TheaterSettings.setSubtitlesLoading(true)
-                this.$store.dispatch('getSubtitles', mediaSource.id).then(subtitles => {
-                    this.subtitles = subtitles
-                    this.$refs.TheaterSettings.setSubtitles(subtitles)
-                }).catch(() => {
-                    this.$refs.TheaterSettings.setSubtitles([])
-                })
+            this.$bus.$on('new-media-source', mediaSource => {
+                this.$refs.player.setMediaSource(mediaSource)
+                this.theater.media_source = mediaSource;
+                if (mediaSource.type === proto.MediaSource.Type.DOWNLOAD_URI) {
+                    this.$refs.TheaterSettings.setSubtitlesLoading(true)
+                    this.$store.dispatch('getSubtitles', mediaSource.id).then(subtitles => {
+                        this.subtitles = subtitles
+                        this.$refs.TheaterSettings.setSubtitles(subtitles)
+                    }).catch(() => {
+                        this.$refs.TheaterSettings.setSubtitles([])
+                    })
+                }
             });
 
             this.$bus.$on('user-updated', updatedUser => {

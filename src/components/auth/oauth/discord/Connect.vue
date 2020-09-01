@@ -46,6 +46,7 @@
             }
         },
         mounted() {
+            this.setTitle(`Redirecting to Discord...`);
             let redirect_url = "https://discordapp.com/api/oauth2/authorize?" +
                 `client_id=${client_id}&` +
                 `state=${this.state}&` +

@@ -50,6 +50,37 @@
                     <div class="logged-in-as">
                         Logged in as: {{ user.fullname }}
                     </div>
+                    
+                    <div class="actions-activity">
+                        <div class="actions-states">
+                            <button class="action-state action-online action-selected">
+                                <i class="state-dot-icon"></i>
+                                Online
+                                <i class="selected-icon icofont-check-alt"></i>
+                            </button>
+                            <button class="action-state action-idle">
+                                <i class="state-dot-icon"></i>
+                                Idle
+                            </button>
+                            <button class="action-state action-busy">
+                                <i class="state-dot-icon"></i>
+                                Busy
+                            </button>
+                            <button class="action-state action-invisible">
+                                <i class="state-dot-icon"></i>
+                                Invisible
+                            </button>
+                        </div>
+                        <div class="custom-control custom-switch mt-3">
+                            <input type="checkbox"
+                                class="custom-control-input"
+                                id="trust_switch"
+                                checked />
+                            <label class="custom-control-label" for="trust_switch">
+                                Show my activity
+                            </label>
+                        </div>
+                    </div>
 
                     <ContextMenuItem @click.native="redirect('settings')">
                         <i class="icofont-gears mr-1"></i>
@@ -87,73 +118,6 @@
             </div>
         </div>
 
-        <div class="modal modal-dark fade" id="inviteFriendToTheaterModal" tabindex="-1" role="dialog">
-            <div class="modal-dialog modal-dialog-centered" role="document">
-
-                <div class="modal-content" v-if="selectForInvite !== null">
-
-                    <div class="modal-header pb-0">
-
-                        <div class="pull-left pt-2">
-                            <i class="icofont-user pull-left mr-2 invite-ico"></i>
-                            <span>Invite your friends to theater</span>
-                        </div>
-
-                        <div class="pull-right">
-
-                            <VueLoadingButton
-                                    @click.native="inviteSelectedFriends"
-                                    :loading="inviteLoading"
-                                    class="btn btn-primary full-width"
-                                    :disabled="selectedFriends.length === 0">
-                                <span>Send</span>
-                            </VueLoadingButton>
-
-                        </div>
-
-                    </div>
-
-                    <div class="modal-body pr-3 pl-3 pt-0 m-0">
-
-                        <Multiselect
-                                class="mt-3"
-                                v-model="selectedFriends"
-                                :multiple="true"
-                                placeholder="Search for a friend to send an invite"
-                                :option-height="104"
-                                :searchable="true"
-                                :internal-search="true"
-                                :hide-selected="true"
-                                :clearOnSelect="true"
-                                :custom-label="searchItemsLabel"
-                                :track-by="'fullname'"
-                                :options="friends">
-
-                            <template slot="option" slot-scope="props">
-
-                                <img class="option__image"
-                                     :src="cdnUrl +  '/avatars/' + props.option.avatar + '.png'"
-                                     :alt="props.option.fullname">
-
-
-                                <div class="option__desc">
-                                    <span class="option__title">
-                                        {{ props.option.fullname }}
-                                    </span>
-                                </div>
-
-                            </template>
-
-                            <span slot="noResult">Oops! No friends found. Consider changing the search query.</span>
-
-                        </Multiselect>
-
-                    </div>
-
-                </div>
-            </div>
-        </div>
-
     </div>
 
 </template>
@@ -168,6 +132,69 @@
     .modal-header {
         border-bottom: none !important;
         display: inline-block !important;
+    }
+
+    .actions-activity {
+        padding: 10px 5px 15px 5px;
+        border-bottom: 1px solid #1e1e1f;
+    }
+
+    .actions-states {
+        border-bottom: 1px solid #1e1e1f;
+        padding-bottom: 5px;
+    }
+
+    button.action-state {
+        width: 100%;
+        padding: 3px;
+        margin-bottom: 5px;
+        font-size: 13px;
+        border-radius: 3px;
+        list-style: none;
+        text-align: left;
+        border: none;
+        color: #FFFFFF;
+        background: transparent;
+    }
+
+    button.action-state:hover {
+        background: #202020;
+    }
+
+    .state-dot-icon {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        display: block;
+        float: left;
+        margin: 5px 7px 0 5px;
+        background: #393939;
+    }
+
+    .action-online > i {
+        background: #28a745;
+    }
+
+    .action-idle > i {
+        background: #ffc107;
+    }
+
+    .action-busy > i {
+        background: #dc3545;
+    }
+
+    .action-invisible > i {
+        background: #333333;
+    }
+
+    .action-selected {
+        background: #1e1e1f !important;
+    }
+
+    .selected-icon {
+        float: right;
+        background: transparent !important;
+        font-size: 20px;
     }
 
 </style>
@@ -288,6 +315,7 @@
             }
         },
         mounted() {
+            this.setTitle("Dashboard");
             $("#inviteFriendToTheaterModal").on('hidden.bs.modal', () => {
                 this.selectForInvite = null;
                 this.selectedFriends = [];

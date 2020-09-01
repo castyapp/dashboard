@@ -46,6 +46,7 @@
             }
         },
         mounted() {
+            this.setTitle(`Redirecting to Spotify...`);
             const redirect_url = "https://accounts.spotify.com/authorize?" +
                 `client_id=${client_id}&` +
                 `redirect_uri=${redirect_uri}&` +

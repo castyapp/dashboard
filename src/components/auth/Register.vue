@@ -260,6 +260,7 @@
             }
         },
         mounted() {
+            this.setTitle("Register");
             let notify = this.$route.params.notify;
             if (notify != null){
                 this.$notify(notify);

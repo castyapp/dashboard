@@ -27,9 +27,7 @@ axios.interceptors.response.use(function (response) {
     if (status === 401) {
         if (!isAlreadyFetchingAccessToken) {
             isAlreadyFetchingAccessToken = true;
-
         }
-
         return new Promise((resolve) => {
             addSubscriber(access_token => {
                 originalRequest.headers["Authorization"] = `Bearer ${access_token}`;

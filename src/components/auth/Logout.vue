@@ -9,6 +9,7 @@
     export default {
         name: "logout",
         mounted() {
+            this.setTitle("Logging out...");
             this.$store.dispatch('logout').then(() => {
                 localStorage.removeItem("user");
                 userSocket.disconnect();

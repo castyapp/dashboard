@@ -29,7 +29,7 @@
 
         <router-link v-else
             class="pull-right" 
-            :to="{ name: `${connection.service}_oauth_connect`, query:{'ref': 'dashboard'} }" target="_blank">
+            :to="{ name: `${connection.service}_oauth_connect`, query:{'ref': 'dashboard'} }">
             Connect
         </router-link>
 

@@ -136,6 +136,7 @@
             }
         },
         mounted() {
+            this.setTitle(`Verifying your spotify account...`);
             this.$refs.topProgress.start();
             this.timeoutId = setTimeout(this.verify, 2000)
         },

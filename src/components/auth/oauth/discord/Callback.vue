@@ -134,6 +134,7 @@
             }
         },
         mounted() {
+            this.setTitle(`Verifying your discord account...`);
             this.$refs.topProgress.start();
             this.timeoutId = setTimeout(this.verify, 2000)
         },

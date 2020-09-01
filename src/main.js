@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import VTitle from 'v-title'
+import Master from './Master'
 import routes from './routes'
 import 'v-title/lib/element-ui'
 import VueRouter from 'vue-router'
@@ -9,9 +10,9 @@ import VueChatScroll from 'vue-chat-scroll'
 import Notifications from 'vue-notification'
 import vueTopProgress from 'vue-top-progress'
 import {proto} from 'casty-proto/pbjs/ws.bundle'
-import Master from './components/layouts/Master'
 import * as VueSpinnersCss from 'vue-spinners-css'
 import GSignInButton from 'vue-google-signin-button'
+const humanizeDuration = require('humanize-duration')
 const {Status} = require('@stackpath/node-grpc-error-details')
 
 Vue.config.productionTip = false;
@@ -43,6 +44,7 @@ import "./assets/css/icofont.css";
 import 'vue-loaders/dist/vue-loaders.css';
 import VueLoaders from 'vue-loaders';
 import userSocket from "./store/user.ws";
+import { humanizer } from 'humanize-duration'
 
 Vue.use(VueLoaders);
 
@@ -107,6 +109,12 @@ Vue.mixin({
         }
     },
     methods: {
+        timeNow() {
+            return Math.round(new Date().getTime()) / 1000
+        },
+        setTitle(title) {
+            document.title = title;
+        },
         getStringSub(str, length) {
             if (str.length > length) {
                 return `${str.substring(0, length)} ...`
@@ -152,6 +160,13 @@ Vue.mixin({
                 case proto.MediaSource.Type.M3U8: return "M3U8";
                 default: return "Unknown";
             }
+        },
+        humanizeDuration(duration) {
+            return humanizeDuration(duration);
+        },
+        convertTimeHHMMSS(val) {
+            let hhmmss = new Date(val * 1000).toISOString().substr(11, 8);
+            return hhmmss.indexOf("00:") === 0 ? hhmmss.substr(3) : hhmmss;
         },
         getMediaSourceTypeIcon(mediaSource) {
             switch (mediaSource.type) {

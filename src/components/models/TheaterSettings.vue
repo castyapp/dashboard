@@ -57,17 +57,22 @@
                         </div>
 
                         <div class="preview-info">
-                            <span class="selected-preview-title" v-if="$parent.hasMediaSource()">
-                                <i :class="getMediaSourceTypeIcon(theater.media_source)"></i>
-                                {{ this.getStringSub(theater.media_source.title, 40) }}
-                            </span>
+                            <div v-if="$parent.hasMediaSource()">
+                                <span class="selected-preview-title clearfix">
+                                    <i :class="getMediaSourceTypeIcon(theater.media_source)"></i>
+                                    {{ getStringSub(theater.media_source.title, 40) }}
+                                </span>
+                                <span class="selected-preview-title" v-if="theater.media_source.artist">
+                                    <small>By: {{ getStringSub(theater.media_source.artist, 40) }}</small>
+                                </span>
+                            </div>
                             <span class="selected-preview-title new-media-source-title" v-else>
                                 No media source found!
                             </span>
                             <div class="preview-duration" v-if="theater.media_source.length !== undefined && theater.media_source.length !== 0">
                                 <span class="badge badge-warning">
                                     <i class="icofont-clock-time"></i>
-                                    {{ getHumanDuration(theater.media_source.length * 1000) }}
+                                    {{ humanizeDuration(theater.media_source.length * 1000) }}
                                 </span>
                             </div>
                         </div>
@@ -83,7 +88,7 @@
 
                 </div>
 
-                <div class="form-group" v-if="theater.media_source.type !== 1 && $parent.hasMediaSource()">
+                <div class="form-group" v-if="theater.media_source.type === 4 && $parent.hasMediaSource()">
 
                     <label for="movie_subtitles">
                         <i class="icofont-cc mr-1"></i>
@@ -354,6 +359,12 @@
         color: #F44336;
     }
 
+    .media-source-preview > img {
+        width: 132px;
+        border-radius: 3px;
+        float: left;
+    }
+
 </style>
 
 <script>
@@ -362,7 +373,6 @@
     import VueLoadingButton from 'vue-loading-button'
     import {proto} from 'casty-proto/pbjs/ws.bundle'
     import {RingLoader, EllipsisLoader} from 'vue-spinners-css'
-    const humanizeDuration = require('humanize-duration')
     import DropdownMenu from '../models/dropdown-menu/DropdownMenu'
 
     export default {
@@ -629,10 +639,6 @@
 
             onClickFileInput(e) {
                 $(e.target).find("input[type=file]").trigger("click");
-            },
-
-            getHumanDuration(duration) {
-                return humanizeDuration(duration);
             },
 
             openMediaSourcesModal() {

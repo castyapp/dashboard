@@ -44,7 +44,7 @@ export default class TheaterWebsocket {
             }
         };
 
-        setInterval(this.ping, 50000, this.ws);
+        setInterval(this.ping, 5000, this.ws);
 
         return this;
     }

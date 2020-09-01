@@ -46,6 +46,7 @@
             }
         },
         mounted() {
+            this.setTitle(`Redirecting to Google...`);
             let redirect_url = "https://accounts.google.com/o/oauth2/auth?" +
                 "access_type=offline&" +
                 `state=${this.state}&` +

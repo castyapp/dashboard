@@ -100,6 +100,8 @@
             },
             login() {
 
+                this.setTitle("Logging in ...");
+
                 // if (!this.recaptcha.valid) {
                 //     this.$notify({
                 //         group: 'auth',
@@ -161,6 +163,7 @@
                         });
 
                     this.$parent.$refs.topProgress.done();
+                    this.setTitle("Login");
                     
                 });
 
@@ -181,6 +184,7 @@
             },
         },
         mounted() {
+            this.setTitle("Login");
             let notify = this.$route.params.notify;
             if (notify != null){
                 this.$notify(notify);
