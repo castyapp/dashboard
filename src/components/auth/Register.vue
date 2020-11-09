@@ -260,7 +260,7 @@
             }
         },
         mounted() {
-            this.setTitle("Register");
+            this.setTitle("Register • Casty");
             let notify = this.$route.params.notify;
             if (notify != null){
                 this.$notify(notify);

@@ -97,7 +97,7 @@
 
         },
         mounted() {
-            this.setTitle("Forgot Password?");
+            this.setTitle("Reset Password • Casty");
             let err = this.$route.params.err;
             if (err != null){
                 this.$notify(err);

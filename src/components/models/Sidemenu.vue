@@ -241,13 +241,13 @@
         cursor: pointer;
         display: inline-flex;
         padding: 10px;
-        margin: 10px 4px;
+        margin: 10px 3px;
         background: #343435;
         border-radius: 50%;
         opacity: 0.6;
         padding: 0;
-        width: 40px;
-        height: 40px;
+        width: 39px;
+        height: 39px;
         text-align: center;
         display: grid;
         align-content: center;

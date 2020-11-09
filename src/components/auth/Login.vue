@@ -163,7 +163,7 @@
                         });
 
                     this.$parent.$refs.topProgress.done();
-                    this.setTitle("Login");
+                    this.setTitle("Login • Casty");
                     
                 });
 
@@ -184,7 +184,7 @@
             },
         },
         mounted() {
-            this.setTitle("Login");
+            this.setTitle("Login • Casty");
             let notify = this.$route.params.notify;
             if (notify != null){
                 this.$notify(notify);

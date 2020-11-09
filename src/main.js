@@ -3,6 +3,7 @@ import VTitle from 'v-title'
 import Master from './Master'
 import routes from './routes'
 import 'v-title/lib/element-ui'
+import linkify from 'vue-linkify'
 import VueRouter from 'vue-router'
 import apiConfig from './store/api'
 import { store } from './store/store'
@@ -24,6 +25,7 @@ Vue.use(VueChatScroll);
 Vue.use(Notifications);
 Vue.use(VueSpinnersCss);
 Vue.use(vueTopProgress);
+Vue.directive('linkified', linkify);
 Vue.use(require('vue-jalali-moment'));
 
 // process.env.VUE_APP_API_GOOGLE_ANALYTICS_TRACK_ID
@@ -114,6 +116,9 @@ Vue.mixin({
         },
         setTitle(title) {
             document.title = title;
+        },
+        addToTitle(title) {
+            document.title = `${title} - ${document.title}`;
         },
         getStringSub(str, length) {
             if (str.length > length) {

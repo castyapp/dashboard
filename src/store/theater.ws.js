@@ -5,11 +5,18 @@ import {Packet} from 'casty-proto/protocol/packet'
 import {emit} from 'casty-proto/protocol/protocol'
 
 export default class TheaterWebsocket {
+
+    ws;
+    room;
+    component;
+    reconnectTries = 0;
+
     constructor(vueComponent) {
         this.component = vueComponent;
     }
+
     connect(room) {
-        
+        this.room = room;
         this.ws = new WebSocket(process.env.VUE_APP_API_THEATER_WEBSOCKET_URI);
         this.ws.binaryType = 'arraybuffer';
 
@@ -32,7 +39,11 @@ export default class TheaterWebsocket {
         };
 
         this.ws.onclose = () => {
+            this.reconnectTries++;
             log("THEATER GATEWAY", `disconnected from theater [${room}] gateway!`, 'red');
+            if (this.reconnectTries < 5) {
+                this.connect(this.room);
+            }
         };
 
         this.ws.onmessage = (message) => {
@@ -44,7 +55,7 @@ export default class TheaterWebsocket {
             }
         };
 
-        setInterval(this.ping, 5000, this.ws);
+        setInterval(this.ping, 10000, this.ws);
 
         return this;
     }

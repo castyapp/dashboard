@@ -46,6 +46,14 @@
                 actualFriend: null,
             }
         },
+        watch: {
+            badgeCount() {
+                if (this.badgeCount !== 0) {
+                    this.addToTitle(`(${this.badgeCount}) New message`);
+                    this.$bus.$emit("play-notif");
+                }
+            }
+        },
         methods: {
             updateFriend(friend) {
                 this.actualFriend = friend

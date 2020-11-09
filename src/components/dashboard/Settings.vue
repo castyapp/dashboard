@@ -38,12 +38,12 @@
             Connections,
         },
         activated() {
-            this.setTitle(`Settings`);
+            this.setTitle(`Settings • Casty`);
             this.$bus.$emit('updated_friends_list_state', 'open');
         },
         mounted() {
             this.$bus.$emit('updated_friends_list_state', 'open');
-            this.setTitle(`Settings`);
+            this.setTitle(`Settings • Casty`);
         }
     }
 

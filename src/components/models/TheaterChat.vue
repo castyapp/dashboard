@@ -97,6 +97,7 @@
 
     .u-avatar > img {
         width: 25px;
+        height: 25px;
         border-radius: 50%;
         margin: 0 5px;
     }
@@ -197,9 +198,6 @@
                             message: msg
                         };
                         this.theaterWebsocket.sendMessage(msg);
-                        newMessage.own_message = true;
-                        newMessage.user = this.$store.state.user;
-                        this.chats.push(newMessage);
                     } else {
                         console.log(`Websocket connection: ${this.theaterWebsocket.ws}`);
                     }

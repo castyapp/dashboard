@@ -228,6 +228,7 @@
                 friends: [],
                 selectForInvite: null,
                 inviteLoading: false,
+                notifSound: new Audio(require('../../assets/sounds/notif.mp3')),
             }
         },
         methods: {
@@ -315,13 +316,16 @@
             }
         },
         mounted() {
-            this.setTitle("Dashboard");
+            this.setTitle("Dashboard • Casty");
             $("#inviteFriendToTheaterModal").on('hidden.bs.modal', () => {
                 this.selectForInvite = null;
                 this.selectedFriends = [];
             });
             this.$bus.$on('start-progress-bar', () => {
                 this.$refs.topProgress.start();
+            });
+            this.$bus.$on('play-notif', () => {
+                this.notifSound.play();
             });
             this.$bus.$on('stop-progress-bar', () => {
                 this.$refs.topProgress.done();

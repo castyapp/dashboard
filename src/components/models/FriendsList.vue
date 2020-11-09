@@ -560,14 +560,20 @@
                 this.$bus.$emit(proto.EMSG[proto.EMSG.NEW_CHAT_MESSAGE], decoded);
                 let friend = JSON.parse(decoded.from);
 
-                if (this.$route.name !== "messages") {
-                    if (this.$route.params.friend_id !== friend.username) {
+                if (this.$route.path !== `/messages/${friend.username}`) {
+                    if (this.$route.params.friend_id !== friend.username && friend.username !== this.user.username) {
                         const currentIndex = this.$refs.friends.findIndex(f => f.$vnode.key === friend.id);
                         const component = this.$refs.friends[currentIndex]
                         component.addBadgeCount()
                     }
                 }
 
+            });
+
+            this.$bus.$on('remove-friend-badge', friend_id => {
+                const currentIndex = this.$refs.friends.findIndex(f => f.$vnode.key === friend_id);
+                const component = this.$refs.friends[currentIndex]
+                component.removeBadgeCount()
             });
 
             this.$bus.$on(proto.EMSG[proto.EMSG.NEW_NOTIFICATION], () => {

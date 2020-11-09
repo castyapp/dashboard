@@ -1,74 +1,70 @@
 <template>
 
-    <div class="messages-section p-2" v-if="friend !== null">
+    <div class="messages-section p-2">
 
-        <div class="title-border-bottom pb-2">
-            <strong>
-                <i class="icofont-user"></i>
-                {{ friend.fullname }}
-                <i class="state-dot-circle"></i>
-            </strong>
-        </div>
+       <div class="messages pl-2 pr-2">
 
-        <div class="clearfix"></div>
-
-        <div class="col-msg-container">
-            <div class="messages pl-2 pr-2">
-
-                <div class="v-loading">
-                    <EllipsisLoader :loading="loading" class="v-loading" :color="'#316bff'" />
-                </div>
-
-                <div id="scrollArea" class="chats" v-chat-scroll>
-
-                    <div class="message" :data-id="index" 
-                         :key="message.id"
-                         :class="{ 'sm-user': isLastOneThisUser(index) }"
-                         v-for="(message, index) in messages">
-
-                        <div class="small-avatar">
-                            <img :src="cdnUrl + '/avatars/' + message.sender.avatar + '.png'"
-                                 alt="Avatar">
-                        </div>
-
-                        <div class="message-content-container">
-                            <div class="message-user-name">
-                                <div>
-                                    <span>{{ message.sender.fullname }}</span>
-                                    <div class="details pull-right" v-if="!isLastOneThisUser(index)">
-                                        <small class="ml-2">
-                                            {{ message.created_at.seconds | moment('timezone', 'Asia/Tehran', 'dddd, MMM Do, h:mm a') }}
-                                        </small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="message-content">
-                                <small class="ml-2 pull-right" v-if="message.edited">(edited)</small>
-                                <div v-if="theater_id = hasMetaData(message)">
-                                    <TheaterMessage :theater_id="theater_id" />
-                                </div>
-                                <div v-else>
-                                    {{ message.content }}
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <div class="clearfix"></div>
-
-                <div class="chat-input-message" v-if="!loading">
-                    <div class="chatbox-container">
-                        <textarea class="send-input-messager"
-                           placeholder="Send a message"
-                           @keyup.enter.exact="sendMessage" />
-                        <!-- <i class="icofont-simple-smile choose-emote clickable"></i> -->
-                    </div>
-                </div>
-
+            <div class="title-border-bottom pb-2" v-if="friend !== null">
+                <strong>
+                    <i class="icofont-user"></i>
+                    {{ friend.fullname }}
+                    <i class="state-dot-circle"></i>
+                </strong>
             </div>
+
+            <div class="v-loading">
+                <EllipsisLoader 
+                    :loading="loading" 
+                    class="v-loading" 
+                    :color="'#316bff'" />
+            </div>
+
+            <div ref="chats" class="chats">
+                <div class="message" :data-id="index"
+                    :key="message.id"
+                    :class="{
+                        'sm-user': isLastOneThisUser(index),
+                        'waiting-for-response': message.waitingForResponse,
+                    }"
+                    v-for="(message, index) in messages">
+
+                    <div class="small-avatar">
+                        <img :src="cdnUrl + '/avatars/' + message.sender.avatar + '.png'"
+                                alt="Avatar">
+                    </div>
+
+                    <div class="message-content-container">
+                        <div class="message-user-name">
+                            <div>
+                                <span>{{ message.sender.fullname }}</span>
+                                <div class="details pull-right" v-if="!isLastOneThisUser(index)">
+                                    <small class="ml-2">
+                                        {{ message.created_at.seconds | moment('timezone', 'Asia/Tehran', 'dddd, MMM Do, h:mm a') }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="message-content">
+                            <small class="ml-2 pull-right" v-if="message.edited">(edited)</small>
+                            <div v-if="theater_id = hasMetaData(message)">
+                                <TheaterMessage :theater_id="theater_id" />
+                            </div>
+                            <div class="message-text" v-linkified v-else>{{ message.content }}</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="chat-input-message" v-show="!loading">
+                <div ref="textbox"
+                    @input="onMessageInput"
+                    class="send-input-messager"
+                    @keyup.enter.exact="sendMessage"
+                    @keydown="onKeydownInputMessage"
+                    contenteditable />
+            </div>
+
         </div>
 
     </div>
@@ -96,49 +92,19 @@
         color: #FFFFFF;
     }
 
-    .send-input-messager {
-        width: 100%;
-        margin: 0;
-        padding: 10px !important;
-        background: #181818;
-        border: 0;
-        border-radius: 5px;
-        outline: none;
-        color: #FFFFFF;
-        resize: none;
-        white-space: nowrap;
-        overflow-x: scroll;
-        padding-right: 50px !important;
+    .messages-section {
+        height: 100vh;
     }
 
     .col-msg-container {
-        display: -webkit-box;
+        height: 100%;
+    }
+
+    .messages {
         display: flex;
-        -webkit-box-orient: vertical;
-        -webkit-box-direction: normal;
-        flex-direction: column;
+        flex-flow: column nowrap;
         height: 100%;
-        width: 100%;
-        position: fixed;
-        padding-right: 300px !important;
     }
-
-    .messages {
-        height: 100%;
-        width: 100%;
-        padding-bottom: 170px !important;
-        padding-right: 20px !important;
-    }
-
-    .messages {
-        height: 100%;
-        width: 100%;
-        padding: 0 35px 170px 0 !important;
-    }
-
-    /* .message.sm-user.message {
-        padding: 0 5px !important;
-    } */
 
     .message:first-child {
         margin-top: 10px !important;
@@ -146,27 +112,31 @@
 
     .message.sm-user {
         margin: 0 !important;
-        padding: 0 !important;
+        padding: 0 10px !important;
         border-top: none !important;
     }
 
     .message:first-child {
         border-top: none !important;
-        padding-top: 0 !important;
+        margin-top: 0px !important;
     }
 
     .message {
-        /* border-top: 1px solid #333 !important; */
         padding-top: 15px !important;
         margin-top: 10px;
+        padding: 10px !important;
+    }
+
+    .message:hover {
+        background: #2f30306b;
     }
 
     .message-user-name {
         /* margin-bottom: 10px; */
         /* margin-top: 10px; */
         color: #b3b3b3;
-        /*border-bottom: 1px solid #333334;*/
-        /*padding-bottom: 10px;*/
+        /* border-bottom: 1px solid #333334; */
+        /* padding-bottom: 10px; */
     }
 
     .message.sm-user > .small-avatar,
@@ -185,8 +155,15 @@
 
     .chats {
         height: 100%;
+        flex-grow: 12;
+        flex-shrink: 1;
+        overflow-y: auto;
+        margin-bottom: 10px;
+    }
+
+    .chats .chat-inner {
+        height: 100%;
         overflow: auto;
-        padding: 0 0 20px 10px;
     }
 
     .messages-container {
@@ -200,6 +177,13 @@
         margin-left: 40px;
     }
 
+    .message.sm-user > .message-content-container {
+        margin-left: 40px;
+    }
+
+    .message-content > .message-text {
+        white-space: pre-wrap;
+    }
     .message-content {
         font-size: 15px;
         display: inline;
@@ -220,13 +204,26 @@
         line-height: 2;
     }
 
-</style>
-
-<style>
-
     .chat-input-message {
-        background: #202020;
-        padding: 0 10px;
+        flex-grow: 1;
+        flex-shrink: 0;
+        min-height: 50px;
+        max-height: 150px;
+        overflow-y: auto;
+    }
+
+    .send-input-messager {
+        width: 100%;
+        line-height: 25px;
+        padding: 10px;
+        margin: 0;
+        background: #181818;
+        border: 0;
+        border-radius: 5px;
+        outline: none;
+        color: #FFFFFF;
+        overflow-x: auto;
+        padding-right: 50px;
     }
 
     .small-avatar {
@@ -240,11 +237,14 @@
         border-radius: 50%;
     }
 
+    .message.waiting-for-response {
+        opacity: 0.3;
+    }
+
 </style>
 
 <script>
 
-    import $ from "jquery";
     import moment from 'moment-timezone'
     import EmojiPicker from 'vue-emoji-picker'
     import userSocket from '../../../store/user.ws'
@@ -256,6 +256,7 @@
         name: 'Message',
         data() {
             return {
+                messageInput: "",
                 friend: null,
                 messages: [],
                 loading: true,
@@ -267,6 +268,27 @@
             EmojiPicker,
         },
         methods: {
+            newline() {
+                this.$refs.textbox.innerText = `${this.messageInput}\n`;
+            },
+            onKeydownInputMessage(e) {
+                if (!e) {
+                    e = window.event;
+                }
+                var keyCode = e.which || e.keyCode,
+                    target = e.target || e.srcElement;
+                if (keyCode === 13 && !e.shiftKey) {
+                    if (e.preventDefault) {
+                        e.preventDefault();
+                    } else {
+                        e.returnValue = false;
+                    }
+                    target.innerHTML = '';
+                }
+            },
+            onMessageInput(e) {
+                this.messageInput = e.target.innerText;
+            },
             hasMetaData(message) {
                 let matches = /<(.*?)>/s.exec(message.data);
                 if (matches !== null){
@@ -280,22 +302,22 @@
                 return false;
             },
             sendMessage() {
-                let messageInput = $(".send-input-messager");
-                let content = messageInput.val();
-                messageInput.val("");
-                userSocket.sendMessage(content, this.friend.username);
-                let message = {
-                    content,
-                    sender: this.user,
-                    reciever: this.friend,
-                    created_at: {
-                        seconds: Math.floor(Date.now() /1000),
-                    },
-                };
-                if (this.messages == null){
-                    this.messages = [];
-                }
-                this.messages.push(message);
+                this.$refs.textbox.innerText = "";
+                userSocket.sendMessage(this.messageInput, this.friend.username);
+                // let message = {
+                //     content,
+                //     sender: this.user,
+                //     reciever: this.friend,
+                //     waitingForResponse: true,
+                //     created_at: {
+                //         seconds: Math.floor(Date.now() /1000),
+                //     },
+                // };
+                // if (this.messages == null){
+                //     this.messages = [];
+                // }
+                // this.messages.push(message);
+                this.scrollToEnd();
             },
             isLastMessageFromThisUser(index) {
                 if (index !== 0){
@@ -312,18 +334,23 @@
             },
             isAlmostTheSameTime(index) {
                 if (index !== 0){
-
                     let lastIndex = index - 1;
                     let diff = moment(this.messages[index].created_at.seconds)
                         .diff(this.messages[lastIndex].created_at.seconds);
-
                     return diff <= 300000;
                 }
                 return false
-            }
+            },
+            scrollToEnd() {
+                const container = this.$refs.chats;
+                if (container) {
+                    container.scrollTop = container.scrollHeight
+                }
+            },
         },
         activated() {
             if (this.friend !== null) {
+                this.$bus.$emit("remove-friend-badge", this.friend.id);
                 this.$bus.$emit("open-message-page", this.friend)
             }
             this.$bus.$emit('updated_friends_list_state', 'open');
@@ -342,9 +369,12 @@
             if (this.friend === null){
                 await this.$store.dispatch("getFriend", friend_username).then(friend => {
                     this.friend = friend;
-                    this.setTitle(`Friends | ${friend.fullname}`);
+                    this.setTitle(`${friend.fullname} (@${friend.username}) • Casty`);
                 });
             }
+
+            this.$bus.$emit("remove-friend-badge", this.friend.id);
+            this.scrollToEnd();
 
             let v = this;
             this.$store.dispatch("getMessages", friend_username).then(messages => {
@@ -361,8 +391,22 @@
                 }
                 if (sender.id === this.friend.id){
                     let message = {
+                        id: decoded.id,
                         content: new TextDecoder("utf-8").decode(decoded.message),
                         sender: sender,
+                        created_at: decoded.createdAt,
+                    };
+                    if (this.messages == null){
+                        this.messages = [];
+                    }
+                    this.messages.push(message);
+                }
+                if (sender.id === this.user.id) {
+                    let message = {
+                        id: decoded.id,
+                        content: new TextDecoder("utf-8").decode(decoded.message),
+                        sender: this.user,
+                        reciever: this.friend,
                         created_at: decoded.createdAt,
                     };
                     if (this.messages == null){
@@ -377,7 +421,6 @@
                     this.friend = updatedUser
                 }
             });
-
         },
         destroyed() {
             this.friend = null;

@@ -142,6 +142,7 @@
 
     img.theater-avatar {
         width: 40px;
+        height: 40px;
         background: #151515;
         float: left;
         background: #FFFFFF;
@@ -331,7 +332,7 @@
             this.theaterLoading = true;
             this.loadTheater(theater => {
 
-                this.setTitle(`${theater.user.fullname}'s theater`);
+                this.setTitle(`${theater.user.fullname} (@${theater.user.username}) • Casty`);
 
                 this.socket = new TheaterWebsocket(this).connect(theater.id);
                 this.ready = true;
