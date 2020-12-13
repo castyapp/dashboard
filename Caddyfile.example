@@ -1,5 +1,0 @@
-:80 {
-    encode gzip
-    root * /casty.caddy/dist/web
-    try_files {path} /index.html
-}
