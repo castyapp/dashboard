@@ -1,5 +1,5 @@
 # stage1 as builder
-FROM node:12-alpine as builder
+FROM node:12-alpine
 
 WORKDIR /casty-dash
 
@@ -12,14 +12,3 @@ COPY . .
 
 # Build the project
 RUN npm run build
-
-FROM caddy:2.1.1
-
-COPY Caddyfile /etc/caddy/Caddyfile
-
-COPY --from=builder /casty-dash/dist/web /srv
-
-EXPOSE 80
-
-ENTRYPOINT ["caddy"]
-CMD ["run", "-config", "/etc/caddy/Caddyfile"]
