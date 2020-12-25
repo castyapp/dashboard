@@ -29,7 +29,7 @@
     <ul class="mt-2 friends_list_ul pending-list" v-show="selected === 'pending'">
 
       <div class="v-loading">
-        <EllipsisLoader :loading="!loadedPendingFriendRequests" class="v-loading" :color="'#316bff'" />
+        <Spinner :loading="!loadedPendingFriendRequests" class="v-loading" :color="'#316bff'" />
       </div>
 
       <li v-if="loadedPendingFriendRequests" v-show="pendingFriendRequests.length === 0">
@@ -329,16 +329,16 @@ import FriendRow from './FriendRow'
 import userSocket from '../../store/user.ws'
 import FriendsActions from './FriendsActions'
 import {proto} from 'casty-proto/pbjs/ws.bundle'
-import {EllipsisLoader} from 'vue-spinners-css'
 import VueLoadingButton from 'vue-loading-button'
 import {VueContentLoading} from 'vue-content-loading'
+import Spinner from './Spinner'
 
 export default {
   name: "FriendsList",
   components: {
     VueContentLoading,
     FriendsActions,
-    EllipsisLoader,
+    Spinner,
     VueLoadingButton,
     FriendRow
   },

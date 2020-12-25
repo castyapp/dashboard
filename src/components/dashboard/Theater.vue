@@ -3,7 +3,7 @@
   <div class="theater-div">
 
     <div class="v-loading">
-      <EllipsisLoader :loading="theaterLoading" class="v-loading" :color="'#316bff'" />
+      <Spinner :loading="theaterLoading" class="v-loading" :color="'#316bff'" />
     </div>
 
     <div class="theater-page" v-if="ready">
@@ -219,7 +219,7 @@ button.remove-subtitle-btn {
 <script>
 
 import $ from "jquery";
-import {EllipsisLoader} from 'vue-spinners-css'
+import Spinner from '../models/Spinner'
 import VideoPlayer from '../models/VideoPlayer'
 import TheaterChat from '../models/TheaterChat'
 import {proto} from 'casty-proto/pbjs/ws.bundle'
@@ -235,7 +235,7 @@ export default {
     TheaterChat,
     VueLoadingButton,
     TheaterSettings,
-    EllipsisLoader
+    Spinner
   },
   data() {
     return {
