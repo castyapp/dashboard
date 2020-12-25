@@ -67,7 +67,6 @@ import 'plyr/dist/plyr.css'
 import Hls from 'hls.js'
 import Plyr from 'plyr'
 import log from '../../store/logging'
-import {RingLoader} from 'vue-spinners-css'
 import {proto} from 'casty-proto/pbjs/ws.bundle'
 import {emit} from 'casty-proto/protocol/protocol'
 
@@ -87,9 +86,6 @@ export default {
       canAccessVideoPlayer: false,
       sentSyncMeAt: null,
     }
-  },
-  components: {
-    RingLoader,
   },
   computed: {
     mediaSourceTheaterTitle() {

@@ -11,10 +11,8 @@ import VueChatScroll from 'vue-chat-scroll'
 import Notifications from 'vue-notification'
 import vueTopProgress from 'vue-top-progress'
 import {proto} from 'casty-proto/pbjs/ws.bundle'
-import * as VueSpinnersCss from 'vue-spinners-css'
 import GSignInButton from 'vue-google-signin-button'
 const humanizeDuration = require('humanize-duration')
-const {Status} = require('@stackpath/node-grpc-error-details')
 
 Vue.config.productionTip = false;
 
@@ -23,7 +21,6 @@ Vue.use(VueRouter);
 Vue.use(GSignInButton);
 Vue.use(VueChatScroll);
 Vue.use(Notifications);
-Vue.use(VueSpinnersCss);
 Vue.use(vueTopProgress);
 Vue.directive('linkified', linkify);
 Vue.use(require('vue-jalali-moment'));
@@ -125,19 +122,6 @@ Vue.mixin({
                 return `${str.substring(0, length)} ...`
             }
             return str
-        },
-        getGrpcErrors(error) {
-            const str = atob(error.metadata['grpc-status-details-bin']);
-            let utf8Encode = new TextEncoder();
-            const bytes = utf8Encode.encode(str);
-            const status = Status.deserializeBinary(bytes);
-            let errors = {};
-            const decoder = new TextDecoder("utf-8");
-            status.getDetailsList().forEach(err => {
-                errors[err.getTypeUrl()] =
-                    decoder.decode(err.getValue());
-            })
-            return errors;
         },
         log(message, color) {
             color = color || "black";

@@ -47,7 +47,7 @@
           <div class="clearfix"></div>
 
           <div class="v-loading">
-            <EllipsisLoader :loading="subtitlesLoading" class="v-loading" :color="'#316bff'" />
+            <Spinner :loading="subtitlesLoading" class="v-loading" :color="'#316bff'" />
           </div>
 
           <div v-if="!subtitlesLoading">
@@ -321,8 +321,9 @@ button.remove-subtitle-btn {
 import MediaSources from './MediaSources'
 import VueLoadingButton from 'vue-loading-button'
 import {proto} from 'casty-proto/pbjs/ws.bundle'
-import {RingLoader, EllipsisLoader} from 'vue-spinners-css'
 import DropdownMenu from '../models/dropdown-menu/DropdownMenu'
+import Spinner from '../models/Spinner'
+import RingLoader from '../models/RingLoader'
 
 export default {
   name: 'theater-settings',
@@ -332,7 +333,7 @@ export default {
     DropdownMenu,
     MediaSource,
     RingLoader,
-    EllipsisLoader,
+    Spinner,
     MediaSources,
   },
   data() {
