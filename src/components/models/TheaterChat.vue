@@ -209,7 +209,7 @@
             newChatMessage(chatMsg) {
                 this.chats.push({
                     type: 'EMSG_CHATS',
-                    user: chatMsg.user,
+                    user: chatMsg.sender,
                     message: new TextDecoder("utf-8").decode(chatMsg.message)
                 });
             },

@@ -384,16 +384,11 @@
             });
 
             this.$bus.$on(proto.EMSG[proto.EMSG.NEW_CHAT_MESSAGE], decoded => {
-                let sender;
-                let senderString = decoded.from.trim();
-                if (senderString !== '' || senderString !== undefined){
-                    sender = JSON.parse(decoded.from.trim());
-                }
-                if (sender.id === this.friend.id){
+                if (decoded.sender.id === this.friend.id){
                     let message = {
                         id: decoded.id,
                         content: new TextDecoder("utf-8").decode(decoded.message),
-                        sender: sender,
+                        sender: decoded.sender,
                         created_at: decoded.createdAt,
                     };
                     if (this.messages == null){
@@ -401,7 +396,7 @@
                     }
                     this.messages.push(message);
                 }
-                if (sender.id === this.user.id) {
+                if (decoded.sender.id === this.user.id) {
                     let message = {
                         id: decoded.id,
                         content: new TextDecoder("utf-8").decode(decoded.message),
