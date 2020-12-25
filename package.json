@@ -4,7 +4,7 @@
   "description": "Casty Vue-JS project",
   "author": "Alireza Josheghani <josheghani.dev@gmail.com>",
   "scripts": {
-    "serve": "./node_modules/.bin/vue-cli-service serve",
+    "start": "./node_modules/.bin/vue-cli-service serve",
     "build": "export TARGET_BUILD=web && ./node_modules/.bin/vue-cli-service build"
   },
   "repository": {
@@ -20,7 +20,7 @@
     "bootstrap": "^4.5.3",
     "bootstrap-select": "^1.13.18",
     "can-autoplay": "^3.0.0",
-    "casty-proto": "1.3.8",
+    "casty-proto": "1.4.0",
     "font-awesome": "^4.7.0",
     "google-protobuf": "^3.13.0",
     "hls.js": "^0.14.16",

@@ -5,7 +5,7 @@ WORKDIR /casty-dash
 
 # Copy the package.json and install dependencies
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 
 # Copy rest of the files
 COPY . .
