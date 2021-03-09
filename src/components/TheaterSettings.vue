@@ -18,6 +18,8 @@
 
       <div class="form-dark">
 
+        <MediaSources :theater="theater" ref="mediaSources" />
+
         <div class="form-group">
 
           <label for="theater_name">
@@ -34,8 +36,6 @@
                  autocomplete="off" />
 
         </div>
-
-        <MediaSources :theater="theater" ref="mediaSources" />
 
         <div class="form-group" v-if="theater.media_source.type === 4 && $parent.hasMediaSource()">
 
@@ -321,9 +321,9 @@ button.remove-subtitle-btn {
 import MediaSources from './MediaSources'
 import VueLoadingButton from 'vue-loading-button'
 import {proto} from 'casty-proto/pbjs/ws.bundle'
-import DropdownMenu from '../models/dropdown-menu/DropdownMenu'
-import Spinner from '../models/Spinner'
-import RingLoader from '../models/RingLoader'
+import DropdownMenu from './dropdown-menu/DropdownMenu'
+import Spinner from './Spinner'
+import RingLoader from './RingLoader'
 
 export default {
   name: 'theater-settings',
@@ -521,7 +521,7 @@ export default {
           duration: 2000,
         });
 
-      }).catch(err => {
+      }).catch(() => {
         this.$notify({
           group: 'dashboard',
           type: 'error',
@@ -605,7 +605,7 @@ export default {
         media_source_id: this.theater.media_source.id,
       }
 
-      await this.$store.dispatch('uploadSubtitle', form).then(response => {
+      await this.$store.dispatch('uploadSubtitle', form).then(() => {
         this.subtitles[index].uploaded = true
       }).catch(console.log)
 

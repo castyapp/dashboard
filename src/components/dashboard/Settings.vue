@@ -15,8 +15,7 @@
 <style>
 
 .settings {
-  margin-left: 265px !important;
-  margin-right: 10px;
+  margin: 0 10px;
 }
 
 form.form-dark > .form-group > input.form-control-disabled {

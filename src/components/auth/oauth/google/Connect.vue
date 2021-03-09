@@ -26,7 +26,7 @@
 
 <script>
 
-import RingLoader from '../../../models/RingLoader'
+import RingLoader from '@/components/RingLoader'
 
 let client_id = process.env.VUE_APP_API_GOOGLE_CLIENT_ID,
   redirect_uri = process.env.VUE_APP_API_GOOGLE_REDIRECT_URI;

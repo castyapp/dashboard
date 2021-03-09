@@ -269,11 +269,10 @@ input#media_source {
 
 <script>
 
-import $ from 'jquery'
-import MediaSource from '../models/MediaSource'
+import MediaSource from './MediaSource'
 import VueLoadingButton from 'vue-loading-button'
-import ContextMenu from '../models/context-menu/ContextMenu';
-import ContextMenuItem from '../models/context-menu/ContextMenuItem';
+import ContextMenu from './context-menu/ContextMenu';
+import ContextMenuItem from './context-menu/ContextMenuItem';
 
 export default {
   name: "MediaSources",
@@ -321,13 +320,13 @@ export default {
   methods: {
 
     connectSpotifyAccount() {
-      $("#mediaSource").modal('hide');
-      this.$router.push({ 
-        name: 'spotify_oauth_connect', 
-        query: {
-          ref: 'dashboard',
-        }
-      })
+      /*$("#mediaSource").modal('hide');*/
+      /*this.$router.push({ */
+        /*name: 'spotify_oauth_connect', */
+        /*query: {*/
+          /*ref: 'dashboard',*/
+        /*}*/
+      /*})*/
     },
 
     saveNewMedia(mediaSource) {
@@ -363,7 +362,7 @@ export default {
 
         this.$bus.$emit('new-media-source', mediaSource);
 
-        $("#mediaSource").modal('hide');
+        /*$("#mediaSource").modal('hide');*/
 
       }).catch(() => {
         this.saveNewMediaLoading = false;
@@ -579,13 +578,13 @@ export default {
   },
   mounted() {
     this.loadMediaSources()
-    $(document).on('show.bs.modal', '.modal', function () {
-      var zIndex = 1040 + (10 * $('.modal:visible').length);
-      $(this).css('z-index', zIndex);
-      setTimeout(function() {
-        $('.modal-backdrop').not('.modal-stack').css('z-index', zIndex - 1).addClass('modal-stack');
-      }, 0);
-    });
+    /*$(document).on('show.bs.modal', '.modal', function () {*/
+      /*var zIndex = 1040 + (10 * $('.modal:visible').length);*/
+      /*$(this).css('z-index', zIndex);*/
+      /*setTimeout(function() {*/
+        /*$('.modal-backdrop').not('.modal-stack').css('z-index', zIndex - 1).addClass('modal-stack');*/
+      /*}, 0);*/
+    /*});*/
   }
 }
 

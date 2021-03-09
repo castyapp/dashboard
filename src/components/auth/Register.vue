@@ -128,8 +128,7 @@
 
 <script>
 
-const jQuery = require('jquery')
-import OAuthButtons from './oauth/OAuthButtons'
+import OAuthButtons from '@/components/auth/oauth/OAuthButtons'
 import VueHcaptcha from '@hcaptcha/vue-hcaptcha'
 import VueLoadingButton from 'vue-loading-button'
 
@@ -186,8 +185,8 @@ export default {
           return
         }
       }
-      
-      jQuery('#serverError').removeClass();
+
+      $this.$parent.$refs.serverError.removeClass();
 
       this.loading = true;
       this.$parent.$refs.topProgress.start();
@@ -229,14 +228,14 @@ export default {
         if (error.response.status === 420) {
           this.errors = error.response.data.result
           this.$parent.serverError = "Please check the form error(s)!";
-          jQuery('#serverError')
+          this.$parent.$refs.serverError
             .addClass('shake animated')
             .one('webkitAnimationEnd' +
               ' mozAnimationEnd ' +
               'MSAnimationEnd ' +
               'oanimationend ' +
               'animationend', () => {
-                jQuery(this).removeClass();
+                this.$parent.$refs.serverError.removeClass();
               });
         }
 

@@ -67,11 +67,9 @@
 </template>
 
 <script>
-
-const jQuery = require('jquery')
 import VueHcaptcha from '@hcaptcha/vue-hcaptcha'
 import VueLoadingButton from 'vue-loading-button'
-import OAuthButtons from './oauth/OAuthButtons'
+import OAuthButtons from '@/components/auth/oauth/OAuthButtons'
 
 export default {
   name: 'login',
@@ -118,7 +116,7 @@ export default {
 
       this.loading = true;
 
-      jQuery('#serverError').removeClass();
+      $this.$parent.$refs.serverError.removeClass();
 
       this.$parent.$refs.topProgress.start();
 
@@ -155,7 +153,7 @@ export default {
         this.password = '';
         this.$parent.successMessage = '';
 
-        jQuery('#serverError')
+        this.$parent.$refs.serverError
           .addClass('shake animated')
           .one('webkitAnimationEnd' +
             ' mozAnimationEnd ' +
@@ -163,7 +161,7 @@ export default {
             'oanimationend ' +
             'animationend', () => {
 
-              jQuery(this).removeClass();
+              /*jQuery(this).removeClass();*/
             });
 
         this.$parent.$refs.topProgress.done();

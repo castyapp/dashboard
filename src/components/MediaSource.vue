@@ -175,7 +175,6 @@ span.media-source-title.no-artist {
 
 <script>
 
-import $ from 'jquery'
 import {proto} from 'casty-proto/pbjs/ws.bundle'
 import VueLoadingButton from 'vue-loading-button'
 

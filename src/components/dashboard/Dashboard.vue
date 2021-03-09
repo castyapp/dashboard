@@ -8,9 +8,9 @@
 
       <Sidemenu />
 
-      <FriendsList v-if="loggedIn" />
+      <TheaterList v-if="loggedIn" />
 
-      <div class="main-container">
+      <div class="main-container" ref="mainContainer">
         <router-view name="theater" :key="$route.fullPath" ref="routerView" />
           <keep-alive>
             <router-view name="dashboard" :key="$route.fullPath" ref="routerView" />
@@ -24,24 +24,24 @@
         <div class="friend-menu" v-show="type === 'friend-menu'">
 
           <ContextMenuItem @click.native="goToTheater(contextData)">
-          <i class="icofont-movie mr-1"></i>
-          Go to Theater
+            <i class="icofont-movie mr-1"></i>
+            Go to Theater
           </ContextMenuItem>
 
           <ContextMenuItem @click.native="startConversation(contextData)">
-          <i class="icofont-chat mr-1"></i>
-          Send Message
+            <i class="icofont-chat mr-1"></i>
+            Send Message
           </ContextMenuItem>
 
           <ContextMenuItem @click.native="$refs.menu.close">
-          <i class="icofont-ui-mute mr-1"></i>
-          Mute Notifications
+            <i class="icofont-ui-mute mr-1"></i>
+            Mute Notifications
           </ContextMenuItem>
 
-          <!-- <ContextMenuItem @click.native="$refs.menu.close">
+          <ContextMenuItem @click.native="$refs.menu.close">
             <i class="icofont-trash mr-1"></i>
             Remove Friend
-            </ContextMenuItem> -->
+          </ContextMenuItem> 
 
         </div>
 
@@ -201,14 +201,13 @@ button.action-state:hover {
 
 <script>
 
-import $ from "jquery";
-import Sidemenu from '../models/Sidemenu';
-import FriendsList from '../models/FriendsList';
-import ContextMenu from './../models/context-menu/ContextMenu';
-import ContextMenuItem from './../models/context-menu/ContextMenuItem';
+import Sidemenu from '@/components/Sidemenu';
+import TheaterList from './TheaterList';
+import ContextMenu from '@/components/context-menu/ContextMenu';
+import ContextMenuItem from '@/components/context-menu/ContextMenuItem';
 
 import Multiselect from 'vue-multiselect'
-import "../../assets/css/vue-multiselect.css";
+import "@/assets/css/vue-multiselect.css";
 
 import VueLoadingButton from 'vue-loading-button'
 
@@ -216,7 +215,7 @@ export default {
   name: "Dashboard",
   components: {
     Sidemenu,
-    FriendsList,
+    TheaterList,
     ContextMenu,
     ContextMenuItem,
     Multiselect,
@@ -228,7 +227,7 @@ export default {
       friends: [],
       selectForInvite: null,
       inviteLoading: false,
-      notifSound: new Audio(require('../../assets/sounds/notif.mp3')),
+      notifSound: new Audio(require('@/assets/sounds/notif.mp3')),
     }
   },
   methods: {
@@ -267,60 +266,64 @@ export default {
         this.$emit("got-friends", friends);
       }
     },
-    inviteModal(theater) {
-      this.selectForInvite = theater;
-      this.$refs.menu.close();
-      if (this.selectForInvite != null){
-        $("#inviteFriendToTheaterModal").modal();
-      }
-    },
-    inviteSelectedFriends() {
+    /*inviteModal(theater) {*/
+      /*this.selectForInvite = theater;*/
+      /*this.$refs.menu.close();*/
+      /*if (this.selectForInvite != null){*/
+        /*$("#inviteFriendToTheaterModal").modal();*/
+      /*}*/
+    /*},*/
+    /*inviteSelectedFriends() {*/
 
-      this.inviteLoading = true;
+      /*this.inviteLoading = true;*/
 
-      let selectedFriendIds = [];
-      this.selectedFriends.forEach(selectedFriend => {
-        selectedFriendIds.push(selectedFriend.id);
-      });
+      /*let selectedFriendIds = [];*/
+      /*this.selectedFriends.forEach(selectedFriend => {*/
+        /*selectedFriendIds.push(selectedFriend.id);*/
+      /*});*/
 
-      this.$store.dispatch("inviteFriendToTheater", {
-        friend_ids: selectedFriendIds,
-        theater_id: this.selectForInvite.id,
-      }).then(() => {
+      /*this.$store.dispatch("inviteFriendToTheater", {*/
+        /*friend_ids: selectedFriendIds,*/
+        /*theater_id: this.selectForInvite.id,*/
+      /*}).then(() => {*/
 
-        this.$notify({
-          group: 'dashboard',
-          type: 'success',
-          text: "Invatations sent successfully!",
-          title: "Success",
-          duration: 2000,
-        });
+        /*this.$notify({*/
+          /*group: 'dashboard',*/
+          /*type: 'success',*/
+          /*text: "Invatations sent successfully!",*/
+          /*title: "Success",*/
+          /*duration: 2000,*/
+        /*});*/
 
-        this.inviteLoading = false;
-        $("#inviteFriendToTheaterModal").modal('hide');
+        /*this.inviteLoading = false;*/
+        /*$("#inviteFriendToTheaterModal").modal('hide');*/
 
-      }).catch(() => {
+      /*}).catch(() => {*/
 
-        this.$notify({
-          group: 'dashboard',
-          type: 'error',
-          text: "Something went wrong, please try again later!",
-          title: "Failed",
-          duration: 2000,
-        });
+        /*this.$notify({*/
+          /*group: 'dashboard',*/
+          /*type: 'error',*/
+          /*text: "Something went wrong, please try again later!",*/
+          /*title: "Failed",*/
+          /*duration: 2000,*/
+        /*});*/
 
-        this.inviteLoading = false;
+        /*this.inviteLoading = false;*/
 
-      });
+      /*});*/
 
-    }
+    /*}*/
   },
   mounted() {
-    this.setTitle("Dashboard • Casty");
-    $("#inviteFriendToTheaterModal").on('hidden.bs.modal', () => {
-      this.selectForInvite = null;
-      this.selectedFriends = [];
-    });
+    if (this.loggedIn) {
+      this.setTitle("Dashboard • Casty");
+    } else {
+      this.$refs.mainContainer.classList.add("visitor-container")
+    }
+    /*$("#inviteFriendToTheaterModal").on('hidden.bs.modal', () => {*/
+      /*this.selectForInvite = null;*/
+      /*this.selectedFriends = [];*/
+    /*});*/
     this.$bus.$on('start-progress-bar', () => {
       this.$refs.topProgress.start();
     });

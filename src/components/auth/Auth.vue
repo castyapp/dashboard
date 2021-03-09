@@ -20,7 +20,7 @@
           <strong>{{ successMessage }}</strong>
         </div>
 
-        <div id="serverError">
+        <div id="serverError" ref="serverError">
           <div class="alert alert-danger" v-if="serverError">
             <strong>{{ serverError }}</strong>
           </div>
@@ -40,7 +40,7 @@
 
         <router-view name="auth" />
 
-          <div class="text-center p-2">2020 Casty.ir</div>
+        <div class="text-center p-2">2020 Casty.ir</div>
 
     </div>
 

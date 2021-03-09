@@ -243,10 +243,10 @@ strong.user-name-title {
   <script>
 
 import moment from 'moment-timezone'
-import userSocket from '../../../store/user.ws'
+import userSocket from '@/store/user.ws'
 import {proto} from 'casty-proto/pbjs/ws.bundle'
-import TheaterMessage from '../../models/TheaterMessage'
-import Spinner from '../../models/Spinner'
+import TheaterMessage from '@/components/TheaterMessage'
+import Spinner from '@/components/Spinner'
 
 export default {
   name: 'Message',

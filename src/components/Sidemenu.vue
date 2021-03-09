@@ -3,25 +3,11 @@
   <div class="sidemenu">
 
     <div class="logo">
-      <img src="../../assets/icons/brand.svg" alt="Brand" />
+      <img src="@/assets/icons/brand.svg" alt="Brand" />
     </div>
 
     <div class="scrollable-menu">
       <ul class="menu" v-if="loggedIn">
-
-        <li>
-          <router-link :to="{ name: 'dashboard' }" v-title="'Friends'" title-placement="right" v-title.delay="'title'">
-            <i class="icofont-users"></i>
-          </router-link>
-        </li>
-
-        <li>
-          <router-link :to="{ name: 'settings' }" v-title="'Settings'" title-placement="right">
-            <i class="icofont-ui-settings"></i>
-          </router-link>
-        </li>
-
-        <li class="bottom-line-sidemenu"></li>
 
         <li>
           <router-link :to="{ path: `/${this.user.username}` }" v-title="'Your Theater'" title-placement="right">
@@ -29,7 +15,21 @@
           </router-link>
         </li>
 
-        <TheaterRow :key="'th-' + theater.user.id" v-for="theater in theaters" :theater="theater" ref="theaters" />
+        <!--<li>-->
+          <!--<router-link :to="{ name: 'dashboard' }" v-title="'Friends'" title-placement="right" v-title.delay="'title'">-->
+            <!--<i class="icofont-users"></i>-->
+          <!--</router-link>-->
+        <!--</li>-->
+
+        <li>
+          <router-link :to="{ name: 'settings' }" v-title="'Settings'" title-placement="right">
+            <i class="icofont-ui-settings"></i>
+          </router-link>
+        </li>
+
+        <!--<li class="bottom-line-sidemenu"></li>-->
+
+        <!--<TheaterRow :key="'th-' + theater.user.id" v-for="theater in theaters" :theater="theater" ref="theaters" />-->
 
       </ul>
     </div>
