@@ -69,8 +69,12 @@ html, body { height: 100%; }
 }
 
 .main-container {
-    margin-left: 65px;
+    margin-left: 320px;
     margin-right: 0;
+}
+
+.visitor-container {
+  margin-left: 65px !important;
 }
 
 .messages-section {
@@ -496,6 +500,8 @@ tr.new-log > td:first-child {
     width: 45px;
     height: 45px;
     margin: 10px auto;
+    background: #FFF;
+    border-radius: 15px;
 }
 
 .toast-dark > .toast-header {

@@ -1,50 +1,47 @@
 <template>
 
-    <div class="dashboard scrollable">
+  <div class="dashboard scrollable">
 
-        <notifications group="dashboard" position="top center" :max="1" />
-        <vue-topprogress ref="topProgress" />
+    <notifications group="dashboard" position="top center" :max="1" />
+    <vue-topprogress ref="topProgress" />
 
-        <Sidemenu />
+      <Sidemenu />
 
-        <div class="main-container">
-            <router-view name="theater" />
-            <keep-alive>
-                <router-view name="dashboard" :key="$route.fullPath" ref="routerView" />
-            </keep-alive>
-        </div>
+      <div class="main-container visitor-container">
+        <router-view name="theater" />
+          <keep-alive>
+            <router-view name="dashboard" :key="$route.fullPath" ref="routerView" />
+          </keep-alive>
+      </div>
 
-    </div>
+  </div>
 
 </template>
 
 <style>
 
-    .invite-ico {
-        font-size: 20px;
-        color: #007bff;
-    }
+.invite-ico {
+  font-size: 20px;
+  color: #007bff;
+}
 
-    .modal-header {
-        border-bottom: none !important;
-        display: inline-block !important;
-    }
+.modal-header {
+  border-bottom: none !important;
+  display: inline-block !important;
+}
 
 </style>
 
 <script>
 
-    import Sidemenu from './models/Sidemenu';
-    import "../../assets/css/vue-multiselect.css";
+import Sidemenu from '@/components/Sidemenu';
+import "@/assets/css/vue-multiselect.css";
 
-    import VueLoadingButton from 'vue-loading-button'
-
-    export default {
-        name: "Visitor",
-        components: {
-            Sidemenu,
-            VueLoadingButton,
-        },
-    }
+export default {
+  name: "Visitor",
+  components: {
+    Sidemenu,
+  },
+}
 
 </script>
