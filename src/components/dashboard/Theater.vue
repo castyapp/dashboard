@@ -60,7 +60,7 @@
             </VueLoadingButton>
           </div>
 
-          <div v-else>
+          <!-- <div v-else>
             <VueLoadingButton
               @click.native="scrollTo('#settings')"
               type="button"
@@ -69,6 +69,7 @@
             Settings
             </VueLoadingButton>
           </div>
+          -->
 
         </div>
 
@@ -218,15 +219,14 @@ button.remove-subtitle-btn {
 
 <script>
 
-import $ from "jquery";
-import Spinner from '../models/Spinner'
-import VideoPlayer from '../models/VideoPlayer'
-import TheaterChat from '../models/TheaterChat'
+import Spinner from '@/components/Spinner'
+import VideoPlayer from '@/components/VideoPlayer'
+import TheaterChat from '@/components/TheaterChat'
 import {proto} from 'casty-proto/pbjs/ws.bundle'
 import VueLoadingButton from 'vue-loading-button'
-import SpotifyPlayer from '../models/SpotifyPlayer'
-import TheaterWebsocket from '../../store/theater.ws'
-import TheaterSettings from '../models/TheaterSettings'
+import SpotifyPlayer from '@/components/SpotifyPlayer'
+import TheaterWebsocket from '@/store/theater.ws'
+import TheaterSettings from '@/components/TheaterSettings'
 
 export default {
   components: {

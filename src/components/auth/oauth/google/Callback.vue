@@ -49,7 +49,7 @@
 
 <script>
 
-import RingLoader from '../../../models/RingLoader'
+import RingLoader from '@/components/RingLoader'
 
 export default {
   name: "GoogleOauthCallback",

@@ -1,6 +1,6 @@
 import log from './logging'
 import {store} from './store'
-import {bus} from '../main'
+import {bus} from '@/main'
 import {proto} from 'casty-proto/pbjs/ws.bundle'
 import {Packet} from 'casty-proto/protocol/packet'
 import {emit} from 'casty-proto/protocol/protocol'

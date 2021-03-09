@@ -66,7 +66,7 @@ import 'plyr/dist/plyr.css'
 
 import Hls from 'hls.js'
 import Plyr from 'plyr'
-import log from '../../store/logging'
+import log from '@/store/logging'
 import {proto} from 'casty-proto/pbjs/ws.bundle'
 import {emit} from 'casty-proto/protocol/protocol'
 

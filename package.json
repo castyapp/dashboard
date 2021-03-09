@@ -1,15 +1,15 @@
 {
-  "name": "casty-web-dash",
-  "version": "1.0.0",
-  "description": "Casty Vue-JS project",
+  "name": "casty-dashboard",
+  "version": "0.0.1",
+  "description": "Casty vuejs dashboard",
   "author": "Alireza Josheghani <josheghani.dev@gmail.com>",
   "scripts": {
     "start": "./node_modules/.bin/vue-cli-service serve",
-    "build": "export TARGET_BUILD=web && ./node_modules/.bin/vue-cli-service build"
+    "build": "./node_modules/.bin/vue-cli-service build"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/CastyLab/dashboard"
+    "url": "https://github.com/castyapp/dashboard"
   },
   "dependencies": {
     "@hcaptcha/vue-hcaptcha": "^0.2.3",
@@ -23,7 +23,6 @@
     "font-awesome": "^4.7.0",
     "hls.js": "^0.14.16",
     "humanize-duration": "^3.24.0",
-    "jquery": "^3.5.1",
     "mini-css-extract-plugin": "^0.8.2",
     "moment-timezone": "^0.5.31",
     "plyr": "^3.6.2",

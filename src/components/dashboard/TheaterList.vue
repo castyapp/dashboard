@@ -1,99 +1,112 @@
 <template>
 
-  <div class="friends_list" :class="state">
+  <div class="theaters_list" :class="state">
 
-    <div class="friends-actions">
+    <div class="friends-actions chat-title-border-bottom">
       <ul>
-        <li :class="{ 'active': selected === 'friends' }">
-          <button @click="openTab('friends')">Friends</button>
+        <li :class="{ 'active': selected === 'theaters' }">
+          <button @click="openTab('theaters')">
+            <i class="icofont-ui-movie"></i>
+            Theaters
+          </button>
         </li>
         <li :class="{ 'active': selected === 'search' }">
-          <button @click="openTab('search')">Add Friend</button>
+          <button @click="openTab('search')">
+            <i class="icofont-search-1"></i>
+            Search
+          </button>
         </li>
-        <li :class="{ 'active': selected === 'pending' }">
-          <button @click="openTab('pending')">Pending</button>
-        </li>
+        <!--<li :class="{ 'active': selected === 'pending' }">-->
+          <!--<button @click="openTab('pending')">Pending</button>-->
+        <!--</li>-->
       </ul>
     </div>
 
-    <div class="search_friends clearfix" v-show="selected === 'search'">
-      <div class="search_container">
-        <input type="text"
-               v-model="search_keyword"
-               title="search"
-               class="pull-left search_box"
-               placeholder="Search for a friend" />
+    <div class="pl-2 pr-2">
+
+      <div class="search_friends clearfix" v-show="selected === 'search'">
+        <div class="search_container">
+          <input type="text"
+                 v-model="search_keyword"
+                 title="search"
+                 class="pull-left search_box"
+                 placeholder="Search for a theater" />
+        </div>
       </div>
+
+      <ul class="mt-2 theaters_list_ul pending-list" v-show="selected === 'pending'">
+
+        <div class="v-loading">
+          <Spinner :loading="!loadedPendingFriendRequests" class="v-loading" :color="'#316bff'" />
+        </div>
+
+        <li v-if="loadedPendingFriendRequests" v-show="pendingFriendRequests.length === 0">
+          You have no pending requests here!
+        </li>
+
+        <li class="offline" :key="request.friend.id" v-for="(request, index) in pendingFriendRequests">
+          <a class="friend">
+            <div class="avatar">
+              <img :src="cdnUrl + '/avatars/' + request.friend.avatar + '.png'"
+                 alt="Avatar" />
+            </div>
+            <div class="innerDetails">
+              <div class="username pull-left">
+                <strong>{{ request.friend.fullname }}</strong>
+              </div>
+              <VueLoadingButton class="friend_request_accept_btn pull-right"
+                                @click.native="acceptFriendRequest($event, request, index)">
+              Accept
+              </VueLoadingButton>
+            </div>
+          </a>
+        </li>
+
+      </ul>
+
+      <ul class="mt-2 theaters_list_ul" v-show="selected === 'search'">
+
+        <li class="offline" :key="user.id" v-for="user in search_result">
+          <a class="friend">
+            <div class="avatar">
+              <img :src="cdnUrl + '/avatars/' + user.avatar + '.png'"
+                 alt="Avatar" />
+            </div>
+            <div class="innerDetails">
+              <div class="username pull-left">
+                <strong>{{ user.fullname }}</strong>
+              </div>
+              <button class="friend_request_btn pull-right" @click="sendFriendRequest(user)">
+                <i class="icofont-plus"></i>
+              </button>
+            </div>
+          </a>
+        </li>
+
+      </ul>
+
+      <ul class="theaters_list_ul" v-show="selected === 'theaters'">
+
+        <div v-if="loading" class="content-loading">
+          <VueContentLoading :width="230" :height="55" primary="#333" secondary="#181818" :key="i" v-for="i in 10">
+          <circle cx="20" cy="20" r="20"></circle>
+          <rect x="55" y="9" rx="9" ry="9" width="170" height="20"></rect>
+          </VueContentLoading>
+        </div>
+
+        <div class="text-center mt-3" v-if="!loading" v-show="theaters.length === 0">
+          No theater followed yet!
+        </div>
+
+        <TheaterRow 
+          ref="theaters" 
+          :key="theater.id" 
+          v-for="theater in theaters" 
+          :theater="theater" />
+
+      </ul>
+
     </div>
-
-    <ul class="mt-2 friends_list_ul pending-list" v-show="selected === 'pending'">
-
-      <div class="v-loading">
-        <Spinner :loading="!loadedPendingFriendRequests" class="v-loading" :color="'#316bff'" />
-      </div>
-
-      <li v-if="loadedPendingFriendRequests" v-show="pendingFriendRequests.length === 0">
-        You have no pending requests here!
-      </li>
-
-      <li class="offline" :key="request.friend.id" v-for="(request, index) in pendingFriendRequests">
-        <a class="friend">
-          <div class="avatar">
-            <img :src="cdnUrl + '/avatars/' + request.friend.avatar + '.png'"
-               alt="Avatar" />
-          </div>
-          <div class="innerDetails">
-            <div class="username pull-left">
-              <strong>{{ request.friend.fullname }}</strong>
-            </div>
-            <VueLoadingButton class="friend_request_accept_btn pull-right"
-                              @click.native="acceptFriendRequest($event, request, index)">
-            Accept
-            </VueLoadingButton>
-          </div>
-        </a>
-      </li>
-
-    </ul>
-
-    <ul class="mt-2 friends_list_ul" v-show="selected === 'search'">
-
-      <li class="offline" :key="user.id" v-for="user in search_result">
-        <a class="friend">
-          <div class="avatar">
-            <img :src="cdnUrl + '/avatars/' + user.avatar + '.png'"
-               alt="Avatar" />
-          </div>
-          <div class="innerDetails">
-            <div class="username pull-left">
-              <strong>{{ user.fullname }}</strong>
-            </div>
-            <button class="friend_request_btn pull-right" @click="sendFriendRequest(user)">
-              <i class="icofont-plus"></i>
-            </button>
-          </div>
-        </a>
-      </li>
-
-    </ul>
-
-    <ul class="mt-2 friends_list_ul" v-show="selected === 'friends'">
-
-      <div v-if="loading" class="content-loading">
-        <VueContentLoading :width="230" :height="55" primary="#333" secondary="#181818" :key="i" v-for="i in 10">
-        <circle cx="20" cy="20" r="20"></circle>
-        <rect x="55" y="9" rx="9" ry="9" width="170" height="20"></rect>
-        </VueContentLoading>
-      </div>
-
-      <div v-if="!loading" v-show="friends.length === 0">
-        You have no friends here right now :(
-      </div>
-
-      <!-- Online Friends -->
-      <FriendRow ref="friends" :key="friend.id" v-for="friend in orderedFriends" :friend="friend" />
-
-    </ul>
 
   </div>
 
@@ -129,7 +142,11 @@
   color: #FAFAFA;
 }
 
-.friends_list_ul > li > .friend {
+.theaters_list_ul {
+  padding: 0;
+}
+
+.theaters_list_ul > li > .theater {
   cursor: pointer;
 }
 
@@ -208,18 +225,18 @@ button.friend_request_btn {
   overflow: hidden;
 }
 
-.friends_list > ul {
+.theaters_list > ul {
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.friends_list > ul > li {
+.theaters_list > ul > li {
   margin-bottom: 5px;
   border-radius: 5px;
 }
 
-.friends_list > ul > li > .friend > .avatar {
+ul.theaters_list_ul > li > .theater > .avatar {
   width: 35px;
   border-radius: 50%;
   float: left;
@@ -227,27 +244,27 @@ button.friend_request_btn {
   margin: 5px 10px 5px 5px;
 }
 
-.friends_list > ul > li.offline > .friend {
+ul.theaters_list_ul > li.offline > .theater {
   opacity: 0.5;
 }
 
-.friends_list > ul > li > .friend > .avatar > img {
+ul.theaters_list_ul > li > .theater > .avatar > img {
   width: 28px;
   height: 28px;
   border-radius: 50%;
 }
 
-.friends_list > ul > li:hover {
+ul.theaters_list_ul > li:hover {
   opacity: 1;
 }
 
-.friends_list > ul > li:hover > .friend,
-.friends_list > ul > li > .friend.router-link-active {
+ul.theaters_list_ul > li:hover > .theater,
+ul.theaters_list_ul > li > .theater.router-link-active {
   background: #333333 !important;
   opacity: 1 !important;
 }
 
-.friends_list > ul > li > .friend {
+ul.theaters_list_ul > li > .theater {
   color: #fff;
   display: flex;
   border-radius: 5px;
@@ -255,17 +272,16 @@ button.friend_request_btn {
   align-items: center;
 }
 
-.friends_list {
+.theaters_list {
   position: fixed;
   top: 0;
   width: 255px;
   background: #181818;
   height: 100%;
-  padding: 8px 10px;
   left: 65px;
 }
 
-.friends_list.close {
+.theaters_list.close {
   display: none;
 }
 
@@ -285,7 +301,8 @@ span.unread_count_notifications {
 }
 
 .friends-actions {
-  margin: 10px 0 15px;
+  padding: 17px 0 !important;
+  margin: 0 10px;
   display: flex;
 }
 
@@ -325,27 +342,25 @@ span.unread_count_notifications {
 
 <script>
 
-import FriendRow from './FriendRow'
-import userSocket from '../../store/user.ws'
-import FriendsActions from './FriendsActions'
+import TheaterRow from '@/components/TheaterRow'
+import userSocket from '@/store/user.ws'
 import {proto} from 'casty-proto/pbjs/ws.bundle'
 import VueLoadingButton from 'vue-loading-button'
 import {VueContentLoading} from 'vue-content-loading'
-import Spinner from './Spinner'
+import Spinner from '@/components/Spinner'
 
 export default {
-  name: "FriendsList",
+  name: "TheatersList",
   components: {
     VueContentLoading,
-    FriendsActions,
     Spinner,
     VueLoadingButton,
-    FriendRow
+    TheaterRow
   },
   data() {
     return {
       state: "open",
-      friends: [],
+      theaters: [],
       loadedPendingFriendRequests: false,
       pendingFriendRequests: [],
       search_result: [],
@@ -355,18 +370,17 @@ export default {
         data: [],
         unread_count: 0,
       },
-      selected: 'friends',
+      selected: 'theaters',
     }
   },
   computed: {
-    orderedFriends() {
-      return this.friends.slice(0).sort(friend => {
-        if (friend.state === proto.PERSONAL_STATE.OFFLINE) {
-          return 1
-        }
-        return -1
-      })
-    }
+    /*orderedFriends() { return this.friends.slice(0).sort(friend => {*/
+        /*if (friend.state === proto.PERSONAL_STATE.OFFLINE) {*/
+          /*return 1*/
+        /*}*/
+        /*return -1*/
+      /*})*/
+    /*}*/
   },
   methods: {
     openTab(tabName) {
@@ -443,14 +457,10 @@ export default {
 
       });
     },
-    setFriends(friends) {
+    setTheaters(theaters) {
       this.loading = false;
-      if (friends !== null){
-        this.friends = [];
-        friends.forEach(friend => {
-          friend.state = proto.PERSONAL_STATE.OFFLINE
-          this.friends.push(friend)
-        })
+      if (theaters !== null){
+        this.theaters = theaters;
       }
     },
     startConversation(user) {
@@ -483,13 +493,13 @@ export default {
       const friendIndex = this.friends.findIndex(friend => friend.id === event.user.id);
       this.friends[friendIndex].state = event.state
 
-      // update friend state in FriendRow component
+      // update friend state in TheaterRow component
       const currentIndex = this.$refs.friends.findIndex(friend => friend.$vnode.key === event.user.id);
       const component = this.$refs.friends[currentIndex]
       component.updateState(event.state)
     },
     updateFriendActivity(event) {
-      // update friend activity in FriendRow component
+      // update friend activity in TheaterRow component
       const currentIndex = this.$refs.friends.findIndex(friend => friend.$vnode.key === event.user.id);
       const component = this.$refs.friends[currentIndex]
       component.updateActivity(event) 
@@ -503,7 +513,7 @@ export default {
 
       console.log("UserUpdated: ", user);
 
-      // update friend in FriendRow component
+      // update friend in TheaterRow component
       const currentIndex = this.$refs.friends.findIndex(friend => friend.$vnode.key === user.id);
       const component = this.$refs.friends[currentIndex]
       component.updateFriend(user) 
@@ -521,9 +531,9 @@ export default {
   },
   async mounted() {
 
-    this.$bus.$on('updated_friends_list_state', newState => {
-      this.state = newState;
-    });
+    //this.$bus.$on('updated_friends_list_state', newState => {
+    //  this.state = newState;
+    //});
 
     userSocket.connect();
 
@@ -538,8 +548,8 @@ export default {
       this.friends.push(friend);
     });
 
-    await this.$store.dispatch("getFriendsList").then(friends => {
-      this.setFriends(friends);
+    await this.$store.dispatch("followedTheaters").then(response => {
+      this.setTheaters(response.data.result)
     });
 
     this.$bus.$on("open-message-page", friend => {
