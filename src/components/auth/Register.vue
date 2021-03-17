@@ -104,6 +104,7 @@
       <div class="buttons">
 
         <VueHcaptcha v-if="$parent.recaptchaEnabled" 
+                     ref="captcha"
                      :sitekey="$parent.sitekey" 
                      @verify="onCaptchaVerified" 
                      @expired="onCaptchaExpired"
@@ -216,6 +217,8 @@ export default {
           duration: 2000,
         });
 
+        this.$refs.captcha.reset()
+
         setTimeout(() => {
           this.$parent.$refs.topProgress.done();
           this.$router.push({ name: 'dashboard' })
@@ -224,6 +227,7 @@ export default {
       }).catch(error => {
 
         this.loading = false;
+        this.$refs.captcha.reset()
 
         if (error.response.status === 420) {
           this.errors = error.response.data.result
@@ -257,6 +261,7 @@ export default {
         title: "Failed",
         duration: 2000,
       });
+      this.$refs.captcha.reset()
     },
     GoogleOAUTHPage() {
       this.$router.push({ name: "google_oauth_connect" });
