@@ -9,6 +9,7 @@
       <input type="text"
              class="form-control"
              id="username"
+             name="user"
              placeholder="E-mail Address or Username"
              autofocus="autofocus"
              v-model="user"
@@ -51,7 +52,7 @@ import VueHcaptcha from '@hcaptcha/vue-hcaptcha'
 import VueLoadingButton from 'vue-loading-button'
 
 export default {
-  name: 'login',
+  name: 'Iforgot',
   components: {
     VueLoadingButton,
     VueHcaptcha,

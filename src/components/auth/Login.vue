@@ -9,6 +9,7 @@
       <input type="text"
              class="form-control"
              id="username"
+             name="user"
              placeholder="E-mail Address or Username"
              autofocus="autofocus"
              v-model="user"
@@ -115,7 +116,7 @@ export default {
 
       this.loading = true;
 
-      this.$parent.$refs.serverError.removeClass();
+      this.$parent.$refs.serverError.className = ''
 
       this.$parent.$refs.topProgress.start();
 
@@ -144,26 +145,23 @@ export default {
           this.$router.push({ name: 'dashboard' })
         }, 1000);
 
-      }).catch(() => {
+      }).catch(error => {
 
         this.loading = false;
-
-        this.$parent.serverError = "Unauthorized";
+        this.errors = error.response.data.result
+        if (error.response.status === 420) {
+          if (this.errors.recaptcha) {
+            this.$parent.serverError = this.errors.recaptcha[0];
+          } else {
+            this.$parent.serverError = "Unauthorized";
+          }
+        } else {
+          this.$parent.serverError = "Unauthorized";
+        }
 
         this.password = '';
         this.$parent.successMessage = '';
-
-        this.$parent.$refs.serverError
-          .addClass('shake animated')
-          .one('webkitAnimationEnd' +
-            ' mozAnimationEnd ' +
-            'MSAnimationEnd ' +
-            'oanimationend ' +
-            'animationend', () => {
-
-              /*jQuery(this).removeClass();*/
-            });
-
+        this.$parent.$refs.serverError.className = 'shake animated'
         this.$parent.$refs.topProgress.done();
         this.setTitle("Login • Casty");
 
