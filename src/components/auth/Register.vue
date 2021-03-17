@@ -225,8 +225,8 @@ export default {
 
         this.loading = false;
 
-        this.errors = error.response.data.result
         if (error.response.status === 420) {
+          this.errors = error.response.data.result
           if (this.errors.recaptcha) {
             this.$parent.serverError = this.errors.recaptcha[0];
           } else {
