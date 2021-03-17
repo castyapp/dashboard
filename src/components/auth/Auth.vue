@@ -40,7 +40,7 @@
 
         <router-view name="auth" />
 
-        <div class="text-center p-2">2020 Casty.ir</div>
+        <div class="text-center p-2">2021 castyapp.com</div>
 
     </div>
 

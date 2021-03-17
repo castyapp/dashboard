@@ -99,7 +99,6 @@ export default {
     },
     login() {
 
-      this.setTitle("Logging in ...");
 
       if (this.$parent.recaptchaEnabled) {
         if (!this.recaptcha.valid) {
@@ -116,7 +115,7 @@ export default {
 
       this.loading = true;
 
-      $this.$parent.$refs.serverError.removeClass();
+      this.$parent.$refs.serverError.removeClass();
 
       this.$parent.$refs.topProgress.start();
 
@@ -125,6 +124,7 @@ export default {
         payload.recaptchaToken = this.recaptcha.token
       }
 
+      this.setTitle("Logging in ...");
       this.$store.dispatch('login', payload).then(() => {
 
         this.errors = {};
@@ -144,7 +144,7 @@ export default {
           this.$router.push({ name: 'dashboard' })
         }, 1000);
 
-      }).catch(err => {
+      }).catch(() => {
 
         this.loading = false;
 

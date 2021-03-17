@@ -186,7 +186,7 @@ export default {
         }
       }
 
-      $this.$parent.$refs.serverError.removeClass();
+      this.$parent.$refs.serverError.removeClass();
 
       this.loading = true;
       this.$parent.$refs.topProgress.start();
