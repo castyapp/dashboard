@@ -186,7 +186,7 @@ export default {
         }
       }
 
-      this.$parent.$refs.serverError.removeClass();
+      this.$parent.$refs.serverError.className = ''
 
       this.loading = true;
       this.$parent.$refs.topProgress.start();
@@ -225,18 +225,16 @@ export default {
 
         this.loading = false;
 
+        this.errors = error.response.data.result
         if (error.response.status === 420) {
-          this.errors = error.response.data.result
+          if (this.errors.recaptcha) {
+            this.$parent.serverError = this.errors.recaptcha[0];
+          } else {
           this.$parent.serverError = "Please check the form error(s)!";
-          this.$parent.$refs.serverError
-            .addClass('shake animated')
-            .one('webkitAnimationEnd' +
-              ' mozAnimationEnd ' +
-              'MSAnimationEnd ' +
-              'oanimationend ' +
-              'animationend', () => {
-                this.$parent.$refs.serverError.removeClass();
-              });
+          this.$parent.$refs.serverError.className = 'shake animated'
+          }
+        } else {
+          this.$parent.serverError = "Could not register at this time!";
         }
 
         this.password = '';
