@@ -11,21 +11,15 @@ import VueChatScroll from 'vue-chat-scroll'
 import Notifications from 'vue-notification'
 import vueTopProgress from 'vue-top-progress'
 import {proto} from 'casty-proto/pbjs/ws.bundle'
-import GSignInButton from 'vue-google-signin-button'
-//const humanizeDuration = require('humanize-duration')
 
 Vue.config.productionTip = false;
 
 Vue.use(VTitle);
 Vue.use(VueRouter);
-Vue.use(GSignInButton);
 Vue.use(VueChatScroll);
 Vue.use(Notifications);
 Vue.use(vueTopProgress);
 Vue.directive('linkified', linkify);
-//Vue.use(require('vue-jalali-moment'));
-
-// process.env.VUE_APP_API_GOOGLE_ANALYTICS_TRACK_ID
 
 const router = new VueRouter({
   mode: 'history',
@@ -43,7 +37,6 @@ import "@/assets/css/icofont.css";
 import 'vue-loaders/dist/vue-loaders.css';
 import VueLoaders from 'vue-loaders';
 import userSocket from "@/store/user.ws";
-import { humanizer } from 'humanize-duration'
 
 Vue.use(VueLoaders);
 
