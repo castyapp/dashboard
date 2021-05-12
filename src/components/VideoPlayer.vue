@@ -4,7 +4,7 @@
 
     <div class="theater-summary-info pl-3 pr-3" v-if="theater.media_source.title">
       <strong class="pull-left">
-        Watching {{ getStringSub(this.theater.media_source.title, 50) }}
+        Watching {{ getStringSub(this.theater.media_source.title, 35) }}
       </strong>
     </div>
 
@@ -27,7 +27,7 @@ video#theater {
 }
 
 .theater-summary-info {
-  background: #316cff;
+  background: #3f51b5;
   padding: 4px;
   display: flow-root;
 }
@@ -38,7 +38,7 @@ video#theater {
 }
 
 .members-loading {
-  background: #181818;
+  background: #0e1115;
   color: #ffffff;
   padding: 10px 20px;
   position: absolute;
@@ -67,7 +67,7 @@ import 'plyr/dist/plyr.css'
 import Hls from 'hls.js'
 import Plyr from 'plyr'
 import log from '@/store/logging'
-import {proto} from 'casty-proto/pbjs/ws.bundle'
+import { proto } from 'libcasty-protocol-js/commonjs'
 import {emit} from 'casty-proto/protocol/protocol'
 
 export default {

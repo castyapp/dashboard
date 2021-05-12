@@ -71,7 +71,7 @@
 .connection > a:hover, 
 .connection > button.disconnect-btn:hover {
   text-decoration: none;
-  background: #131212;
+  background: #151a21;
   color: #fff;
 }
 

@@ -214,7 +214,7 @@ strong.user-name-title {
   line-height: 25px;
   padding: 10px;
   margin: 0;
-  background: #181818;
+  background: #0e1115;
   border: 0;
   border-radius: 5px;
   outline: none;
@@ -244,7 +244,7 @@ strong.user-name-title {
 
 import moment from 'moment-timezone'
 import userSocket from '@/store/user.ws'
-import {proto} from 'casty-proto/pbjs/ws.bundle'
+import { proto } from 'libcasty-protocol-js/commonjs'
 import TheaterMessage from '@/components/TheaterMessage'
 import Spinner from '@/components/Spinner'
 

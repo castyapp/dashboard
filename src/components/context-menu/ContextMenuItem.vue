@@ -12,7 +12,7 @@ export default {}
 .context-menu-item {
   display: block;
   position: relative;
-  background: #131212;
+  background: #151a21;
   color: #eeeeee;
   text-decoration: none;
   font-size: 13px;

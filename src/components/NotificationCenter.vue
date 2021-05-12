@@ -44,15 +44,17 @@
 <style>
 
 .notification-center {
-  z-index: 1;
+  z-index: 9;
   position: absolute;
   background: #141212;
   width: 370px;
-  left: 70px;
   padding: 5px;
   border-radius: 3px;
   max-height: 400px;
-  bottom: 60px;
+  bottom: 0;
+  top: 55px;
+  right: 5px;
+  display: table;
 }
 
 .notification-center > .nc-title {
@@ -64,7 +66,7 @@
 
 button.mark-all-as-read-btn {
   float: right;
-  background: #181818;
+  background: #0e1115;
   color: #ffffff;
   border: none;
   font-size: 12px;

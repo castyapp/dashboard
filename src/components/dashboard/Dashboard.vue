@@ -2,121 +2,123 @@
 
   <div class="dashboard scrollable">
 
+    <Menubar />
+
     <notifications group="dashboard" position="top center" :max="1" />
 
     <vue-topprogress ref="topProgress" />
 
-      <Sidemenu />
+    <Sidemenu />
 
-      <TheaterList v-if="loggedIn" />
+    <TheaterList v-if="loggedIn" />
 
-      <div class="main-container" ref="mainContainer">
-        <router-view name="theater" :key="$route.fullPath" ref="routerView" />
-          <keep-alive>
-            <router-view name="dashboard" :key="$route.fullPath" ref="routerView" />
-          </keep-alive>
+    <div class="main-container" ref="mainContainer">
+      <router-view name="theater" :key="$route.fullPath" ref="routerView" />
+        <keep-alive>
+          <router-view name="dashboard" :key="$route.fullPath" ref="routerView" />
+        </keep-alive>
+    </div>
+
+    <ContextMenu ref="menu" v-if="loggedIn">
+
+    <template slot-scope="{ type, contextData }">
+
+      <div class="friend-menu" v-show="type === 'friend-menu'">
+
+        <ContextMenuItem @click.native="goToTheater(contextData)">
+          <i class="icofont-movie mr-1"></i>
+          Go to Theater
+        </ContextMenuItem>
+
+        <ContextMenuItem @click.native="startConversation(contextData)">
+          <i class="icofont-chat mr-1"></i>
+          Send Message
+        </ContextMenuItem>
+
+        <ContextMenuItem @click.native="$refs.menu.close">
+          <i class="icofont-ui-mute mr-1"></i>
+          Mute Notifications
+        </ContextMenuItem>
+
+        <ContextMenuItem @click.native="$refs.menu.close">
+          <i class="icofont-trash mr-1"></i>
+          Remove Friend
+        </ContextMenuItem> 
+
       </div>
 
-      <ContextMenu ref="menu" v-if="loggedIn">
+      <div class="usermenu-actions-menu" v-show="type === 'usermenu-actions'">
 
-      <template slot-scope="{ type, contextData }">
-
-        <div class="friend-menu" v-show="type === 'friend-menu'">
-
-          <ContextMenuItem @click.native="goToTheater(contextData)">
-            <i class="icofont-movie mr-1"></i>
-            Go to Theater
-          </ContextMenuItem>
-
-          <ContextMenuItem @click.native="startConversation(contextData)">
-            <i class="icofont-chat mr-1"></i>
-            Send Message
-          </ContextMenuItem>
-
-          <ContextMenuItem @click.native="$refs.menu.close">
-            <i class="icofont-ui-mute mr-1"></i>
-            Mute Notifications
-          </ContextMenuItem>
-
-          <ContextMenuItem @click.native="$refs.menu.close">
-            <i class="icofont-trash mr-1"></i>
-            Remove Friend
-          </ContextMenuItem> 
-
+        <div class="logged-in-as">
+          Logged in as: {{ user.fullname }}
         </div>
 
-        <div class="usermenu-actions-menu" v-show="type === 'usermenu-actions'">
-
-          <div class="logged-in-as">
-            Logged in as: {{ user.fullname }}
+        <div class="actions-activity">
+          <div class="actions-states">
+            <button class="action-state action-online action-selected">
+              <i class="state-dot-icon"></i>
+              Online
+              <i class="selected-icon icofont-check-alt"></i>
+            </button>
+            <button class="action-state action-idle">
+              <i class="state-dot-icon"></i>
+              Idle
+            </button>
+            <button class="action-state action-busy">
+              <i class="state-dot-icon"></i>
+              Busy
+            </button>
+            <button class="action-state action-invisible">
+              <i class="state-dot-icon"></i>
+              Invisible
+            </button>
           </div>
-
-          <div class="actions-activity">
-            <div class="actions-states">
-              <button class="action-state action-online action-selected">
-                <i class="state-dot-icon"></i>
-                Online
-                <i class="selected-icon icofont-check-alt"></i>
-              </button>
-              <button class="action-state action-idle">
-                <i class="state-dot-icon"></i>
-                Idle
-              </button>
-              <button class="action-state action-busy">
-                <i class="state-dot-icon"></i>
-                Busy
-              </button>
-              <button class="action-state action-invisible">
-                <i class="state-dot-icon"></i>
-                Invisible
-              </button>
-            </div>
-            <div class="custom-control custom-switch mt-3">
-              <input type="checkbox"
-                     class="custom-control-input"
-                     id="trust_switch"
-                     checked />
-              <label class="custom-control-label" for="trust_switch">
-                Show my activity
-              </label>
-            </div>
+          <div class="custom-control custom-switch mt-3">
+            <input type="checkbox"
+                   class="custom-control-input"
+                   id="trust_switch"
+                   checked />
+            <label class="custom-control-label" for="trust_switch">
+              Show my activity
+            </label>
           </div>
-
-          <ContextMenuItem @click.native="redirect('settings')">
-          <i class="icofont-gears mr-1"></i>
-          Settings
-          </ContextMenuItem>
-
-          <ContextMenuItem @click.native="openLogoutModal()">
-          <i class="icofont-logout mr-1"></i>
-          Logout
-          </ContextMenuItem>
-
         </div>
 
-      </template>
+        <ContextMenuItem @click.native="redirect('settings')">
+        <i class="icofont-gears mr-1"></i>
+        Settings
+        </ContextMenuItem>
 
-      </ContextMenu>
+        <ContextMenuItem @click.native="openLogoutModal()">
+        <i class="icofont-logout mr-1"></i>
+        Logout
+        </ContextMenuItem>
 
-      <div class="modal modal-dark fade" id="logoutModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-          <div class="modal-content">
-            <div class="modal-body pb-0">
-              <h5>
-                Are you sure you want to logout from this account?
-              </h5>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-outline-danger" data-dismiss="modal">
-                No, im gonna stay!
-              </button>
-              <button type="button" class="btn btn-outline-success" @click="redirectWithModal('logout')">
-                Yeah, get me out!
-              </button>
-            </div>
+      </div>
+
+    </template>
+
+    </ContextMenu>
+
+    <div class="modal modal-dark fade" id="logoutModal" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-body pb-0">
+            <h5>
+              Are you sure you want to logout from this account?
+            </h5>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-danger" data-dismiss="modal">
+              No, im gonna stay!
+            </button>
+            <button type="button" class="btn btn-outline-success" @click="redirectWithModal('logout')">
+              Yeah, get me out!
+            </button>
           </div>
         </div>
       </div>
+    </div>
 
   </div>
 
@@ -202,6 +204,7 @@ button.action-state:hover {
 <script>
 
 import Sidemenu from '@/components/Sidemenu';
+import Menubar from '@/components/Menubar';
 import TheaterList from './TheaterList';
 import ContextMenu from '@/components/context-menu/ContextMenu';
 import ContextMenuItem from '@/components/context-menu/ContextMenuItem';
@@ -214,6 +217,7 @@ import VueLoadingButton from 'vue-loading-button'
 export default {
   name: "Dashboard",
   components: {
+    Menubar,
     Sidemenu,
     TheaterList,
     ContextMenu,

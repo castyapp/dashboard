@@ -16,7 +16,12 @@
 
       <div class="innerDetails">
         <div class="username">
-          <strong>{{ theater.user.fullname }}</strong>
+          <strong v-if="theater.user.id === user.id">
+            Your Theater
+          </strong>
+          <strong v-else>
+            {{ theater.user.fullname }}
+          </strong>
         </div>
         <div class="activity" v-if="hasActivity">
           {{ activity }}
@@ -31,7 +36,7 @@
 
 <script>
 
-import {proto} from 'casty-proto/pbjs/ws.bundle'
+import { proto } from 'libcasty-protocol-js/commonjs'
 
 export default {
   name: "TheaterRow",

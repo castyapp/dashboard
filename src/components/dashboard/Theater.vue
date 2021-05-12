@@ -80,7 +80,7 @@
       <SpotifyPlayer v-if="theater.media_source.type === 6" :theater="theater" ref="player" />
       <VideoPlayer v-else :theater="theater" :subtitles="subtitles" ref="player" />
       <TheaterChat :ready="ready" :theater="theater" />
-      <TheaterSettings :theater="theater" v-if="loggedIn && theater.user.id === user.id" ref="TheaterSettings" />
+      <TheaterSettings :theater="theater" v-if="loggedIn" ref="TheaterSettings" />
 
     </div>
 
@@ -123,7 +123,7 @@ button.btn-follow {
 .theater-top-actions {
   position: absolute;
   right: 315px;
-  top: 17px;
+  margin-top: 7px;
 }
 
 .theater-top-details {
@@ -222,7 +222,7 @@ button.remove-subtitle-btn {
 import Spinner from '@/components/Spinner'
 import VideoPlayer from '@/components/VideoPlayer'
 import TheaterChat from '@/components/TheaterChat'
-import {proto} from 'casty-proto/pbjs/ws.bundle'
+import {proto} from 'libcasty-protocol-js/commonjs'
 import VueLoadingButton from 'vue-loading-button'
 import SpotifyPlayer from '@/components/SpotifyPlayer'
 import TheaterWebsocket from '@/store/theater.ws'
@@ -274,22 +274,22 @@ export default {
     },
     followTheater() {
       this.followLoading = true;
-      this.$store.dispatch("followTheater", this.theater.id).then(response => {
+      this.$store.dispatch("followTheater", this.theater.id).then(() => {
         this.$bus.$emit('new-theater-followed', this.theater);
         this.theater.followed = true;
         this.followLoading = false;
-      }).catch(err => {
+      }).catch(() => {
         console.log("Could not follow!");
         this.followLoading = false;
       })
     },
     unfollowTheater() {
       this.followLoading = true;
-      this.$store.dispatch("unfollowTheater", this.theater.id).then(response => {
+      this.$store.dispatch("unfollowTheater", this.theater.id).then(() => {
         this.$bus.$emit('new-theater-unfollowed', this.theater);
         this.theater.followed = false;
         this.followLoading = false;
-      }).catch(err => {
+      }).catch(() => {
         console.log("Could not unfollow!");
         this.followLoading = false;
       })
@@ -365,12 +365,13 @@ export default {
     });
 
     this.$on(proto.EMSG[proto.EMSG.THEATER_MEDIA_SOURCE_CHANGED], packet => {
-      if (packet.data !== null) {
-        let mediaSource = proto.MediaSource.decode(packet.data);
-        console.log("MediaSource Changed!", mediaSource);
 
+      if (packet.data !== null) {
+
+        let mediaSource = proto.MediaSource.decode(packet.data);
         this.$refs.player.setMediaSource(mediaSource)
         this.theater.media_source = mediaSource;
+
         if (mediaSource.type === proto.MediaSource.Type.DOWNLOAD_URI) {
           this.$refs.TheaterSettings.setSubtitlesLoading(true)
           this.$store.dispatch('getSubtitles', mediaSource.id).then(subtitles => {
@@ -382,6 +383,7 @@ export default {
         }
 
       }
+
     });
 
     this.$bus.$on('user-updated', updatedUser => {

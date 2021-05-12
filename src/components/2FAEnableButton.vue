@@ -36,9 +36,7 @@
                 Scan the image above with the two-factor authentication app on your phone.
               </span>
               <canvas id="qrCode"></canvas>
-              <strong>
-                Enter the six-digit code from the application
-              </strong>
+              <strong>Enter the six-digit code from the application</strong>
               <form class="form-dark">
                 <div class="form-group accessory_name_container">
 

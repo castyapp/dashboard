@@ -86,7 +86,7 @@ export const store = new Vuex.Store({
       return new Promise((resolve, reject) => {
 
         const params = new URLSearchParams();
-        params.append('source', uri);
+        params.append('media_source_uri', uri);
 
         axios.post('/user/@media/parse', params, {
           headers: {
@@ -126,7 +126,7 @@ export const store = new Vuex.Store({
 
         const params = new URLSearchParams();
         params.append('title', title);
-        params.append('source', uri);
+        params.append('media_source_uri', uri);
 
         let headers = {
           authorization: `Bearer ${context.state.token}`,

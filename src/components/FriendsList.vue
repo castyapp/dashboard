@@ -88,7 +88,7 @@
       <ul class="friends_list_ul" v-show="selected === 'friends'">
 
         <div v-if="loading" class="content-loading">
-          <VueContentLoading :width="230" :height="55" primary="#333" secondary="#181818" :key="i" v-for="i in 10">
+          <VueContentLoading :width="230" :height="55" primary="#333" secondary="#0e1115" :key="i" v-for="i in 10">
           <circle cx="20" cy="20" r="20"></circle>
           <rect x="55" y="9" rx="9" ry="9" width="170" height="20"></rect>
           </VueContentLoading>
@@ -273,7 +273,7 @@ button.friend_request_btn {
   position: fixed;
   top: 0;
   width: 255px;
-  background: #181818;
+  background: #0e1115;
   height: 100%;
   left: 65px;
 }
@@ -327,7 +327,7 @@ span.unread_count_notifications {
 .friends-actions > ul > li > button:hover,
 .friends-actions > ul > li.active > button {
   text-decoration: none;
-  background: #316cff;
+  background: #3f51b5;
   color: #ffffff;
 }
 
@@ -342,7 +342,7 @@ span.unread_count_notifications {
 import TheaterRow from './TheaterRow'
 import userSocket from '@/store/user.ws'
 import FriendsActions from './FriendsActions'
-import {proto} from 'casty-proto/pbjs/ws.bundle'
+import { proto } from 'libcasty-protocol-js/commonjs'
 import VueLoadingButton from 'vue-loading-button'
 import {VueContentLoading} from 'vue-content-loading'
 import Spinner from './Spinner'

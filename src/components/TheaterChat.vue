@@ -2,13 +2,12 @@
 
   <div class="theater_chat">
 
-    <div class="col-container pull-left">
+    <!--<VoiceConnections :theater="theater" />-->
 
-      <div class="chat-title-border-bottom pb-3">
-        <strong class="side-component-title">
-          <i class="icofont-ui-chat mr-2"></i>
-          <span class="ml-1">Chat</span>
-        </strong>
+    <div class="col-container ml-2 mr-2">
+
+      <div class="sidebar-title">
+        CHAT
       </div>
 
       <div class="chat-container">
@@ -78,7 +77,6 @@
   flex-direction: column;
   height: 100%;
   width: 100%;
-  padding: 10px;
 }
 
 .u-msg > .u-name {
@@ -109,7 +107,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 0;
+  bottom: 50px;
   padding: 15px;
 }
 
@@ -123,6 +121,7 @@
   flex-grow: 1;
   height: 100%;
   overflow: auto;
+  overflow-x: hidden;
 }
 
 .chat-messages {
@@ -132,13 +131,14 @@
 
 .chat-container {
   width: 100%;
-  height: 100%;
+  height: 100vh;
   padding: 0 0 125px 0;
+  padding-bottom: 255px;
 }
 
 .chat-box-text {
   width: 100%;
-  background: #202020;
+  background: #151a21;
   border: 0;
   border-radius: 5px;
   color: #eeeeee;
@@ -158,8 +158,9 @@
   top: 0;
   right: 0;
   width: 300px;
-  background: #151515;
+  background: #0e1115;
   height: 100%;
+  margin-top: 48px;
 }
 
 .message.welcome-msg {
@@ -172,14 +173,18 @@
 
 </style>
 
-  <script>
+<script>
 
 import log from '@/store/logging'
-import {proto} from 'casty-proto/pbjs/ws.bundle'
-import {Packet} from 'casty-proto/protocol/packet'
+import {proto} from 'libcasty-protocol-js/commonjs'
+import {Packet} from 'libcasty-protocol-js/protocol/packet'
+import VoiceConnections from './VoiceConnections'
 
 export default {
   props: ['theater', 'ready'],
+  components: {
+    VoiceConnections,
+  },
   data() {
     return {
       chats: [],
@@ -194,11 +199,7 @@ export default {
       if (msg !== ""){
         this.chatMessage = '';
         if (this.theaterWebsocket.ws !== null){
-          let newMessage = {
-            type: proto.EMSG.NEW_CHAT_MESSAGE,
-            message: msg
-          };
-          this.theaterWebsocket.sendMessage(msg);
+          this.theaterWebsocket.sendMessage(msg)
         } else {
           console.log(`Websocket connection: ${this.theaterWebsocket.ws}`);
         }

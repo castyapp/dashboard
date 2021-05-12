@@ -32,7 +32,7 @@
 
 <script>
 
-import {proto} from 'casty-proto/pbjs/ws.bundle'
+import { proto } from 'libcasty-protocol-js/commonjs'
 
 export default {
   props: ['friend'],

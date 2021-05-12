@@ -1,8 +1,7 @@
 import log from './logging'
 import {store} from './store'
-import {proto} from 'casty-proto/pbjs/ws.bundle'
-import {Packet} from 'casty-proto/protocol/packet'
-import {emit} from 'casty-proto/protocol/protocol'
+import {proto} from 'libcasty-protocol-js/commonjs'
+import {Packet} from 'libcasty-protocol-js/protocol/packet'
 
 export default class TheaterWebsocket {
 
@@ -23,14 +22,16 @@ export default class TheaterWebsocket {
 
     this.ws.onopen = () => {
       if (store.getters.loggedIn) {
-        emit(this.ws, proto.EMSG.LOGON, proto.TheaterLogOnEvent, {
-          room:  new Buffer(room),
-          token: new Buffer(store.state.token),
-        });
+        let message = new proto.TheaterLogOnEvent({
+          room:  Buffer.from(room),
+          token: Buffer.from(store.state.token),
+        })
+        this.ws.send(Packet.serialize(proto.EMSG.LOGON, message))
       } else {
-        emit(this.ws, proto.EMSG.LOGON, proto.TheaterLogOnEvent, {
-          room:  new Buffer(room),
-        });
+        let message = new proto.TheaterLogOnEvent({
+          room:  Buffer.from(room),
+        })
+        this.ws.send(Packet.serialize(proto.EMSG.LOGON, message))
       }
     };
 
@@ -59,17 +60,17 @@ export default class TheaterWebsocket {
     };
 
     setInterval(this.ping, 10000, this.ws);
-
     return this;
   }
   ping(ws) {
     if (ws.readyState !== 1) return;
-    emit(ws, proto.EMSG.PING, proto.PingMsgEvent, {});
+    ws.send(Packet.serialize(proto.EMSG.PING, null))
   }
-  sendMessage(message) {
-    emit(this.ws, proto.EMSG.NEW_CHAT_MESSAGE, proto.ChatMsgEvent, {
-      message: new Buffer(message),
-    });
+  sendMessage(msg) {
+    const message = new proto.ChatMsgEvent({
+      message: Buffer.from(msg),
+    })
+    this.ws.send(Packet.serialize(proto.EMSG.NEW_CHAT_MESSAGE, message))
   }
   disconnect() {
     if (typeof this.ws !== 'undefined' && this.ws !== null){

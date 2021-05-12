@@ -24,7 +24,7 @@
 <script>
 
 import Connection from './Connection'
-import {proto} from 'casty-proto/pbjs/ws.bundle'
+import { proto } from 'libcasty-protocol-js/commonjs'
 
 export default {
   name: "Connections",

@@ -217,7 +217,9 @@ export default {
           duration: 2000,
         });
 
-        this.$refs.captcha.reset()
+        if (this.$parent.recaptchaEnabled) {
+          this.$refs.captcha.reset()
+        }
 
         setTimeout(() => {
           this.$parent.$refs.topProgress.done();
@@ -227,7 +229,10 @@ export default {
       }).catch(error => {
 
         this.loading = false;
-        this.$refs.captcha.reset()
+
+        if (this.$parent.recaptchaEnabled) {
+          this.$refs.captcha.reset()
+        }
 
         if (error.response.status === 420) {
           this.errors = error.response.data.result

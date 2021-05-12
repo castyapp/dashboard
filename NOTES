@@ -1,0 +1,7 @@
+BG: "#0b0e11"
+BG2: "#151a21"
+BG3: "#242c37"
+
+https://dogehouse.tv/room/3181d973-2cd0-4dc5-ae58-01aded39dbb3, { iceServers: [], iceTransportPolicy: all, bundlePolicy: max-bundle, rtcpMuxPolicy: require, iceCandidatePoolSize: 0, sdpSemantics: "unified-plan" },
+
+

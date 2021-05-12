@@ -134,7 +134,7 @@
 
 .change_avatar_overlay {
   position: absolute;
-  background: #181818e0;
+  background: #0e1115e0;
   width: 75px;
   height: 75px;
   text-align: center;

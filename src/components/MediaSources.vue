@@ -20,32 +20,6 @@
 
     </template>
     </ContextMenu>
-    <!--<div class="modal modal-dark fade" id="removeMediaSourceModal" tabindex="-1" role="dialog">-->
-    <!--<div class="modal-dialog modal-dialog-centered" role="document">-->
-    <!--<div class="modal-content" v-if="selectedForRemove !== null">-->
-    <!--<div class="modal-body pb-0">-->
-    <!--<h5>-->
-    <!--<span class="clearfix">Are you sure you want remove</span>-->
-    <!--<span class="th-bold-title">-->
-    <!--{{ getStringSub(selectedForRemove.title, 45) }}-->
-    <!--</span>-->
-    <!--</h5>-->
-    <!--</div>-->
-    <!--<div class="modal-footer">-->
-    <!--<button type="button" class="btn btn-outline-danger" data-dismiss="modal">-->
-    <!--No, Never mind!-->
-    <!--</button>-->
-    <!--<VueLoadingButton-->
-    <!--@click.native="removeMediaSource"-->
-    <!--:loading="removeLoading"-->
-    <!--class="btn btn-outline-success"-->
-    <!--:disabled="this.selectedForRemove === null">-->
-    <!--<span>Yes, Im sure!</span>-->
-    <!--</VueLoadingButton>-->
-    <!--</div>-->
-    <!--</div>-->
-    <!--</div>-->
-    <!--</div>-->
 
     <div class="media-source-container">
       <div class="add-media-source-title pull-left">
@@ -102,7 +76,7 @@
           <div class="preview-duration" v-if="newMediaSource.data.length !== 0">
             <span class="badge badge-warning">
               <i class="icofont-clock-time"></i>
-              {{ humanizeDuration(newMediaSource.data.length * 1000) }}
+              {{ humanizeDuration(newMediaSource.data.length) }}
             </span>
           </div>
         </div>
@@ -144,7 +118,7 @@
 <style>
 
 .media-source-preview {
-  background: #131212;
+  background: #151a21;
   border-radius: 4px;
   padding: 10px;
   display: flex;
@@ -167,7 +141,7 @@ span.selected-preview-title.new-media-source-title {
 
 .media-sources-list > .media-source {
   width: 100%;
-  background: #131212;
+  background: #151a21;
   border-radius: 5px;
   display: flow-root;
   align-content: center;
@@ -203,7 +177,7 @@ margin-bottom: 5px;
 
 .editable-preview-title,
 .form-dark > .form-group.editable-preview-title input {
-  background: #181818 !important;
+  background: #0e1115 !important;
   cursor: pointer;
 }
 
@@ -215,7 +189,7 @@ margin-bottom: 5px;
 
 .media-sources-icons > i {
   font-size: 25px;
-  color: #333;
+  color: #36404c;
   margin: 0 5px;
 }
 

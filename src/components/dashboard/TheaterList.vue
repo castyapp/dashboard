@@ -2,24 +2,8 @@
 
   <div class="theaters_list" :class="state">
 
-    <div class="friends-actions chat-title-border-bottom">
-      <ul>
-        <li :class="{ 'active': selected === 'theaters' }">
-          <button @click="openTab('theaters')">
-            <i class="icofont-ui-movie"></i>
-            Theaters
-          </button>
-        </li>
-        <li :class="{ 'active': selected === 'search' }">
-          <button @click="openTab('search')">
-            <i class="icofont-search-1"></i>
-            Search
-          </button>
-        </li>
-        <!--<li :class="{ 'active': selected === 'pending' }">-->
-          <!--<button @click="openTab('pending')">Pending</button>-->
-        <!--</li>-->
-      </ul>
+    <div class="sidebar-title">
+      THEATERS YOU FOLLOW
     </div>
 
     <div class="pl-2 pr-2">
@@ -87,26 +71,26 @@
 
       <ul class="theaters_list_ul" v-show="selected === 'theaters'">
 
+        <TheaterRow ref="userTheater" :theater="user.theater" />
+
         <div v-if="loading" class="content-loading">
-          <VueContentLoading :width="230" :height="55" primary="#333" secondary="#181818" :key="i" v-for="i in 10">
+          <VueContentLoading :width="230" :height="55" primary="#333" secondary="#0e1115" :key="i" v-for="i in 10">
           <circle cx="20" cy="20" r="20"></circle>
           <rect x="55" y="9" rx="9" ry="9" width="170" height="20"></rect>
           </VueContentLoading>
         </div>
 
-        <div class="text-center mt-3" v-if="!loading" v-show="theaters.length === 0">
+        <div class="text-center mt-3" v-if="!loading && theaters.length === 0">
           No theater followed yet!
         </div>
 
-        <TheaterRow 
-          ref="theaters" 
-          :key="theater.id" 
-          v-for="theater in theaters" 
-          :theater="theater" />
+        <TheaterRow ref="theaters" :key="theater.id" v-for="theater in theaters" :theater="theater" />
 
       </ul>
 
     </div>
+
+    <VoiceConnections :theater="theater" />
 
   </div>
 
@@ -144,6 +128,10 @@
 
 .theaters_list_ul {
   padding: 0;
+}
+
+.theaters_list_ul > li {
+  margin-top: 5px;
 }
 
 .theaters_list_ul > li > .theater {
@@ -231,6 +219,10 @@ button.friend_request_btn {
   list-style: none;
 }
 
+.theaters_list_ul > li {
+  list-style: none;
+}
+
 .theaters_list > ul > li {
   margin-bottom: 5px;
   border-radius: 5px;
@@ -260,7 +252,7 @@ ul.theaters_list_ul > li:hover {
 
 ul.theaters_list_ul > li:hover > .theater,
 ul.theaters_list_ul > li > .theater.router-link-active {
-  background: #333333 !important;
+  background: #151a21 !important;
   opacity: 1 !important;
 }
 
@@ -276,9 +268,10 @@ ul.theaters_list_ul > li > .theater {
   position: fixed;
   top: 0;
   width: 255px;
-  background: #181818;
+  background: #0e1115;
   height: 100%;
-  left: 65px;
+  margin-top: 48px;
+  padding-left: 50px;
 }
 
 .theaters_list.close {
@@ -330,12 +323,17 @@ span.unread_count_notifications {
 .friends-actions > ul > li > button:hover,
 .friends-actions > ul > li.active > button {
   text-decoration: none;
-  background: #316cff;
+  background: #3f51b5;
   color: #ffffff;
 }
 
 .pending-list > li > a > .innerDetails > .username {
   margin: 10px 0;
+}
+
+.content-loading {
+  margin-top: 10px;
+  padding: 5px;
 }
 
 </style>
@@ -344,10 +342,11 @@ span.unread_count_notifications {
 
 import TheaterRow from '@/components/TheaterRow'
 import userSocket from '@/store/user.ws'
-import {proto} from 'casty-proto/pbjs/ws.bundle'
+import { proto } from 'libcasty-protocol-js/commonjs'
 import VueLoadingButton from 'vue-loading-button'
 import {VueContentLoading} from 'vue-content-loading'
 import Spinner from '@/components/Spinner'
+import VoiceConnections from '@/components/VoiceConnections'
 
 export default {
   name: "TheatersList",
@@ -355,7 +354,8 @@ export default {
     VueContentLoading,
     Spinner,
     VueLoadingButton,
-    TheaterRow
+    TheaterRow,
+    VoiceConnections,
   },
   data() {
     return {

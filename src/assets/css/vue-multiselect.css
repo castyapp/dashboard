@@ -196,7 +196,7 @@ fieldset[disabled] .multiselect {
 
 .multiselect__tag-icon:after {
     content: "\D7";
-    color: #1f1f1f;
+    color: #151a21;
     font-size: 14px
 }
 

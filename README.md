@@ -2,7 +2,23 @@
 
 ### Project setup
 ```bash
-$ git clone https://github.com/CastyLab/dashboard.git
+$ git clone https://github.com/castyapp/dashboard.git
+```
+
+## Run Docker Container
+```bash
+$ docker run -p 8000:80 castyapp/dashboard:latest
+```
+
+## docker-compose example
+```yaml
+version: '3'
+
+services:
+  api:
+    image: castyapp/dashboard:latest
+    ports:
+      - 8000:80
 ```
 
 #### Install dependencies via npm

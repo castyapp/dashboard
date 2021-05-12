@@ -1,9 +1,8 @@
 import log from './logging'
 import {store} from './store'
 import {bus} from '@/main'
-import {proto} from 'casty-proto/pbjs/ws.bundle'
-import {Packet} from 'casty-proto/protocol/packet'
-import {emit} from 'casty-proto/protocol/protocol'
+import {proto} from 'libcasty-protocol-js/commonjs'
+import {Packet} from 'libcasty-protocol-js/protocol/packet'
 
 class UserWebsocket {
 
@@ -24,9 +23,10 @@ class UserWebsocket {
 
     this.ws.onopen = () => {
       log("USER GATEWAY", `Connected to user[${this.user.id}] gateway!`, 'green');
-      emit(this.ws, proto.EMSG.LOGON, proto.LogOnEvent, {
-        token: new Buffer(store.state.token),
-      });
+      const message = new proto.LogOnEvent({
+        token: Buffer.from(store.state.token),
+      })
+      this.ws.send(Packet.serialize(proto.EMSG.LOGON, message))
     };
 
     this.ws.onerror = e => {
@@ -49,22 +49,22 @@ class UserWebsocket {
       if (proto.EMSG.UNAUTHORIZED === packet.emsg){
         log("USER GATEWAY", "Unauthorized! try to refresh token!", 'red');
       }
-      bus.$emit(proto.EMSG[packet.emsg], packet.data);
+      bus.$emit(proto.EMSG[packet.emsg], packet.bytes);
     };
 
     setInterval(this.ping, 10000, this.ws);
-
     return this.ws;
   }
   ping(ws) {
     if (ws.readyState !== 1) return;
-    emit(ws, proto.EMSG.PING, proto.PingMsgEvent, {});
+    ws.send(Packet.serialize(proto.EMSG.PING, null))
   }
   sendMessage(message, to) {
-    emit(this.ws, proto.EMSG.NEW_CHAT_MESSAGE, proto.ChatMsgEvent, {
-      message: new Buffer(message),
+    const event = new proto.ChatMsgEvent({
+      message: Buffer.from(message),
       reciever: {id: to},
-    });
+    })
+    this.ws.send(Packet.serialize(proto.EMSG.NEW_CHAT_MESSAGE, event))
   }
   disconnect() {
     if (typeof this.ws !== 'undefined' && this.ws !== null){

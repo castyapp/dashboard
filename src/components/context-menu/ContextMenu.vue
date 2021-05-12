@@ -111,7 +111,7 @@ export default {
   position: fixed;
   z-index: 999;
   overflow: hidden;
-  background: #131212;
+  background: #151a21;
   border-radius: 4px;
   width: 200px;
   padding: 10px;

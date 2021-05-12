@@ -65,7 +65,7 @@ i.avatar {
 }
 
 .nc-th {
-  background: #181818;
+  background: #0e1115;
   padding: 10px 5px;
   border-radius: 2px;
   display: block;

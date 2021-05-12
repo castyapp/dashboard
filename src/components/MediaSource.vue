@@ -24,11 +24,11 @@
 
     <div class="media-source-title-box">
       <span class="media-source-title pull-left" :class="{ 'no-artist': !mediaSource.artist}" :title="mediaSource.title">
-        {{ getStringSub(mediaSource.title, 50) }}
+        {{ getStringSub(mediaSource.title, 30) }}
       </span>
       <span class="media-source-title pull-left" 
             v-if="mediaSource.artist" :title="mediaSource.artist">
-        <small>By: {{ getStringSub(mediaSource.artist, 50) }}</small>
+        <small>By: {{ getStringSub(mediaSource.artist, 30) }}</small>
       </span>
     </div>
 
@@ -62,7 +62,7 @@
 <style scoped>
 
 .small-default-preview-banner {
-  background: #333333;
+  background: #3b436d;
   width: 60px;
   height: 40px;
   border-radius: 4px;
@@ -71,7 +71,7 @@
   display: grid;
   font-size: 25px;
   margin: 10px;
-  color: #131212;
+  color: #151a21;
 }
 
 button.media-trash-btn {
@@ -116,7 +116,7 @@ span.media-source-title {
 }
 
 .external-link {
-  background: #1a7bff;
+  background: #3f51b5;
   margin: 20px 0;
 }
 
@@ -134,15 +134,15 @@ background: #ea4132;
 }
 
 .media-source-download-uri {
-  background: #1a7bff;
+  background: #3f51b5;
 }
 
 .media-source-m3u8 {
-  background: #1a7bff;
+  background: #3f51b5;
 }
 
 .media-source.selected-media-source {
-  background: #1a7bff;
+  background: #3f51b5;
 }
 
 .selected-btn {
@@ -175,7 +175,7 @@ span.media-source-title.no-artist {
 
 <script>
 
-import {proto} from 'casty-proto/pbjs/ws.bundle'
+import {proto} from 'libcasty-protocol-js/commonjs'
 import VueLoadingButton from 'vue-loading-button'
 
 export default {
@@ -200,7 +200,7 @@ export default {
     },
     select() {
       this.loading = true;
-      this.$store.dispatch("selectNewMediaSource", this.mediaSource.id).then(response => {
+      this.$store.dispatch("selectNewMediaSource", this.mediaSource.id).then(() => {
         this.loading = false;
         //this.$bus.$emit('new-media-source', response.data.result);
         $("#mediaSource").modal('hide');

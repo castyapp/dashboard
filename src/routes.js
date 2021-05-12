@@ -8,7 +8,7 @@ import Register from '@/components/auth/Register'
 // Dashboard components
 import Dashboard from '@/components/dashboard/Dashboard'
 import Settings from '@/components/dashboard/Settings'
-import Friends from '@/components/dashboard/Friends'
+//import Friends from '@/components/dashboard/Friends'
 import Theater from '@/components/dashboard/Theater'
 import UserTheater from '@/components/dashboard/UserTheater'
 
@@ -32,169 +32,169 @@ import SpotifyCallback from '@/components/auth/oauth/spotify/Callback'
 import Splash from '@/components/Splash';
 
 const routes = [
-    {
-        name: 'splash',
-        path: '/splash',
-        components: {
-            main: Splash
-        },
+  {
+    name: 'splash',
+    path: '/splash',
+    components: {
+      main: Splash
     },
-    {
-        path: '/',
+  },
+  {
+    path: '/',
+    components: {
+      main: Dashboard,
+    },
+    children: [
+      {
+        path: '',
+        name: 'dashboard',
         components: {
-            main: Dashboard,
+          dashboard: UserTheater,
         },
-        children: [
-            {
-                path: '',
-                name: 'dashboard',
-                components: {
-                    dashboard: UserTheater,
-                },
-            },
-            {
-                path: "messages/:friend_id",
-                name: "messages",
-                components: {
-                    dashboard: Message,
-                },
-            },
-            {
-                path: 'settings',
-                name: 'settings',
-                components: {
-                    dashboard: Settings,
-                },
-            },
-            {
-                path: 'me',
-                name: 'me',
-                components: {
-                    dashboard: UserTheater,
-                },
-            },
-        ],
-        meta: {
-            requiresAuth: true,
+      },
+      {
+        path: "messages/:friend_id",
+        name: "messages",
+        components: {
+          dashboard: Message,
+        },
+      },
+      {
+        path: 'settings',
+        name: 'settings',
+        components: {
+          dashboard: Settings,
+        },
+      },
+      {
+        path: 'me',
+        name: 'me',
+        components: {
+          dashboard: UserTheater,
+        },
+      },
+    ],
+    meta: {
+      requiresAuth: true,
+    }
+  },
+  {
+    path: '/oauth',
+    name: 'oauth',
+    components: {
+      main: OAUTH,
+    },
+    children: [
+      {
+        path: 'google/connect',
+        name: 'google_oauth_connect',
+        components: {
+          oauth: GoogleOAUTH
+        },
+      },
+      {
+        path: 'google/callback',
+        name: 'google_oauth_callback',
+        components: {
+          oauth: GoogleCallback
         }
-    },
-    {
-        path: '/oauth',
-        name: 'oauth',
+      },
+      {
+        path: 'discord/connect',
+        name: 'discord_oauth_connect',
         components: {
-            main: OAUTH,
+          oauth: DiscordOAUTH
         },
-        children: [
-            {
-                path: 'google/connect',
-                name: 'google_oauth_connect',
-                components: {
-                    oauth: GoogleOAUTH
-                },
-            },
-            {
-                path: 'google/callback',
-                name: 'google_oauth_callback',
-                components: {
-                    oauth: GoogleCallback
-                }
-            },
-            {
-                path: 'discord/connect',
-                name: 'discord_oauth_connect',
-                components: {
-                    oauth: DiscordOAUTH
-                },
-            },
-            {
-                path: 'discord/callback',
-                name: 'discord_oauth_callback',
-                components: {
-                    oauth: DiscordCallback
-                }
-            },
-            {
-                path: 'spotify/connect',
-                name: 'spotify_oauth_connect',
-                components: {
-                    oauth: SpotifyOAUTH
-                },
-            },
-            {
-                path: 'spotify/callback',
-                name: 'spotify_oauth_callback',
-                components: {
-                    oauth: SpotifyCallback
-                }
-            }
-        ],
-    },
-    {
-        path: '',
-        name: 'auth',
+      },
+      {
+        path: 'discord/callback',
+        name: 'discord_oauth_callback',
         components: {
-            main: Auth,
-        },
-        children: [
-            {
-                path: '/login',
-                name: 'login',
-                components: {
-                    auth: Login,
-                },
-                meta: {
-                    requiresVisitor: true,
-                }
-            },
-            {
-                path: '/register',
-                name: 'register',
-                components: {
-                    auth: Register,
-                },
-                meta: {
-                    requiresVisitor: true,
-                }
-            },
-            {
-                path: '/iforgot',
-                name: 'iforgot',
-                components: {
-                    auth: IForgot,
-                },
-                meta: {
-                    requiresVisitor: true,
-                }
-            },
-            {
-                path: '/logout',
-                name: 'logout',
-                components: {
-                    auth: Logout,
-                },
-                meta: {
-                    requiresAuth: true,
-                }
-            },
-        ]
-    },
-    {
-        path: '',
+          oauth: DiscordCallback
+        }
+      },
+      {
+        path: 'spotify/connect',
+        name: 'spotify_oauth_connect',
         components: {
-            main: Dashboard,
+          oauth: SpotifyOAUTH
         },
-        children: [
-            {
-                path: ':user',
-                name: 'theater',
-                components: {
-                    theater: Theater,
-                    dashboard: null,
-                },
-            },
-        ]
+      },
+      {
+        path: 'spotify/callback',
+        name: 'spotify_oauth_callback',
+        components: {
+          oauth: SpotifyCallback
+        }
+      }
+    ],
+  },
+  {
+    path: '',
+    name: 'auth',
+    components: {
+      main: Auth,
     },
-    { path: '*' }
+    children: [
+      {
+        path: '/login',
+        name: 'login',
+        components: {
+          auth: Login,
+        },
+        meta: {
+          requiresVisitor: true,
+        }
+      },
+      {
+        path: '/register',
+        name: 'register',
+        components: {
+          auth: Register,
+        },
+        meta: {
+          requiresVisitor: true,
+        }
+      },
+      {
+        path: '/iforgot',
+        name: 'iforgot',
+        components: {
+          auth: IForgot,
+        },
+        meta: {
+          requiresVisitor: true,
+        }
+      },
+      {
+        path: '/logout',
+        name: 'logout',
+        components: {
+          auth: Logout,
+        },
+        meta: {
+          requiresAuth: true,
+        }
+      },
+    ]
+  },
+  {
+    path: '',
+    components: {
+      main: Dashboard,
+    },
+    children: [
+      {
+        path: ':user',
+        name: 'theater',
+        components: {
+          theater: Theater,
+          dashboard: null,
+        },
+      },
+    ]
+  },
+  { path: '*' }
 ];
 
 export default routes

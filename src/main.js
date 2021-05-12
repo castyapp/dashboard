@@ -6,11 +6,11 @@ import 'v-title/lib/element-ui'
 import linkify from 'vue-linkify'
 import VueRouter from 'vue-router'
 import apiConfig from '@/store/api'
-import { store } from '@/store/store'
+import {store} from '@/store/store'
 import VueChatScroll from 'vue-chat-scroll'
 import Notifications from 'vue-notification'
 import vueTopProgress from 'vue-top-progress'
-import {proto} from 'casty-proto/pbjs/ws.bundle'
+import {proto} from 'libcasty-protocol-js/commonjs'
 
 Vue.config.productionTip = false;
 
@@ -40,7 +40,7 @@ import userSocket from "@/store/user.ws";
 
 Vue.use(VueLoaders);
 
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to, _, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
     if (!store.getters.loggedIn) {
       next({ name: 'login' })
@@ -58,11 +58,16 @@ router.beforeEach(async (to, from, next) => {
   }
 });
 
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (__, _, next) => {
   if (store.getters.loggedIn) {
     if (store.state.user == null){
-      await store.dispatch("getUser").then(user => {
-        store.state.user = user;
+      await store.dispatch("getUser").then(async user => {
+
+        await store.dispatch("getTheater").then(theater => {
+          user.theater = theater;
+          store.state.user = user;
+        })
+
       }).catch(() => {
         store.dispatch("refreshToken").catch(async () => {
           await store.dispatch('logout').then(() => {
@@ -144,7 +149,15 @@ Vue.mixin({
       }
     },
     humanizeDuration(duration) {
-      return humanizeDuration(duration);
+
+      let dateObj = new Date(duration * 1000),
+        hours = dateObj.getUTCHours(),
+        minutes = dateObj.getUTCMinutes(),
+        seconds = dateObj.getSeconds();
+
+      return hours.toString().padStart(2, '0') + ':' + 
+        minutes.toString().padStart(2, '0') + ':' + 
+        seconds.toString().padStart(2, '0');
     },
     convertTimeHHMMSS(val) {
       let hhmmss = new Date(val * 1000).toISOString().substr(11, 8);

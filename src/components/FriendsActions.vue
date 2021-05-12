@@ -47,7 +47,7 @@
     <!--.friends-actions > ul > li > button:hover,-->
     <!--.friends-actions > ul > li.active > button {-->
         <!--text-decoration: none;-->
-        <!--background: #316cff;-->
+        <!--background: #3f51b5;-->
         <!--color: #ffffff;-->
     <!--}-->
 
